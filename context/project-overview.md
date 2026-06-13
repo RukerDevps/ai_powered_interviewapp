@@ -6,6 +6,31 @@ IntervAI is a full-stack AI-powered mock interview platform built with Next.js 1
 
 The platform includes a marketing landing page with pricing tiers, a comprehensive dashboard for interview management, live interview sessions with real-time feedback, a detailed history of past interviews, and in-depth analytics for performance tracking. The entire experience is designed to help users build confidence, improve communication, and land their dream jobs.
 
+### Tech Stack Summary
+
+| Layer | Technology | Version / Spec | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Frontend** | React / Next.js (App Router) | React 19.2.4, Next.js 16.2.9 | UI, Routing, Client/Server rendering |
+| **Styling** | Tailwind CSS | Tailwind v4.x | Responsive components and layout styling |
+| **Backend** | Next.js Server Actions & Route Handlers | Next.js 16.2.9 | Business logic, API layer, and integration |
+| **Database** | InsForge Database (PostgreSQL) | PostgreSQL 16+ compatible | Relational storage for profiles, sessions, questions |
+| **Authentication** | InsForge Auth | OAuth 2.0 | User registration & login via Google and GitHub |
+| **AI Model** | Kimi 2.6 | API (OpenAI-compatible SDK) | Real-time mock interview evaluation and feedback generation |
+| **Hosting** | Vercel / InsForge Infrastructure | Serverless Node.js | Deployment, hosting, and storage buckets |
+
+### AI Integration
+
+- **API Interface**: Called using the official OpenAI Node.js SDK (or OpenAI-compatible API client) configured with a custom `baseURL` (pointing to Kimi API endpoint) and `apiKey`.
+- **Streaming Support**: Real-time response streaming (`stream: true`) is utilized for generating questions and feedback to reduce Time to First Token (TTFT) and provide a smoother user experience.
+- **Model Parameters**: Temperature is set to 0.7 for creative and adaptive interview question generation, and 0.2 for structured, deterministic grading and feedback evaluation.
+
+### Key Constraints
+
+- **Fullscreen API**: Live interview sessions require entering fullscreen mode. Escaping, minimizing, or switching tabs immediately halts screen recording and terminates the interview.
+- **Language**: English-only support for interviews, questions, resume processing, and feedback evaluation (MVP).
+- **Responsive Web**: Mobile-optimized web interface (no native applications).
+- **Infrastructure Tier**: InsForge serverless execution limits, database connection pool thresholds, and standard Kimi API rate limits apply.
+
 ---
 
 ## The Problem It Solves
@@ -215,35 +240,43 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 
 ## Data Architecture
 
-### User Profile Data
+### Schema & Relationships
 
-- Lives in `profiles` table
-- Fields: name, email, avatar, target_role, experience_level, primary_skills[], resume_url, job_description_text
-- Only changes when user explicitly edits profile or uploads resume and selects "Extract from Resume"
-- Used to personalize interview questions and generate tips
-- Never modified by any interview session
+```mermaid
+erDiagram
+    profiles ||--o{ interviews : "has"
+    interviews ||--o{ interview_questions : "contains"
+    interviews ||--|| interview_analytics : "has"
+```
 
-### Interview Session Data
+### User Profile Data (`profiles` table)
 
-- Stored in `interviews` table
-- Generated per interview when user clicks "Start Interview"
-- Fields: user_id, role, experience_level, interview_type, skills[], duration, question_count, time_per_question, sections[], status, score, started_at, completed_at
-- Status enum: `in_progress`, `completed`, `abandoned`, `incomplete`
-- Score calculated upon completion based on AI evaluation of all answers
+- **Fields**: id (UUID, Primary Key), name, email, avatar, target_role, experience_level, primary_skills[], resume_url, job_description_text
+- **Relationships**:
+  - `id` references `auth.users(id)` with `ON DELETE CASCADE` (managed by auth provider metadata link).
+- **Notes**: Only changes when user explicitly edits profile or uploads resume and selects "Extract from Resume". Used to personalize interview questions and generate tips. Never modified by any interview session.
 
-### Question & Answer Data
+### Interview Session Data (`interviews` table)
 
-- Stored in `interview_questions` table
-- Each row: interview_id, question_number, question_text, user_answer, ai_feedback, scores_json, duration_seconds, created_at
-- `scores_json` contains: clarity, relevance, technical_depth, confidence, overall
-- Linked to interview session
+- **Fields**: id (UUID, Primary Key), user_id (UUID, Foreign Key), role, experience_level, interview_type, skills[], duration, question_count, time_per_question, sections[], status, score, started_at, completed_at
+- **Relationships**:
+  - `user_id` references `profiles(id)` with `ON DELETE CASCADE`.
+- **Notes**: Generated per interview when user clicks "Start Interview". Status enum: `in_progress`, `completed`, `abandoned`, `incomplete`. Score calculated upon completion based on AI evaluation of all answers.
 
-### Analytics & Feedback Data
+### Question & Answer Data (`interview_questions` table)
 
-- Aggregated from `interview_questions` per session
-- Stored in `interview_analytics` table for fast dashboard queries
-- Fields: interview_id, overall_score, clarity_score, relevance_score, technical_depth_score, confidence_score, strengths[], areas_to_improve[], speaking_pace_rating, confidence_trend_data
-- Used to populate dashboard Recent Performance and Analytics page
+- **Fields**: interview_id (UUID, Foreign Key), question_number (integer), question_text, user_answer, ai_feedback, scores_json, duration_seconds, created_at
+- **Relationships**:
+  - Compound Primary Key: `(interview_id, question_number)`.
+  - `interview_id` references `interviews(id)` with `ON DELETE CASCADE`.
+- **Notes**: `scores_json` contains: clarity, relevance, technical_depth, confidence, overall.
+
+### Analytics & Feedback Data (`interview_analytics` table)
+
+- **Fields**: id (UUID, Primary Key), interview_id (UUID, Foreign Key, Unique), overall_score, clarity_score, relevance_score, technical_depth_score, confidence_score, strengths[], areas_to_improve[], speaking_pace_rating, confidence_trend_data
+- **Relationships**:
+  - `interview_id` references `interviews(id)` with `ON DELETE CASCADE` (1-to-1 relationship).
+- **Notes**: Aggregated from `interview_questions` per session. Used to populate dashboard Recent Performance and Analytics page.
 
 ---
 
@@ -274,8 +307,6 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 - Score color-coding (green/yellow/red) in history table
 - Dashboard with welcome header, quick stats, continue interview, recent performance chart, interview tips, recent interviews list
 - Analytics page with full score breakdowns and visualizations
-- Resume Builder — AI-generated professional PDF
-- Resources page with curated interview prep content
 - Settings page for profile, preferences, and account management
 - Pricing page with Free, Pro ($19/mo), Team ($49/mo per user), Enterprise (Custom) tiers
 - Monthly/Yearly billing toggle with 20% yearly discount
@@ -291,6 +322,8 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 
 - Auto-apply to real jobs — platform is purely for practice
 - Live video interview (face-to-face) — text and voice only
+- Resume Builder — AI-generated professional PDF
+- Resources page with curated interview prep conten
 - Real human interviewer booking or scheduling
 - Peer-to-peer mock interviews with other users
 - LinkedIn integration or job board connections
@@ -330,35 +363,24 @@ settings_updated; // { userId, settingType: 'profile' | 'preferences' | 'notific
 
 ---
 
-## Target User
+## Target User Personas
 
-A job seeker or student who:
-
-- Is preparing for technical or behavioral job interviews
-- Wants realistic, pressure-simulating practice sessions
-- Needs personalized feedback on their answers and delivery
-- Wants to track improvement over time with concrete metrics
-- Is targeting specific roles (Frontend, Backend, Full Stack, etc.) and wants tailored questions
-- Has an existing resume they want to use for context-aware interviews
-- Wants a structured, guided approach to interview preparation
-- Is comfortable with a modern web application and AI-assisted tools
+| Persona | Description | Key Needs |
+| :--- | :--- | :--- |
+| **Free Tier User** (Job Seekers & Students) | Individuals practicing interview basics, standard Q&A, and evaluating the platform. | <ul><li>Access to standard question configuration (up to 5 questions).</li><li>Basic text and voice response input options.</li><li>Immediate overall session score with clarity rating.</li><li>Access to basic interview preparation tips.</li></ul> |
+| **Pro Tier User** (Active Job Seekers) | High-intent candidates with active/upcoming job interviews who need high-fidelity simulations. | <ul><li>Context-aware questions tailored to uploaded resume (PDF/DOCX) or pasted job descriptions.</li><li>Multi-dimensional evaluation (Overall, Clarity, Relevance, Depth, Speaking Pace).</li><li>Full progress analytics dashboard with confidence trends.</li><li>One-click professional PDF resume generation.</li></ul> |
 
 ---
 
 ## Success Criteria
 
-- User can sign up, complete profile, and start their first mock interview in under 3 minutes
-- AI interviewer asks relevant, role-specific questions that feel realistic
-- Real-time feedback is actionable and specific to the user's answer
-- Post-interview analytics provide clear, visual score breakdowns that help users understand strengths and weaknesses
-- Interview history accurately tracks all sessions with filterable, searchable records
-- Dashboard gives an at-a-glance view of progress and motivates continued practice
-- Resume upload and job description paste successfully personalize interview questions
-- Live interview session is stable — timer works, questions flow sequentially, no broken states
-- Full screen enforcement and proctoring logic triggers correctly (stops recording and exits on escape/minimize/tab switch/screenshot)
-- Analytics charts and score visualizations render correctly across all supported browsers
-- All interview data stored correctly with full structured question/answer/feedback records
-- PostHog events fire correctly for all key user actions
-- UI is visually consistent across landing page and all dashboard pages
-- Pricing page clearly communicates value and drives conversions
-- The platform handles incomplete or abandoned interviews gracefully (resume capability)
+1. **Fast-path Onboarding**: A new user can complete Google/GitHub OAuth, basic profile configuration, and launch a new mock interview session within 180 seconds.
+2. **AI-Driven Personalization**: The Kimi 2.6 API successfully generates a list of N questions (where N is the configured question count) matching the chosen role, difficulty level, and skills.
+3. **Multi-Dimensional Evaluation**: Every answered question receives an AI feedback payload containing five numeric metrics (Overall, Clarity, Relevance, Depth, Pace) in the range 0-100.
+4. **State Persistence**: Saving a completed interview writes records to the `interviews`, `interview_questions`, and `interview_analytics` tables, making them immediately retrievable via history API filters.
+5. **Context Integration**: Uploading a PDF resume or pasting a job description modifies the generated interview questions to reference specific candidate experience/skills.
+6. **Interview Stability**: The session timer accurately counts down, and the user can step sequentially through all N questions without state loss or application crashes.
+7. **Proctoring Enforcement**: Exiting browser fullscreen mode, switching active browser tabs, minimizing the browser window, or pressing screenshot hotkeys immediately invokes the `stopRecording` function and redirects the user to `/dashboard` with a proctoring violation status.
+8. **Responsive Visualization**: Analytics charts render without visual clipping or overflow on screens ranging from 375px (mobile) to 1920px (desktop) width.
+9. **Telemetry Completeness**: The application fires PostHog events (`interview_started`, `question_answered`, `interview_completed`, `interview_abandoned`, `analysis_viewed`) matching the exact payload schema for every corresponding user action.
+10. **Session State Recovery**: Uncompleted or closed browser sessions persist in the DB with status `incomplete` or `abandoned`, allowing the user to resume them from the dashboard.
