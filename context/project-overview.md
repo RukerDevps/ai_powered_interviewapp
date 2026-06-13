@@ -2,42 +2,62 @@
 
 ## About the Project
 
-JobPilot is a full stack AI-powered job hunting assistant. The user sets up their profile once, uploads their resume, and the agent automatically discovers relevant jobs from Adzuna — scoring each one against the user's profile using GPT-4o. For jobs they're interested in, the agent researches the company across their public web pages and builds a structured dossier — company overview, tech stack, culture, why the role exists, and interview prep. The user reviews everything and applies with one click.
+IntervAI is a full-stack AI-powered mock interview platform built with Next.js 16. It helps job seekers and students practice technical and behavioral interviews with an AI interviewer powered by Kimi 2.6. Users configure their interview preferences — role, experience level, skills, and question types — and engage in realistic, timed mock interviews that adapt to their answers in real-time. After each session, users receive detailed analytics including overall scores, clarity, relevance, technical depth, and confidence metrics, along with personalized feedback and improvement tips.
 
-The entire process is tracked on a dashboard with PostHog-powered analytics and a recent activity feed.
+The platform includes a marketing landing page with pricing tiers, a comprehensive dashboard for interview management, live interview sessions with real-time feedback, a detailed history of past interviews, and in-depth analytics for performance tracking. The entire experience is designed to help users build confidence, improve communication, and land their dream jobs.
 
 ---
 
 ## The Problem It Solves
 
-Job hunting is one of the most repetitive and time-consuming tasks a developer faces. Reading dozens of job descriptions, deciding if a role fits, researching each company from scratch — all of this before even clicking apply.
+Preparing for job interviews is one of the most stressful parts of the job hunt. Practicing with friends or family rarely replicates the pressure and technical depth of a real interview. Existing platforms are either too generic, lack real-time feedback, or don't provide actionable insights on where to improve.
 
-JobPilot eliminates all of that preparation work. The agent finds the jobs, scores them intelligently against the user's actual skills, and researches each company so the user arrives at every application fully informed. The user just decides which ones to apply to and clicks.
+IntervAI solves this by providing realistic, AI-driven mock interviews that simulate the actual interview environment. Users get instant feedback on their answers, detailed performance analytics, and personalized tips — all tailored to their specific role, experience level, and target skills. Whether it's a Frontend Developer preparing for React questions or a Backend Engineer brushing up on system design, IntervAI creates a customized practice experience that grows with the user.
 
 ---
 
 ## Pages
 
 ```
-/                  → Homepage
-/login             → Auth page (Google + GitHub OAuth)
-/dashboard         → Overview, recent activity, analytics
-/find-jobs         → Search controls + full jobs list
-/find-jobs/[id]    → Individual job details page + company research
-/profile           → Profile form, resume management
+/                          → Landing page (marketing site)
+/login                     → Auth page (Google + GitHub OAuth)
+/dashboard                 → Overview, stats, continue interview, recent performance, tips
+/interview/new             → Start New Interview — configure role, skills, duration, question types
+/interview/[id]            → Live interview session — AI interviewer chat, answer input, real-time feedback
+/history                   → Interview history — past sessions, scores, filters, pagination
+/analytics                 → Detailed analytics — score breakdowns, strengths, areas to improve, charts
+/resume-builder            → Resume builder — generate professional PDF from profile data
+/resources                 → Interview resources — tips, guides, and preparation materials
+/settings                  → User settings — profile, preferences, notifications, billing
 ```
 
 ---
 
 ## Navigation
 
-Top navbar. Clean and minimal. Three navigation items:
+### Landing Page Navigation
+Top navbar. Clean and minimal. Five navigation items plus auth:
 
 ```
-Dashboard    Find Jobs    Profile
+Features    How it Works    Pricing    Testimonials    FAQ          Log in    Get Started →
 ```
 
-Full width layout on all pages. No sidebar.
+### Dashboard Navigation
+Left sidebar. Collapsible on mobile. Eight navigation items plus user profile:
+
+```
+
+📊  Dashboard
+🕐  History
+📈  Analytics
+⚙️  Settings
+
+[Powered by Kimi 2.6 AI card]
+```
+
+Top header bar: Kimi 2.6 badge, theme toggle, "Hello, [Name]" user dropdown with avatar.
+
+Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 
 ---
 
@@ -45,198 +65,300 @@ Full width layout on all pages. No sidebar.
 
 ### Homepage
 
-- Hero section
-- Logged in users → redirect to dashboard
-- Logged out users → redirect to login
+- Hero section with "Ace Every Interview with AI" headline
+- Features grid: AI Mock Interviews, Real-time Feedback, Detailed Analytics, Custom Interviews, Resume & JD Support
+- How it Works: 4-step process (Choose Your Role → Add Your Context → Start Interview → Get Insights & Improve)
+- Testimonials section: "Loved by Job Seekers"
+- Pricing section with monthly/yearly toggle
+- CTA banner: "Ready to Ace Your Next Interview?"
+- Footer with Product, Resources, Company, and Newsletter sections
+- Logged in users → redirect to /dashboard
+- Logged out users → CTA buttons redirect to /login
 
 ### Onboarding
 
-- User signs up via InsForge auth (Google or GitHub OAuth)
-- On login → redirect to /dashboard
-- Dashboard shows incomplete profile banner if profile not finished
+- User signs up via OAuth (Google or GitHub)
+- On first login → redirect to /dashboard with incomplete profile banner
+- User prompted to complete profile and select preferences
 
-### Profile Setup
+### Profile & Preferences Setup
 
-- User fills profile form — all standard resume fields
-- User uploads their existing resume PDF
-- Two options on upload:
-  - "Extract from Resume" → GPT-4o parses resume and auto-fills profile form fields
+- User fills basic profile: name, target role, experience level, primary skills
+- User can upload their resume (PDF or DOCX) for context-aware interviews
+- User can paste a job description to tailor interview questions to a specific role
+- Two options on resume upload:
+  - "Extract from Resume" → AI parses resume and auto-fills profile fields
   - "Skip" → resume stored as-is, profile unchanged
-- User can manually edit any profile field at any time
-- User can generate a clean professional PDF resume from their current profile data using GPT-4o
+- User can manually edit any profile field at any time in Settings
+- Resume Builder: generate a clean professional PDF resume from current profile data
 
-### Finding Jobs — Adzuna Discovery
+### Starting a New Interview
 
-- User goes to Find Jobs page
-- Enters job title and location
-- Clicks Find Jobs button
-- Agent calls Adzuna API with user's search criteria
-- GPT-4o scores each job 0-100 against user profile
-- Jobs appear in the job list below
-- After search completes a message shows: "Found 8 jobs and saved 4 strong matches"
+- User clicks "Start New Interview" from dashboard or sidebar
+- Step 1 — Interview Details:
+  - Select Role / Position (e.g., Frontend Developer)
+  - Select Experience Level (Junior, Mid Level, Senior)
+  - Select Interview Type (Technical, Behavioral, Mixed)
+  - Add Primary Skills (optional tags: React, JavaScript, TypeScript, CSS, etc.)
+- Step 2 — Add Context (Optional):
+  - Upload Resume (PDF, DOCX) — AI uses this to personalize questions
+  - Paste Job Description — AI tailors questions to match the JD
+- Step 3 — Customize Interview:
+  - Select question sections: Technical Questions, Behavioral Questions, System Design, Coding Challenge
+  - Question Focus dropdown: Mix of Conceptual, Practical, and Problem Solving
+- Step 4 — Set Duration & Questions:
+  - Total Duration: 15 / 30 / 45 / 60 Minutes
+  - Number of Questions: 5 / 8-10 / 12-15 / 20
+  - Time per Question (Average): 1-2 / 2-3 / 3-5 Minutes
+- Right sidebar shows live Interview Summary with all selections
+- User clicks "Start Interview" → launches live interview session
 
-### Job Matching
+### Live Interview Session
 
-- GPT-4o scores each job 0-100 against user profile
-- Returns: score, match reason, matched skills array, missing skills array
-- All jobs visible in Find Jobs page regardless of score
-- High scoring jobs visually highlighted
-- Low scoring jobs still accessible — user decides what to do
+- Interview page loads with configured settings and automatically enters/enlarges to full screen mode.
+- Top info bar: Role, Difficulty, Interview Type, Time Remaining
+- AI Interviewer avatar with "Speaking..." status indicator
+- AI introduces itself and asks the first question
+- Audio waveform visualization during AI speech
+- User answer input area:
+  - Text input: "Type or speak your answer here..."
+  - "Speak Answer" button for voice input
+  - "Submit Answer" button to send response
+- Contextual tip below input: "Take your time. Think clearly before answering."
+- Right sidebar: Questions panel showing all questions with status
+  - Progress indicator: "3 / 8"
+  - Status states: Answered (green check), Current (purple highlight), Pending (gray)
+- Bottom action bar:
+  - Live Analysis → opens real-time feedback panel
+  - Interview Notes → add personal notes during session
+  - Settings → adjust interview settings
+- "End Interview" button available at all times
+- Timer counts down automatically; interview ends when time expires or all questions answered
+- Strict proctoring and security rules:
+  - User is strictly prohibited from escaping full screen mode, minimizing the application, opening a new tab, or taking screenshots.
+  - If any of these actions are detected, the screen recorder automatically stops and the user is immediately exited from the interview.
 
-### Job Details Page
+### Live Analysis (Real-time Feedback)
 
-- Full structured job information:
-  - Title, company, location, salary, job type, source, date found
-  - About the role
-  - Responsibilities (bullet points)
-  - Requirements (bullet points)
-  - Nice to have (if present)
-  - Benefits (if present)
-  - About the company
-- Match score section:
-  - Score number prominently displayed
-  - Visual score indicator
-  - Matched skills — green tags
-  - Missing skills — red tags
-  - Match reason paragraph from GPT-4o
-- Company Research section:
-  - Empty state with Research Company button
-  - After research: structured dossier showing company overview, tech stack, culture, why this role exists, interview prep talking points
-  - Powered by Browserbase + Stagehand browsing the company's public pages
-- Apply Now button — opens external apply URL in new tab
+- Accessible during and after the interview
+- Back to Interview button returns to live session
+- Score cards with circular progress indicators:
+  - Overall Score /100
+  - Clarity /100
+  - Relevance /100
+  - Technical Depth /100
+  - Confidence /100
+- Qualitative labels: Good, Average, Excellent
+- Strengths section: bulleted list of what the user did well
+- Areas to Improve section: bulleted actionable suggestions
+- Detailed Feedback per question:
+  - Shows current question number (e.g., "Question 3 of 8")
+  - AI-generated feedback on the specific answer
+  - "View Answer" button to review what was submitted
+- Speaking Pace analysis: waveform visualization + qualitative rating
+- Confidence trend chart: line graph showing confidence trajectory across answers
+- Right sidebar persists showing full question list with statuses
 
-### Company Research Flow
+### Interview History
 
-- User clicks Research Company on job details page
-- Single Browserbase session opens with Stagehand
-- Agent navigates to company homepage — extracts overview, nav links, tech mentions
-- Agent visits About, Blog, Engineering pages if they exist
-- GPT-4o synthesizes all extracted content into structured dossier
-- Dossier displayed on job details page
-- If company site cannot be found — GPT-4o generates best dossier from company name and job description alone
+- Table view of all past interview sessions
+- Search bar: "Search interviews..."
+- Filter dropdowns: All Roles, All Types (Technical/Behavioral/Mixed), All Time
+- Columns: Interview Name, Role, Type, Date, Duration, Score, Status, Action
+- Each row shows:
+  - Interview icon (varies by type: code, brain, JS, etc.)
+  - Interview name and question count (e.g., "Frontend Developer Interview — 8 Questions")
+  - Role badge
+  - Type badge (Technical / Behavioral / Mixed)
+  - Date and time
+  - Duration
+  - Score badge (color-coded: green 70+, yellow 50-69, red <50)
+  - Status badge (Completed / In Progress / Incomplete)
+  - Action button: "View Details" or "Continue"
+- Pagination at bottom: 8-10 interviews per page
+- Click any row → opens detailed interview analytics page
 
 ### Dashboard
 
-- Stats bar — 4 cards: Total Jobs Found, Avg. Match Rate, Companies Researched, Jobs This Week
-- Recent activity — list of last 5-10 user actions pulled from DB
-- Analytics section (PostHog powered):
-  - Jobs found over time — line chart
-  - Match score distribution — bar chart
-  - Company research activity — bar chart
+- Welcome header: "Welcome back, [Name]! 👋" with personalized greeting
+- "Start New Interview" primary CTA button
+- Quick stats row: Role, Difficulty, Interview Type, Time per Interview, Questions
+- Continue Interview card (if session in progress):
+  - Interview name, current question, time remaining
+  - Progress bar showing percentage completed
+  - "Resume" button to jump back into the session
+- Recent Performance section:
+  - Circular chart showing average score (e.g., 72/100)
+  - Stats: Average Score, Interviews Taken, Questions Answered, Total Time
+  - Dropdown: "Last 5 Interviews" / "Last 10 Interviews" / "All Time"
+- Upcoming Interview Tips:
+  - AI-generated suggestions based on weak areas
+  - Examples: "Review JavaScript fundamentals", "Practice React concepts", "Work on problem solving"
+  - "View All" link to resources page
+- Your Recent Interviews:
+  - List of last 5 completed interviews with scores
+  - Color-coded score badges
+  - "View All" link to full history page
 
-### Find Jobs Page
+### Analytics Page
 
-- Search controls at top:
-  - Job title input
-  - Location input
-  - Find Jobs button
-  - Success message after search: "Found 8 jobs and saved 4 strong matches"
-- Full paginated job list below:
-  - Filter: All Matches / High Match / Low Match dropdown
-  - Sort dropdown: Match Score / Newest / Oldest
-  - Each job row: company, title, match score badge, salary, source badge, date found
-  - Click job row → opens job details page
-  - Pagination — 20 jobs per page
-  - "Jobs by Adzuna" credit displayed on job listings
+- Deep-dive performance analytics (post-interview or historical)
+- Same layout as Live Analysis but for completed sessions
+- Score breakdowns with visual indicators
+- Strengths and areas to improve
+- Per-question feedback with viewable answers
+- Speaking pace and confidence visualizations
+- Question-by-question review panel on the right
+
 
 ---
 
 ## Data Architecture
 
-### Main Profile Data
+### User Profile Data
 
 - Lives in `profiles` table
-- Only changes when user explicitly edits profile page or uploads resume and selects "Extract from Resume"
-- Used for job matching
-- Never modified by any agent operation
+- Fields: name, email, avatar, target_role, experience_level, primary_skills[], resume_url, job_description_text
+- Only changes when user explicitly edits profile or uploads resume and selects "Extract from Resume"
+- Used to personalize interview questions and generate tips
+- Never modified by any interview session
 
-### Company Research Data
+### Interview Session Data
 
-- Stored in `jobs.company_research` jsonb column
-- Generated per job when user clicks Research Company
-- Never affects profile data or match score
+- Stored in `interviews` table
+- Generated per interview when user clicks "Start Interview"
+- Fields: user_id, role, experience_level, interview_type, skills[], duration, question_count, time_per_question, sections[], status, score, started_at, completed_at
+- Status enum: `in_progress`, `completed`, `abandoned`, `incomplete`
+- Score calculated upon completion based on AI evaluation of all answers
+
+### Question & Answer Data
+
+- Stored in `interview_questions` table
+- Each row: interview_id, question_number, question_text, user_answer, ai_feedback, scores_json, duration_seconds, created_at
+- `scores_json` contains: clarity, relevance, technical_depth, confidence, overall
+- Linked to interview session
+
+### Analytics & Feedback Data
+
+- Aggregated from `interview_questions` per session
+- Stored in `interview_analytics` table for fast dashboard queries
+- Fields: interview_id, overall_score, clarity_score, relevance_score, technical_depth_score, confidence_score, strengths[], areas_to_improve[], speaking_pace_rating, confidence_trend_data
+- Used to populate dashboard Recent Performance and Analytics page
 
 ---
 
 ## Features In Scope
 
-- Homepage with hero, how it works, features, footer
-- Top navbar — Dashboard, Find Jobs, Profile
-- InsForge authentication (Google + GitHub OAuth)
-- Redirect to dashboard after login
-- Profile form with all standard resume fields
-- Resume PDF upload with optional profile auto-fill via GPT-4o
-- Resume PDF generation from profile data using GPT-4o
-- Adzuna API job discovery — searches by title and location, category filtered to IT jobs
-- GPT-4o job matching with score, reason, matched skills, missing skills
-- Job details page with full structured description
-- Company Research Agent — single Browserbase session browses company public pages, GPT-4o builds dossier
-- Find Jobs page with search controls, filter, sort dropdown, pagination
-- Dashboard with stats bar, recent activity, analytics charts
+- Landing page with hero, features, how it works, pricing, testimonials, FAQ, footer
+- Top navbar on landing page: Features, How it Works, Pricing, Testimonials, FAQ, Log in, Get Started
+- Left sidebar navigation on dashboard: Interview, Dashboard, History, Analytics, Resume Builder, Resources, Settings
+- OAuth authentication (Google + GitHub)
+- Redirect to /dashboard after login
+- User profile setup with role, experience level, and skills
+- Resume upload (PDF, DOCX) with optional AI auto-fill of profile fields
+- Job description paste for context-aware interviews
+- Start New Interview wizard — 4-step configuration flow
+- Live AI interview session with chat interface
+- Automatic browser section enlargement to full screen mode on interview launch
+- Strict full screen compliance (escaping full screen, minimizing, tab switching, or screenshot attempts stops screen recording and exits the interview)
+- AI interviewer avatar with speaking status indicator
+- Text and voice answer input methods
+- Real-time timer with countdown
+- Question progress sidebar with status indicators (Answered, Current, Pending)
+- Live Analysis panel with 5 score dimensions (Overall, Clarity, Relevance, Technical Depth, Confidence)
+- AI-generated strengths and areas to improve
+- Per-question detailed feedback with answer review
+- Speaking pace visualization and rating
+- Confidence trend line chart
+- Interview History page with search, filters, sort, pagination
+- Score color-coding (green/yellow/red) in history table
+- Dashboard with welcome header, quick stats, continue interview, recent performance chart, interview tips, recent interviews list
+- Analytics page with full score breakdowns and visualizations
+- Resume Builder — AI-generated professional PDF
+- Resources page with curated interview prep content
+- Settings page for profile, preferences, and account management
+- Pricing page with Free, Pro ($19/mo), Team ($49/mo per user), Enterprise (Custom) tiers
+- Monthly/Yearly billing toggle with 20% yearly discount
+- 30-day money-back guarantee messaging
 - PostHog event tracking throughout
-- PostHog analytics charts on dashboard
-- Incomplete profile banner on dashboard
-- "Jobs by Adzuna" credit on all job listings
+- "Powered by Kimi 2.6 AI" branding in sidebar
+- Theme toggle (light/dark mode)
+- User dropdown with profile and logout
 
 ---
 
 ## Features Out of Scope
 
-- Auto apply — agent does not fill or submit application forms
-- LinkedIn scraping or LinkedIn account connection
-- URL input for manual job import
-- Cover letter generation
-- Resume tailoring per job
-- Score recalculation after tailoring
-- Previous Job + Next Job navigation
-- Sidebar navigation — top navbar only
-- Separate analytics page — charts live on dashboard
-- Live browser embed on dashboard
-- Live agent feed / realtime log
-- Job-specific profile form on job details page
-- Dismiss job feature
-- Email or push notifications
-- Mobile app
-- Team or multi-user accounts
-- Scheduled agent runs — manually triggered only
-- Multiple saved resume versions — one active resume per user at a time
-- Payment or subscription system
+- Auto-apply to real jobs — platform is purely for practice
+- Live video interview (face-to-face) — text and voice only
+- Real human interviewer booking or scheduling
+- Peer-to-peer mock interviews with other users
+- LinkedIn integration or job board connections
+- Company-specific interview question banks (only role/skill-based)
+- Code editor / IDE integration for live coding challenges (questions are Q&A format only)
+- Mobile native app — responsive web only
+- Offline mode — requires internet for AI responses
+- Multi-language interviews — English only for MVP
+- Team collaboration features (shared dashboards, manager reviews) — beyond basic Team plan
+- Advanced billing/subscription management portal (Stripe integration for Team/Enterprise is future scope)
+- Email or push notifications for interview reminders
+- Calendar integration for scheduling practice sessions
+- Gamification / badges / leaderboards
+- Community forum or discussion boards
+- AI-generated cover letters
+- Salary negotiation coaching module
+- Third-party LMS integrations
 - Browser extension
+- White-label / custom branding for Enterprise
 
 ---
 
 ## PostHog Events
 
 ```typescript
-job_search_started; // { userId, jobTitle, location }
-job_found; // { userId, source, matchScore }
-profile_completed; // { userId }
-company_researched; // { userId, jobId, company }
+interview_started; // { userId, role, experienceLevel, interviewType, duration, questionCount, sections[] }
+question_answered; // { userId, interviewId, questionNumber, durationSeconds, inputMethod: 'text' | 'voice' }
+interview_completed; // { userId, interviewId, overallScore, clarityScore, relevanceScore, technicalDepthScore, confidenceScore, totalDuration }
+interview_abandoned; // { userId, interviewId, questionsAnswered, totalQuestions, reason: 'user_ended' | 'timeout' }
+analysis_viewed; // { userId, interviewId, viewType: 'live' | 'post_interview' }
+history_filter_used; // { userId, filterType: 'role' | 'type' | 'time', filterValue }
+resume_uploaded; // { userId, fileType, usedForExtraction: boolean }
+job_description_pasted; // { userId, interviewId, descriptionLength }
+pricing_viewed; // { userId, plan: 'free' | 'pro' | 'team' | 'enterprise' }
+settings_updated; // { userId, settingType: 'profile' | 'preferences' | 'notifications' }
 ```
 
 ---
 
 ## Target User
 
-A developer or technical job seeker who:
+A job seeker or student who:
 
-- Is actively applying to jobs
-- Has an existing resume they want to use
-- Wants intelligent job matching based on their actual skills
-- Wants to research companies quickly before applying
-- Is comfortable with a modern web application
+- Is preparing for technical or behavioral job interviews
+- Wants realistic, pressure-simulating practice sessions
+- Needs personalized feedback on their answers and delivery
+- Wants to track improvement over time with concrete metrics
+- Is targeting specific roles (Frontend, Backend, Full Stack, etc.) and wants tailored questions
+- Has an existing resume they want to use for context-aware interviews
+- Wants a structured, guided approach to interview preparation
+- Is comfortable with a modern web application and AI-assisted tools
 
 ---
 
 ## Success Criteria
 
-- User can sign up, fill profile, upload resume, and start finding jobs in under 5 minutes
-- Adzuna job discovery returns relevant tech jobs for any title and location search
-- GPT-4o match scores feel accurate and the reasoning makes sense
-- Company Research Agent returns a useful dossier for well-known tech companies
-- Company Research Agent gracefully handles companies with minimal web presence
-- Job details page displays clean structured job information
-- Dashboard analytics charts show meaningful data after several searches
-- All job data stored correctly in InsForge with full structured fields
+- User can sign up, complete profile, and start their first mock interview in under 3 minutes
+- AI interviewer asks relevant, role-specific questions that feel realistic
+- Real-time feedback is actionable and specific to the user's answer
+- Post-interview analytics provide clear, visual score breakdowns that help users understand strengths and weaknesses
+- Interview history accurately tracks all sessions with filterable, searchable records
+- Dashboard gives an at-a-glance view of progress and motivates continued practice
+- Resume upload and job description paste successfully personalize interview questions
+- Live interview session is stable — timer works, questions flow sequentially, no broken states
+- Full screen enforcement and proctoring logic triggers correctly (stops recording and exits on escape/minimize/tab switch/screenshot)
+- Analytics charts and score visualizations render correctly across all supported browsers
+- All interview data stored correctly with full structured question/answer/feedback records
 - PostHog events fire correctly for all key user actions
-- UI is visually consistent across all pages
+- UI is visually consistent across landing page and all dashboard pages
+- Pricing page clearly communicates value and drives conversions
+- The platform handles incomplete or abandoned interviews gracefully (resume capability)
