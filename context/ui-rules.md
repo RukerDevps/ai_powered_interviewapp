@@ -197,6 +197,26 @@ This project uses Tailwind v4. Tokens are defined with `@theme` in `app/globals.
 
 ---
 
+## Sequential Scroll Animations
+
+When implementing sequential flow animations (like step-by-step instructions or onboarding wizards):
+- Use **Framer Motion's** `useInView` hook (or native Intersection Observers) to trigger animation when the component is at least 15% visible.
+- Use `<motion.div>` with spring physics configurations (e.g. `type: "spring", stiffness: 90, damping: 14`) for card entrance animations to give them a premium, organic feel.
+- Manage staggered entry sequences by setting relative `delay` calculations based on element indices (`idx * 0.6` seconds).
+- Animate connecting lines (horizontal on desktop, vertical on mobile) using `<motion.div>` with simple height/width ease transitions timed to start mid-reveal of their respective steps.
+
+---
+
+## Page Entrance Animations (GSAP)
+
+When implementing top-of-page entry animations (such as the Hero section):
+- Use **GSAP timelines** inside a React `useEffect` hook. Always run `gsap.context()` to scope element selections to the component's container and return `ctx.revert()` in the hook's cleanup function to prevent memory leaks during hot-reloads and route changes.
+- Add an initial `opacity-0` class on the DOM elements to prevent layout flash (FOUC) before JavaScript compiles and GSAP starts.
+- Use `gsap.set()` inside the context to set initial Y translations or scaling before building the timeline to avoid conflicts with Tailwind transition variables.
+- Stagger animations using standard easing (e.g. `ease: "power3.out"`, `ease: "back.out(1.2)"` for interactive layouts) to keep the entrance feeling smooth and premium.
+
+---
+
 ## Do Nots
 
 - Never use Tailwind's built-in color classes (`bg-purple-500`, `text-gray-600`) — use project tokens only

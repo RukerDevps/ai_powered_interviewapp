@@ -82,18 +82,26 @@ Status: `Pending`
 ### Landing / Marketing Page
 
 #### Landing Hero
-File: `components/homepage/Hero.tsx`
-Status: `Pending`
+File: `src/components/homepage/Hero.tsx`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Border | |
-| Title Typography | |
-| Subtitle Typography | |
-| Buttons/CTAs | |
-| Spacing | |
-| Shadow | |
+| Background | Ambient glows: `bg-accent-light/30` (#e8e2fd / 30%), `bg-success-light/20` (#e1fbf2 / 20%). Graphic panel background: `bg-surface/40 backdrop-blur-md` (#ffffff / 40%), `bg-surface` (#ffffff). |
+| Border | `border-border` (#dfe1e7) on graphic container, `border-border-light` (#f3f4f6) on separators. |
+| Title Typography | `text-4xl sm:text-5xl font-bold tracking-tight text-text-primary leading-[1.15]` with `text-accent` (#6740fa) for highlights. |
+| Subtitle Typography | `text-base sm:text-lg text-text-secondary leading-relaxed` |
+| Buttons/CTAs | Primary: `bg-accent px-6 py-3 text-base font-medium text-accent-foreground shadow-lg hover:bg-accent-hover hover:shadow-xl`. Secondary: `bg-surface border border-border px-6 py-3 text-base font-medium text-text-primary hover:bg-surface-secondary`. |
+| Spacing | Section: `pt-12 pb-16 md:pt-20 md:pb-24`. Grid: `gap-12 lg:gap-8`. Left container items: `space-y-6`. |
+| Shadow | Primary CTA: `shadow-lg` (hover `shadow-xl`). Graphic Mockup: `shadow-2xl`. |
+
+**Pattern notes:**
+- Leverages GSAP context for timeline management to prevent memory leaks and React unmounting conflicts.
+- Implements staggered fade/slide-up entrance animations for elements on page load:
+  - Left-hand side copy and CTAs animate via class `.animate-hero-item` (`stagger: 0.12`).
+  - Right-hand side mockup panel scales and slides up via class `.animate-hero-mockup` with a slight timeline overlap (`-=0.6s`).
+  - Trusted brand logos fade in via class `.animate-hero-footer` at the end (`-=0.4s`).
+- All elements start with a base class of `opacity-0` to avoid initial layout flashing before GSAP context executes.
 
 ---
 
@@ -112,15 +120,23 @@ Status: `Pending`
 ---
 
 #### How It Works Flow
-File: `components/homepage/HowItWorks.tsx`
-Status: `Pending`
+File: `src/components/homepage/HowItWorks.tsx`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Step Border/Connectors | |
-| Text | |
-| Spacing | |
+| Background | `bg-surface` (#ffffff), `bg-accent-muted` (#f9f7fc) for active step icons |
+| Step Border/Connectors | `border-border-muted` (#dfe1e7) for background line, `bg-accent` (#6740fa) for animated step lines |
+| Text | `text-accent` (#6740fa), `text-text-primary` (#101828), `text-text-secondary` (#6a7282), `text-accent-foreground` (#ffffff) |
+| Spacing | `py-16 md:py-20` for section container padding, `gap-12 lg:gap-8` for grid gap, `mb-16` for title spacing, `mb-6` for icon container margins |
+| Hover State | `group-hover:scale-105` transition scale |
+| Shadow | `shadow-sm` on step icon container, `shadow-md` on step number badge |
+| Accent Usage | `bg-accent` (#6740fa) for active step numbers & progress lines, `border-accent-light` (#e8e2fd) for icon border |
+
+**Pattern notes:**
+- Integrates Framer Motion's `useInView` hook for viewport tracking (triggers once when 15% of section is visible).
+- Staggers card reveals using spring physics (`staggerChildren` logic simulated via calculated index-based delays `idx * 0.6`s) with a customized spring transition (`stiffness: 90, damping: 14`).
+- Progress lines (desktop horizontal width, mobile vertical height) animate sequentially using Framer Motion `<motion.div>` width/height transitions with customized delay timings starting mid-reveal of adjacent cards.
 
 ---
 

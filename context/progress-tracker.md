@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 1: Foundation & Database Setup`
-- **Overall Completion**: `5%`
+- **Overall Completion**: `7%`
 - **Last Updated**: `2026-06-15`
 
 ---
@@ -71,12 +71,16 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
-### 2026-06-15: Landing Page & Pricing Setup
+### 2026-06-15: Landing Page, Pricing Setup & Hero/How-It-Works Animations
 - **Decisions Made**:
   - Initiated coding for the landing page UI design based on delivered screenshots.
   - Aligned on integration of the separate pricing section with billing toggle into the marketing homepage layout flow.
+  - Installed `framer-motion` dependency and rebuilt `HowItWorks` component scroll-animations using spring physics and the declarative `useInView` hook to improve layout responsiveness and feel.
+  - Segmented the desktop connecting lines and mobile connecting lines to draw sequentially using Framer Motion path animations.
+  - Installed `gsap` dependency and added a smooth, staggered page entrance animation in `Hero.tsx` using GSAP context timeline.
+  - Set elements to start at `opacity-0` to prevent FOUC (flash of unstyled content) and used GSAP to coordinate the stagger and entry.
+  - Updated `ui-registry.md` and `ui-rules.md` to establish visual standards for scroll-triggered and page load animations.
 - **Next Steps**:
-  - Review implementation plan and obtain approval.
-  - Initialize CSS design tokens inside `src/app/globals.css` and font styling in `src/app/layout.tsx`.
   - Implement full responsive HTML/Tailwind mockup components for all landing sections, navbar, and footer.
+  - Initialize database schema migrations and connection pool utilities.
 
