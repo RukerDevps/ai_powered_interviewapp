@@ -22,16 +22,21 @@ After building any component — update this file with the component name, file 
 
 #### Landing Navbar
 File: `components/layout/Navbar.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Border | |
-| Text | |
-| Spacing | |
-| Hover State | |
-| Accent Usage | |
+| Background | `bg-surface/90 backdrop-blur-md` |
+| Border | `border-b border-border` |
+| Text | `text-text-dark`, `text-text-secondary`, `text-accent` |
+| Spacing | `h-16 w-full px-4 sm:px-6 lg:px-8`, desktop gaps `gap-6 lg:gap-8` |
+| Hover State | `hover:text-accent`, `hover:bg-surface-secondary` |
+| Accent Usage | `bg-accent` CTA button, `bg-gradient-to-br from-accent to-accent-dark` logo mark |
+
+**Pattern notes:**
+- Full desktop links and auth CTAs are revealed at `lg` and above.
+- Tablet widths fall back to the hamburger menu to avoid wrapped nav text and broken alignment.
+- Anchor links rely on native smooth scrolling, with section scroll offsets set globally for the sticky navbar.
 
 ---
 

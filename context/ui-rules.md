@@ -42,6 +42,8 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 
 ### Landing Navbar
 Items: Features, How it Works, Pricing, Testimonials, FAQ. Plus "Log in" link and "Get Started" CTA button.
+- Full desktop nav and auth actions should stay hidden below `lg`; tablet widths should collapse to the menu button so link labels never wrap.
+- Landing anchor links should use native smooth scrolling, with section offsets preserved so the sticky navbar does not cover section headings.
 
 ### Dashboard Left Sidebar
 Items: Dashboard, History, Analytics, Settings.

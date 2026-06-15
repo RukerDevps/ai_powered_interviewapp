@@ -114,7 +114,7 @@ export const Hero = () => {
           </div>
 
           {/* Hero Right Graphic Mockup */}
-          <div className="lg:col-span-7 flex justify-center animate-hero-mockup opacity-0">
+          <div className="lg:col-span-7 justify-center animate-hero-mockup opacity-0 hidden sm:flex">
             <div className="relative w-full max-w-[580px] p-2 sm:p-4 bg-surface/40 backdrop-blur-md border border-border rounded-2xl shadow-2xl">
               {/* Header bar */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-border bg-surface-secondary rounded-t-xl">

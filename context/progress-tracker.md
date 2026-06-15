@@ -84,3 +84,18 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Implement full responsive HTML/Tailwind mockup components for all landing sections, navbar, and footer.
   - Initialize database schema migrations and connection pool utilities.
 
+### 2026-06-15: Navbar Tablet Responsiveness Fix
+- **Decisions Made**:
+  - Moved the landing navbar’s full link set and auth CTAs to `lg` and above so tablet widths no longer force the labels to wrap.
+  - Kept the logo compact by hiding the subtitle until `xl`, and made the hamburger menu the fallback for tablet widths.
+  - Updated the living UI docs so the new landing navbar breakpoint rule is explicit for future layout work.
+- **Next Steps**:
+  - Finish the remaining landing footer polish and continue with the homepage sections as planned.
+
+### 2026-06-15: Landing Smooth Scroll Links
+- **Decisions Made**:
+  - Enabled native smooth scrolling globally for landing page anchor links.
+  - Added a section scroll offset so the sticky navbar does not obscure the target section heading after navigation.
+  - Kept the solution dependency-free and aligned with browser-native behavior, including reduced-motion fallback.
+- **Next Steps**:
+  - Continue polishing landing page sections and footer interaction states.

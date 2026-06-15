@@ -18,18 +18,16 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 h-16 w-full border-b border-border bg-surface/90 backdrop-blur-md">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
+        <a href="/" className="flex flex-shrink-0 items-center gap-2 whitespace-nowrap">
           <div className="flex h-9 items-center justify-center rounded-[10px] bg-gradient-to-br from-accent to-accent-dark px-3 py-1 font-bold text-accent-foreground shadow-sm">
             <span className="text-sm font-extrabold tracking-wider">INTERV</span>
             <span className="ml-1 rounded bg-white px-1 py-0.5 text-[10px] font-black text-accent">AI</span>
           </div>
-          <span className="hidden text-xs font-semibold text-text-secondary sm:inline-block">
-            AI Mock Interview
-          </span>
+
         </a>
 
         {/* Desktop Nav Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden items-center gap-6 lg:flex xl:gap-8">
           {navLinks.map((link) => (
             <a
               key={link.name}
@@ -42,7 +40,7 @@ export const Navbar = () => {
         </div>
 
         {/* Desktop CTAs */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden items-center gap-4 lg:flex">
           <a
             href="/login"
             className="text-sm font-semibold text-text-dark transition-colors hover:text-accent"
@@ -58,13 +56,13 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile menu button */}
-        <div className="flex md:hidden">
+        <div className="flex lg:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
             type="button"
             className="inline-flex items-center justify-center rounded-md p-2 text-text-secondary hover:bg-surface-secondary hover:text-text-primary focus:outline-none"
             aria-controls="mobile-menu"
-            aria-expanded="false"
+            aria-expanded={isOpen}
           >
             <span className="sr-only">Open main menu</span>
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -74,7 +72,7 @@ export const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden border-b border-border bg-surface shadow-lg" id="mobile-menu">
+        <div className="border-b border-border bg-surface shadow-lg lg:hidden" id="mobile-menu">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
             {navLinks.map((link) => (
               <a
