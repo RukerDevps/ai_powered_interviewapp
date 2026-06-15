@@ -2,18 +2,20 @@
 
 ## Stack
 
-| Layer                          | Tool                     | Purpose                                          |
-| ------------------------------ | ------------------------ | ------------------------------------------------ |
-| Framework                      | Next.js 16 (App Router)  | Full stack framework                             |
-| Auth + DB + Storage + Realtime | InsForge                 | Entire backend                                   |
-| Cloud browser                  | Browserbase              | Company research — browsing company public pages |
-| AI browser control             | Stagehand                | Company page interaction and content extraction  |
-| Job Discovery                  | Adzuna API               | Job search and discovery                         |
-| AI model                       | OpenAI GPT-4o            | Matching, research synthesis, extraction         |
-| Analytics                      | PostHog                  | Event tracking and dashboard charts              |
-| PDF generation                 | @react-pdf/renderer      | Resume PDF rendering                             |
-| Styling                        | Tailwind CSS + shadcn/ui | UI components and styling                        |
-| Language                       | TypeScript strict        | Throughout                                       |
+| Layer | Tool | Purpose |
+| --- | --- | --- |
+| Framework | Next.js 16 (App Router) | Full stack framework |
+| Database | PostgreSQL (latest version) | Relational database |
+| Authentication | Email Authentication | Email & password based login |
+| Storage | InsForge Storage | File storage (resumes) |
+| Cloud browser | Browserbase | Company research — browsing company public pages |
+| AI browser control | Stagehand | Company page interaction and content extraction |
+| Job Discovery | Adzuna API | Job search and discovery |
+| AI model | OpenAI GPT-4o | Matching, research synthesis, extraction |
+| Analytics | PostHog | Event tracking and dashboard charts |
+| PDF generation | @react-pdf/renderer | Resume PDF rendering |
+| Styling | Tailwind CSS + shadcn/ui | UI components and styling |
+| Language | TypeScript strict | Throughout |
 
 ---
 
@@ -37,9 +39,9 @@
 │   ├── page.tsx                            → Homepage
 │   ├── (auth)/
 │   │   ├── login/
-│   │   │   └── page.tsx                   → Login page
-│   │   └── callback/
-│   │       └── page.tsx                   → OAuth callback handler
+│   │   │   └── page.tsx                   → Login page (Email/password)
+│   │   └── register/
+│   │       └── page.tsx                   → Register page (Email/password signup)
 │   ├── dashboard/
 │   │   └── page.tsx                       → Main dashboard
 │   ├── profile/
@@ -63,6 +65,7 @@
 │   └── types.ts                           → Agent-specific TypeScript types
 ├── actions/
 │   ├── profile.ts                         → Profile save + update
+│   ├── auth.ts                            → Email authentication actions (login, signup, logout)
 │   └── jobs.ts                            → Job status updates
 ├── components/
 │   ├── ui/                                → shadcn/ui components only
@@ -94,8 +97,8 @@
 │       ├── CompanyResearch.tsx
 │       └── JobActions.tsx
 ├── lib/
-│   ├── insforge-client.ts                 → InsForge browser client instance
-│   ├── insforge-server.ts                 → InsForge server client
+│   ├── db.ts                              → PostgreSQL connection pool (pg client)
+│   ├── insforge.ts                        → InsForge client instance for Storage
 │   ├── browserbase.ts                     → Browserbase session creation + management
 │   ├── stagehand.ts                       → Stagehand initialisation with Browserbase session
 │   ├── adzuna.ts                          → Adzuna API client
@@ -110,14 +113,14 @@
 
 ## System Boundaries
 
-| Folder        | Owns                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| `app/`        | Pages and API routes only. No business logic.                                                          |
-| `agent/`      | All agent logic. Adzuna discovery, company research, matching, extraction. Nothing here touches React. |
-| `actions/`    | Server Actions for UI-triggered mutations only. Profile save, profile update.                          |
-| `components/` | UI only. No data fetching logic. No direct DB calls.                                                   |
-| `lib/`        | Third party client initialisation and shared utilities only.                                           |
-| `types/`      | TypeScript types shared across the project.                                                            |
+| Folder | Owns |
+| --- | --- |
+| `app/` | Pages and API routes only. No business logic. |
+| `agent/` | All agent logic. Adzuna discovery, company research, matching, extraction. Nothing here touches React. |
+| `actions/` | Server Actions for UI-triggered mutations only. Profile save, profile update, auth operations. |
+| `components/` | UI only. No data fetching logic. No direct DB calls. |
+| `lib/` | Third party client initialisation and shared utilities only. |
+| `types/` | TypeScript types shared across the project. |
 
 ---
 
@@ -130,7 +133,7 @@ User interaction in component
         ↓
 Server Action in actions/
         ↓
-InsForge DB write
+PostgreSQL DB write
         ↓
 Revalidate or redirect
 ```
@@ -148,7 +151,7 @@ Adzuna API returns job listings
         ↓
 GPT-4o scores each job against user profile
         ↓
-Agent writes results to InsForge DB
+Agent writes results to PostgreSQL DB
         ↓
 Page data revalidated
 ```
@@ -191,96 +194,105 @@ URL saved to profiles table
 
 ---
 
-## InsForge Database Schema
+## PostgreSQL Database Schema
+
+### `users`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid | Primary Key |
+| email | text | Unique |
+| password_hash | text | Salted and hashed password |
+| created_at | timestamptz | |
 
 ### `profiles`
 
-| Column              | Type        | Notes                                        |
-| ------------------- | ----------- | -------------------------------------------- |
-| id                  | uuid        | References auth.users                        |
-| full_name           | text        |                                              |
-| email               | text        | Pre-filled from auth                         |
-| phone               | text        |                                              |
-| location            | text        | City, country                                |
-| current_title       | text        | Most recent job title                        |
-| experience_level    | text        | junior / mid / senior / lead                 |
-| years_experience    | integer     |                                              |
-| skills              | text[]      | Array of skill tags                          |
-| industries          | text[]      | Industries worked in                         |
-| work_experience     | jsonb       | Array of up to 3 roles                       |
-| education           | jsonb       | Degree, field, institution, year             |
-| job_titles_seeking  | text[]      | Roles they want                              |
-| remote_preference   | text        | remote / onsite / hybrid / any               |
-| preferred_locations | text[]      | Optional preferred locations                 |
-| salary_expectation  | text        | Optional                                     |
-| cover_letter_tone   | text        | formal / casual / enthusiastic               |
-| linkedin_url        | text        |                                              |
-| portfolio_url       | text        |                                              |
-| work_authorization  | text        | citizen / permanent_resident / visa_required |
-| resume_pdf_url      | text        | InsForge Storage URL of current resume       |
-| is_complete         | boolean     | True when all required fields filled         |
-| created_at          | timestamptz |                                              |
-| updated_at          | timestamptz |                                              |
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid | References users(id) |
+| full_name | text | |
+| email | text | Pre-filled from user account |
+| phone | text | |
+| location | text | City, country |
+| current_title | text | Most recent job title |
+| experience_level | text | junior / mid / senior / lead |
+| years_experience | integer | |
+| skills | text[] | Array of skill tags |
+| industries | text[] | Industries worked in |
+| work_experience | jsonb | Array of up to 3 roles |
+| education | jsonb | Degree, field, institution, year |
+| job_titles_seeking | text[] | Roles they want |
+| remote_preference | text | remote / onsite / hybrid / any |
+| preferred_locations | text[] | Optional preferred locations |
+| salary_expectation | text | Optional |
+| cover_letter_tone | text | formal / casual / enthusiastic |
+| linkedin_url | text | |
+| portfolio_url | text | |
+| work_authorization | text | citizen / permanent_resident / visa_required |
+| resume_pdf_url | text | InsForge Storage URL of current resume |
+| is_complete | boolean | True when all required fields filled |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
 
 ### `agent_runs`
 
-| Column             | Type        | Notes                        |
-| ------------------ | ----------- | ---------------------------- |
-| id                 | uuid        |                              |
-| user_id            | uuid        | References profiles          |
-| status             | text        | running / completed / failed |
-| job_title_searched | text        |                              |
-| location_searched  | text        |                              |
-| jobs_found         | integer     | Total jobs discovered        |
-| started_at         | timestamptz |                              |
-| completed_at       | timestamptz |                              |
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid | |
+| user_id | uuid | References profiles |
+| status | text | running / completed / failed |
+| job_title_searched | text | |
+| location_searched | text | |
+| jobs_found | integer | Total jobs discovered |
+| started_at | timestamptz | |
+| completed_at | timestamptz | |
 
 ### `jobs`
 
-| Column             | Type        | Notes                                          |
-| ------------------ | ----------- | ---------------------------------------------- |
-| id                 | uuid        |                                                |
-| run_id             | uuid        | References agent_runs — null if from URL input |
-| user_id            | uuid        | References profiles                            |
-| source             | text        | search / url                                   |
-| source_url         | text        | Original job listing URL                       |
-| external_apply_url | text        | Direct company apply URL                       |
-| title              | text        |                                                |
-| company            | text        |                                                |
-| location           | text        |                                                |
-| salary             | text        | If available                                   |
-| job_type           | text        | fulltime / parttime / contract                 |
-| about_role         | text        | 2-3 sentence summary                           |
-| responsibilities   | text[]      | Bullet points                                  |
-| requirements       | text[]      | Bullet points                                  |
-| nice_to_have       | text[]      | Optional                                       |
-| benefits           | text[]      | Optional                                       |
-| about_company      | text        | Brief company description                      |
-| match_score        | integer     | 0-100 scored against main profile              |
-| match_reason       | text        | GPT-4o explanation                             |
-| matched_skills     | text[]      | Skills user has that match                     |
-| missing_skills     | text[]      | Skills user lacks                              |
-| company_research   | jsonb       | Company dossier from research agent            |
-| found_at           | timestamptz |                                                |
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid | |
+| run_id | uuid | References agent_runs — null if from URL input |
+| user_id | uuid | References profiles |
+| source | text | search / url |
+| source_url | text | Original job listing URL |
+| external_apply_url | text | Direct company apply URL |
+| title | text | |
+| company | text | |
+| location | text | |
+| salary | text | If available |
+| job_type | text | fulltime / parttime / contract |
+| about_role | text | 2-3 sentence summary |
+| responsibilities | text[] | Bullet points |
+| requirements | text[] | Bullet points |
+| nice_to_have | text[] | Optional |
+| benefits | text[] | Optional |
+| about_company | text | Brief company description |
+| match_score | integer | 0-100 scored against main profile |
+| match_reason | text | GPT-4o explanation |
+| matched_skills | text[] | Skills user has that match |
+| missing_skills | text[] | Skills user lacks |
+| company_research | jsonb | Company dossier from research agent |
+| found_at | timestamptz | |
 
 ### `agent_logs`
 
-| Column     | Type        | Notes                            |
-| ---------- | ----------- | -------------------------------- |
-| id         | uuid        |                                  |
-| run_id     | uuid        | References agent_runs            |
-| user_id    | uuid        | References profiles              |
-| message    | text        | Human readable log entry         |
-| level      | text        | info / success / warning / error |
-| job_id     | uuid        | Optional — related job           |
-| created_at | timestamptz |                                  |
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | uuid | |
+| run_id | uuid | References agent_runs |
+| user_id | uuid | References profiles |
+| message | text | Human readable log entry |
+| level | text | info / success / warning / error |
+| job_id | uuid | Optional — related job |
+| created_at | timestamptz | |
 
 ---
 
 ## InsForge Storage
 
-| Bucket  | Path                         | Contents                  |
-| ------- | ---------------------------- | ------------------------- |
+| Bucket | Path | Contents |
+| --- | --- | --- |
 | resumes | resumes/{user_id}/resume.pdf | Current active resume PDF |
 
 Access: authenticated users only, own files only.
@@ -289,49 +301,37 @@ Access: authenticated users only, own files only.
 
 ## Authentication
 
-- Provider: InsForge Auth
-- Methods: Google OAuth, GitHub OAuth
+- System: Session-based cookie authentication
+- Methods: Email & password login and registration
 - Protected routes: /dashboard, /profile, /find-jobs, /find-jobs/[id]
-- Public routes: /, /login
-- Middleware in middleware.ts checks session on every protected route
+- Public routes: /, /login, /register
+- Middleware in middleware.ts checks user session cookie on every protected route
 - On login → redirect to /dashboard
 
 ---
 
-## InsForge Client Pattern
+## PostgreSQL Client Pattern
 
-Two separate InsForge instances — never mix them:
+All database connections use a pooled `pg` connection pattern managed server-side:
 
 ```typescript
-// lib/insforge-client.ts
-// Browser-side — used in client components for auth state
-import { createBrowserClient } from "@insforge/ssr";
-export const insforge = createBrowserClient(
-  process.env.NEXT_PUBLIC_INSFORGE_URL!,
-  process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-);
+// lib/db.ts
+import { Pool } from "pg";
 
-// lib/insforge-server.ts
-// Server-side — used in API routes, Server Actions, agent code
-import { createServerClient } from "@insforge/ssr";
-import { cookies } from "next/headers";
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
 
-export const createInsforgeServer = async () => {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_INSFORGE_URL!,
-    process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
+export const query = async (text: string, params?: any[]) => {
+  const start = Date.now();
+  const res = await pool.query(text, params);
+  const duration = Date.now() - start;
+  // Performance logging if query duration is slow
+  if (duration > 100) {
+    console.warn(`[db] Slow query: ${text} (${duration}ms)`);
+  }
+  return res;
 };
 ```
 
@@ -420,11 +420,11 @@ Rules the AI agent must never violate:
 - API routes contain no UI logic. Components contain no DB logic.
 - Agent code in `/agent` never imports from `/components` or `/actions`.
 - Server Actions never call agent functions. Agent functions are only called from API routes.
-- All InsForge server-side writes use `createInsforgeServer()` — never the browser client.
+- All database operations use the PostgreSQL connection pool from `lib/db.ts`.
 - No hardcoded hex values or raw Tailwind color classes in components — use CSS variables from ui-tokens.md.
 - Every Stagehand action is wrapped in try/catch. Failures are logged to agent_logs, never thrown to crash the run.
 - Company research always returns a dossier — even if browser research fails, GPT-4o synthesizes from company name and job description alone. Never return empty.
 - Browserbase sessions are always closed with stagehand.close() when done — never leave sessions open.
-- Always scope InsForge queries to the current user_id — never query without a user filter.
+- Always scope database queries to the current user_id — never query without a user filter.
 - Adzuna API always includes category=it-jobs — never search without this filter.
 - jobs.source is always 'search' or 'url' — never any other value.

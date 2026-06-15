@@ -13,8 +13,8 @@ The platform includes a marketing landing page with pricing tiers, a comprehensi
 | **Frontend** | React / Next.js (App Router) | React 19.2.4, Next.js 16.2.9 | UI, Routing, Client/Server rendering |
 | **Styling** | Tailwind CSS | Tailwind v4.x | Responsive components and layout styling |
 | **Backend** | Next.js Server Actions & Route Handlers | Next.js 16.2.9 | Business logic, API layer, and integration |
-| **Database** | InsForge Database (PostgreSQL) | PostgreSQL 16+ compatible | Relational storage for profiles, sessions, questions |
-| **Authentication** | InsForge Auth | OAuth 2.0 | User registration & login via Google and GitHub |
+| **Database** | PostgreSQL | Latest version | Relational storage for profiles, sessions, questions |
+| **Authentication** | Email Authentication | Email & password | User registration & login via email authentication |
 | **AI Model** | Kimi 2.6 | API (OpenAI-compatible SDK) | Real-time mock interview evaluation and feedback generation |
 | **Hosting** | Vercel / InsForge Infrastructure | Serverless Node.js | Deployment, hosting, and storage buckets |
 
@@ -45,7 +45,7 @@ IntervAI solves this by providing realistic, AI-driven mock interviews that simu
 
 ```
 /                          → Landing page (marketing site)
-/login                     → Auth page (Google + GitHub OAuth)
+/login                     → Auth page (Email Authentication)
 /dashboard                 → Overview, stats, continue interview, recent performance, tips
 /interview/new             → Start New Interview — configure role, skills, duration, question types
 /interview/[id]            → Live interview session — AI interviewer chat, answer input, real-time feedback
@@ -102,7 +102,7 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 
 ### Onboarding
 
-- User signs up via OAuth (Google or GitHub)
+- User signs up via Email Authentication
 - On first login → redirect to /dashboard with incomplete profile banner
 - User prompted to complete profile and select preferences
 
@@ -285,7 +285,7 @@ erDiagram
 - Landing page with hero, features, how it works, pricing, testimonials, FAQ, footer
 - Top navbar on landing page: Features, How it Works, Pricing, Testimonials, FAQ, Log in, Get Started
 - Left sidebar navigation on dashboard: Interview, Dashboard, History, Analytics, Resume Builder, Resources, Settings
-- OAuth authentication (Google + GitHub)
+- Email authentication (no OAuth 2.0)
 - Redirect to /dashboard after login
 - User profile setup with role, experience level, and skills
 - Resume upload (PDF, DOCX) with optional AI auto-fill of profile fields
@@ -374,7 +374,7 @@ settings_updated; // { userId, settingType: 'profile' | 'preferences' | 'notific
 
 ## Success Criteria
 
-1. **Fast-path Onboarding**: A new user can complete Google/GitHub OAuth, basic profile configuration, and launch a new mock interview session within 180 seconds.
+1. **Fast-path Onboarding**: A new user can complete email authentication, basic profile configuration, and launch a new mock interview session within 180 seconds.
 2. **AI-Driven Personalization**: The Kimi 2.6 API successfully generates a list of N questions (where N is the configured question count) matching the chosen role, difficulty level, and skills.
 3. **Multi-Dimensional Evaluation**: Every answered question receives an AI feedback payload containing five numeric metrics (Overall, Clarity, Relevance, Depth, Pace) in the range 0-100.
 4. **State Persistence**: Saving a completed interview writes records to the `interviews`, `interview_questions`, and `interview_analytics` tables, making them immediately retrievable via history API filters.

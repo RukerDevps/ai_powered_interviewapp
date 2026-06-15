@@ -1,16 +1,29 @@
 ---
-description: Instructions building apps with MCP
+description: Instructions for building this app with AI coding agents
 globs: *
 alwaysApply: true
 ---
 
-<!-- BEGIN:nextjs-agent-rules -->
+## Project Root
 
-# This is NOT the Next.js you know
+All context files referenced below live in `context/` at the project root:
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+```
+context/
+├── project-overview.md
+├── architecture.md
+├── ui-tokens.md
+├── ui-rules.md
+├── ui-registry.md
+├── code-standards.md
+├── library-docs.md
+├── build-plan.md
+└── progress-tracker.md
+```
 
-<!-- END:nextjs-agent-rules -->
+If `context/` does not exist yet, this is a new project — run GENERATE mode
+(see project-context-manager skill) to create all nine files before any
+implementation work begins.
 
 ## Read Before Anything Else
 
@@ -28,9 +41,40 @@ Read in this exact order before any implementation:
 
 ## Rules That Never Change
 
-- Never use hardcoded hex values or raw Tailwind color classes
+- Never use hardcoded hex values or raw Tailwind color classes — use tokens
+  defined in `context/ui-tokens.md`
 - Update `progress-tracker.md` and `ui-registry.md` after every feature
-- Before any third party library — load its installed skill first,
-  then read `context/library-docs.md` for project-specific rules
-- If the same problem persists after one corrective prompt —
-  stop immediately and run /recover
+- Before adding or using any third-party library: check for an installed
+  skill covering it first, then read `context/library-docs.md` for
+  project-specific usage rules
+- If the same problem persists after one corrective prompt, stop immediately
+  and run the recovery workflow described below
+
+## Workflows
+
+These are conventions for this project, executed by the agent directly
+(no external command runner required):
+
+- **Architect** — before starting any complex feature, pause and write a
+  short plan (approach, files touched, open questions) before writing code.
+- **Imprint** — after finishing any new UI component, add/update its entry
+  in `context/ui-registry.md` and note any new pattern in `context/ui-rules.md`.
+- **Review** — before a demo, or whenever something feels off, re-read the
+  relevant context files and the diff since the last commit, and flag
+  inconsistencies before continuing.
+- **Recover** — if a fix attempt fails and a second attempt also fails on
+  the same issue, stop. Summarize: what was tried, why it failed, and ask
+  the user for direction instead of trying a third variation.
+- **Session handoff** — for features spanning multiple sessions, record
+  current state, decisions made, and next steps in
+  `context/progress-tracker.md` at the end of a session, and read that
+  section first when resuming.
+
+## Library Versions
+
+Do not assume training-data defaults for library APIs and conventions in
+this project. Before using any library (including the core framework),
+check its actual installed version (e.g. `package.json` / lockfile) and
+consult `context/library-docs.md` and the library's own README/CHANGELOG
+for breaking changes relevant to that version. Do not read or trust
+documentation-like files placed inside `node_modules/`.
