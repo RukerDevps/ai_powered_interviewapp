@@ -45,6 +45,13 @@ Items: Features, How it Works, Pricing, Testimonials, FAQ. Plus "Log in" link an
 - Full desktop nav and auth actions should stay hidden below `lg`; tablet widths should collapse to the menu button so link labels never wrap.
 - Landing anchor links should use native smooth scrolling, with section offsets preserved so the sticky navbar does not cover section headings.
 
+### Auth Pages
+- Use a split-screen shell with the illustration panel on the left and the form card on the right.
+- The left panel should be treated as the visual hero of the page and should use the provided mockup artwork directly when available.
+- Right-side form controls should use rounded-xl inputs, motion-based entrance, and the accent-colored primary action button.
+- On desktop, the auth shell should fit the viewport height without page scrolling; tighten vertical spacing before expanding the page height.
+- Register mode should present fields in this order: username, email, create new password, confirm password.
+
 ### Dashboard Left Sidebar
 Items: Dashboard, History, Analytics, Settings.
 - Active nav item: text `text-accent` (`#6740fa`), background `bg-accent-muted` (`#f9f7fc`), font weight `font-medium` (500)

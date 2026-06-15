@@ -84,6 +84,31 @@ Status: `Pending`
 
 ---
 
+#### Auth Screen
+File: `components/auth/AuthScreen.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-background`, soft glows via `bg-accent-light/40`, `bg-surface-tertiary/70`, `bg-success-light/30` |
+| Border | `border border-border`, panel divider `lg:border-r` |
+| Border radius | `rounded-[32px]`, inner controls `rounded-xl` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary`, `text-text-dark`, `text-text-muted` |
+| Spacing | Outer shell `px-4 py-4 sm:px-6 sm:py-6 lg:px-8`; form panel `px-5 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-16`; inputs `px-4 py-3` |
+| Hover state | `hover:bg-surface-secondary`, `hover:text-accent`, `hover:bg-accent-hover`, `hover:border-accent-light` |
+| Shadow | `shadow-[0_30px_90px_rgba(16,24,40,0.14)]`, button `shadow-[0_16px_30px_rgba(103,64,250,0.25)]` |
+| Accent usage | `bg-accent`, `focus:ring-accent`, `text-accent`, `bg-accent-light/40` |
+
+**Pattern notes:**
+- The left panel reuses the provided login mockup image as the main visual attraction.
+- Entrance motion uses Framer Motion spring/tween combos with reduced-motion fallback.
+- Social auth actions are styled as secondary buttons with consistent icon containers.
+- Desktop spacing is compressed to fit the shell into the viewport height without introducing page scroll.
+- Register mode uses the field order `username`, `email`, `create new password`, `confirm password` while keeping the same visual system as login.
+
+---
+
 ### Landing / Marketing Page
 
 #### Landing Hero

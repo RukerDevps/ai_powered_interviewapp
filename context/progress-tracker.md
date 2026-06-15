@@ -7,7 +7,8 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 1: Foundation & Database Setup`
-- **Overall Completion**: `7%`
+- **Current Phase**: `Phase 2: Authentication & Profile Setup`
+- **Overall Completion**: `12%`
 - **Last Updated**: `2026-06-15`
 
 ---
@@ -23,7 +24,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ### Phase 2: Authentication & Profile Setup
 - [ ] Password hashing & Session utilities (`actions/auth.ts`)
-- [ ] Split-panel Login & Registration views (`/login`, `/register`)
+- [x] Split-panel Login & Registration views (`/login`, `/register`)
 - [ ] Protected route check Middleware (`middleware.ts`)
 - [ ] Profile Save & Edit forms
 - [ ] PDF & DOCX resume parser utilities
@@ -99,3 +100,17 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Kept the solution dependency-free and aligned with browser-native behavior, including reduced-motion fallback.
 - **Next Steps**:
   - Continue polishing landing page sections and footer interaction states.
+
+### 2026-06-15: Auth Login Page Build
+- **Decisions Made**:
+  - Built a new split-screen auth shell for login and register pages.
+  - Reused the provided design mockup directly as the left-side hero panel so the main illustration matches the reference exactly.
+  - Added Framer Motion entrance animations, staggered social button motion, and interactive password visibility toggles.
+  - Created a matching register route so the login page CTA path stays unbroken.
+- **Follow-up**:
+  - Updated the register variant to use the requested `username`, `email`, `create new password`, and `confirm password` field order while keeping the same layout.
+- **Latest Fix**:
+  - Corrected the register form so the second field is labeled and configured as `Email Address` instead of a duplicate username field.
+- **Next Steps**:
+  - Wire the form to real auth actions once the backend session utilities are ready.
+  - Optional: refine the register page copy if you want it to follow a separate design later.

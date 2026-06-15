@@ -1,6 +1,7 @@
 "use client";
 
-import { MessageSquare, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -9,12 +10,12 @@ export const Footer = () => {
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Brand Info */}
           <div className="space-y-8 xl:col-span-1">
-            <a href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="flex h-9 items-center justify-center rounded-[10px] bg-gradient-to-br from-accent to-accent-dark px-3 py-1 font-bold text-accent-foreground shadow-sm">
                 <span className="text-sm font-extrabold tracking-wider">INTERV</span>
                 <span className="ml-1 rounded bg-white px-1 py-0.5 text-[10px] font-black text-accent">AI</span>
               </div>
-            </a>
+            </Link>
             <p className="text-sm text-text-secondary max-w-xs">
               AI-powered mock interviews with real-time feedback and insights to help you land your dream job.
             </p>
