@@ -5,16 +5,16 @@
 | Layer | Tool | Purpose |
 | --- | --- | --- |
 | Framework | Next.js 16 (App Router) | Full stack framework |
-| Database | PostgreSQL (latest version) | Relational database |
-| Authentication | Email Authentication | Email & password based login |
-| Storage | InsForge Storage | File storage (resumes) |
-| Cloud browser | Browserbase | Company research — browsing company public pages |
-| AI browser control | Stagehand | Company page interaction and content extraction |
-| Job Discovery | Adzuna API | Job search and discovery |
-| AI model | OpenAI GPT-4o | Matching, research synthesis, extraction |
+| UI Library | React 19.2.4 | Component rendering |
+| Database | PostgreSQL (latest) | Relational storage for profiles, interviews, questions, analytics |
+| Authentication | Email Authentication | Email & password based login, session cookie |
+| Storage | InsForge Storage | File storage (uploaded resumes). Cloudinary is an acceptable drop-in alternative if InsForge limits become a problem — keep storage access behind `lib/storage.ts` so the provider can be swapped without touching callers. |
+| AI model | Kimi 2.6 (OpenAI-compatible SDK, custom baseURL) | Interview question generation, real-time answer evaluation, feedback synthesis, resume extraction |
+| Speech-to-text | Browser Web Speech API | In-browser voice-to-text for answer input. No server-side audio processing. |
+| Proctoring | Fullscreen API + Page Visibility API + Screen Capture detection (client-side only) | Detect fullscreen exit, tab switch, minimize, screenshot attempts. No video/screen recording is stored — violations are detected and acted on client-side only. |
+| PDF/DOCX parsing | pdf-parse (PDF) + mammoth (DOCX) | Extract text from uploaded resumes before sending to Kimi for profile auto-fill |
 | Analytics | PostHog | Event tracking and dashboard charts |
-| PDF generation | @react-pdf/renderer | Resume PDF rendering |
-| Styling | Tailwind CSS + shadcn/ui | UI components and styling |
+| Styling | Tailwind CSS v4 + shadcn/ui | UI components and styling |
 | Language | TypeScript strict | Throughout |
 
 ---
@@ -24,6 +24,7 @@
 ```
 /
 ├── AGENTS.md
+├── middleware.ts                           → Session cookie check on protected routes
 ├── context/
 │   ├── project-overview.md
 │   ├── architecture.md
@@ -35,75 +36,107 @@
 │   ├── build-plan.md
 │   └── progress-tracker.md
 ├── app/
-│   ├── layout.tsx                          → Root layout, PostHog provider
-│   ├── page.tsx                            → Homepage
+│   ├── layout.tsx                          → Root layout, PostHog provider, theme provider
+│   ├── page.tsx                            → Landing page (marketing)
 │   ├── (auth)/
 │   │   ├── login/
-│   │   │   └── page.tsx                   → Login page (Email/password)
+│   │   │   └── page.tsx                   → Login page (email/password)
 │   │   └── register/
-│   │       └── page.tsx                   → Register page (Email/password signup)
+│   │       └── page.tsx                   → Register page (email/password signup)
 │   ├── dashboard/
-│   │   └── page.tsx                       → Main dashboard
-│   ├── profile/
-│   │   └── page.tsx                       → Profile form + resume management
-│   ├── find-jobs/
-│   │   ├── page.tsx                       → Find Jobs page — search controls + jobs list
+│   │   └── page.tsx                       → Dashboard — stats, continue interview, recent performance, tips
+│   ├── interview/
+│   │   ├── new/
+│   │   │   └── page.tsx                   → Start New Interview — 4-step config wizard
 │   │   └── [id]/
-│   │       └── page.tsx                   → Individual job details page
+│   │       ├── page.tsx                   → Live interview session (fullscreen, AI chat)
+│   │       └── analysis/
+│   │           └── page.tsx               → Live/post analysis panel for this interview
+│   ├── history/
+│   │   └── page.tsx                       → Interview history — search, filters, pagination
+│   ├── analytics/
+│   │   └── page.tsx                       → Analytics — score breakdowns, trends, per-question review
+│   ├── resources/
+│   │   └── page.tsx                       → Interview resources / prep materials
+│   ├── settings/
+│   │   └── page.tsx                       → Profile, preferences, notifications, billing
 │   └── api/
-│       ├── agent/
-│       │   ├── find/route.ts              → Trigger Adzuna job discovery
-│       │   └── research/route.ts          → Trigger company research agent
-│       ├── resume/
-│       │   ├── generate/route.ts          → Generate base resume PDF from profile
-│       │   └── extract/route.ts           → Extract profile data from uploaded resume PDF
+│       ├── interview/
+│       │   ├── generate/route.ts          → Generate question set via Kimi (start of session)
+│       │   ├── complete/route.ts          → Evaluate interview, generate question feedback, finalize session, write DB
+│       │   └── [id]/
+│       │       └── abandon/route.ts       → Mark interview abandoned (proctoring violation or user exit)
+│       └── resume/
+│           ├── extract/route.ts           → Parse uploaded resume + Kimi profile auto-fill
 ├── agent/
-│   ├── adzuna.ts                          → Adzuna API job discovery + GPT-4o scoring
-│   ├── research.ts                        → Company research — Browserbase + Stagehand + GPT-4o
-│   ├── matcher.ts                         → GPT-4o job matching logic
-│   ├── extractor.ts                       → GPT-4o job description extraction + structuring
-│   └── types.ts                           → Agent-specific TypeScript types
+│   ├── interviewer.ts                     → Kimi prompt construction for question generation (streaming)
+│   ├── evaluator.ts                       → Kimi prompt construction for post-interview evaluation and feedback synthesis
+│   ├── resume-extractor.ts                → Kimi-based resume → profile field extraction
+│   └── types.ts                           → Agent-specific TypeScript types (prompts, Kimi responses)
 ├── actions/
-│   ├── profile.ts                         → Profile save + update
-│   ├── auth.ts                            → Email authentication actions (login, signup, logout)
-│   └── jobs.ts                            → Job status updates
+│   ├── auth.ts                            → Email auth actions (login, signup, logout)
+│   ├── profile.ts                         → Profile save + update, resume upload handling
+│   ├── interview.ts                       → Create interview record, save question/answer rows, update status
+│   └── settings.ts                        → Preferences, theme, notification settings updates
 ├── components/
 │   ├── ui/                                → shadcn/ui components only
 │   ├── layout/
-│   │   ├── Navbar.tsx
+│   │   ├── Navbar.tsx                     → Landing page top nav
+│   │   ├── Sidebar.tsx                    → Dashboard left sidebar
+│   │   ├── Header.tsx                     → Dashboard top header (badge, theme toggle, user dropdown)
 │   │   └── Footer.tsx
 │   ├── homepage/
 │   │   ├── Hero.tsx
+│   │   ├── Features.tsx
 │   │   ├── HowItWorks.tsx
-│   │   └── Features.tsx
+│   │   ├── Testimonials.tsx
+│   │   ├── Pricing.tsx
+│   │   └── FAQ.tsx
 │   ├── dashboard/
-│   │   ├── StatsBar.tsx
-│   │   ├── RecentActivity.tsx
-│   │   └── AnalyticsCharts.tsx
-│   ├── profile/
-│   │   ├── ProfileForm.tsx
+│   │   ├── WelcomeHeader.tsx
+│   │   ├── QuickStats.tsx
+│   │   ├── ContinueInterviewCard.tsx
+│   │   ├── RecentPerformance.tsx
+│   │   ├── InterviewTips.tsx
+│   │   └── RecentInterviews.tsx
+│   ├── interview-setup/
+│   │   ├── StepInterviewDetails.tsx       → Step 1: role, experience, type, skills
+│   │   ├── StepContext.tsx                → Step 2: resume upload, JD paste
+│   │   ├── StepCustomize.tsx              → Step 3: question sections, focus
+│   │   ├── StepDuration.tsx               → Step 4: session duration
+│   │   └── InterviewSummary.tsx           → Right sidebar live summary
+│   ├── interview-session/
+│   │   ├── InterviewerAvatar.tsx          → AI avatar + speaking indicator + waveform
+│   │   ├── AnswerInput.tsx                → Text + Web Speech API voice input
+│   │   ├── QuestionsPanel.tsx             → Right sidebar question list with status
+│   │   ├── SessionTimer.tsx               → Countdown timer
+│   │   ├── ProctoringGuard.tsx            → Fullscreen/visibility/screenshot detection, triggers abandon
+│   │   └── SessionActionBar.tsx           → Live Analysis / Notes / Settings / End Interview
+│   ├── analysis/
+│   │   ├── ScoreCard.tsx                  → Circular progress score (Overall/Clarity/Relevance/Depth/Confidence)
+│   │   ├── StrengthsAndImprovements.tsx
+│   │   ├── PerQuestionFeedback.tsx
+│   │   ├── SpeakingPaceChart.tsx
+│   │   └── ConfidenceTrendChart.tsx
+│   ├── history/
+│   │   ├── HistoryFilters.tsx
+│   │   ├── HistoryTable.tsx
+│   │   └── HistoryPagination.tsx
+│   ├── resume/
 │   │   ├── ResumeUpload.tsx
 │   │   ├── ResumePreview.tsx
 │   │   └── CompletionIndicator.tsx
-│   ├── find-jobs/
-│   │   ├── SearchControls.tsx
-│   │   ├── JobsTable.tsx
-│   │   ├── JobFilters.tsx
-│   │   └── JobsPagination.tsx
-│   └── job-details/
-│       ├── JobInfo.tsx
-│       ├── MatchScore.tsx
-│       ├── JobDescription.tsx
-│       ├── CompanyResearch.tsx
-│       └── JobActions.tsx
+│   └── settings/
+│       ├── ProfileForm.tsx
+│       ├── PreferencesForm.tsx
+│       └── BillingSection.tsx
 ├── lib/
 │   ├── db.ts                              → PostgreSQL connection pool (pg client)
-│   ├── insforge.ts                        → InsForge client instance for Storage
-│   ├── browserbase.ts                     → Browserbase session creation + management
-│   ├── stagehand.ts                       → Stagehand initialisation with Browserbase session
-│   ├── adzuna.ts                          → Adzuna API client
+│   ├── kimi.ts                            → Kimi 2.6 client (OpenAI SDK, custom baseURL + apiKey)
+│   ├── storage.ts                         → InsForge Storage client (resume uploads)
 │   ├── posthog-client.ts                  → PostHog browser client
 │   ├── posthog-server.ts                  → PostHog server client
+│   ├── proctoring.ts                      → Fullscreen/visibility/screenshot event listeners (client-only)
 │   └── utils.ts                           → Shared utility functions
 └── types/
     └── index.ts                           → Global TypeScript types
@@ -116,10 +149,10 @@
 | Folder | Owns |
 | --- | --- |
 | `app/` | Pages and API routes only. No business logic. |
-| `agent/` | All agent logic. Adzuna discovery, company research, matching, extraction. Nothing here touches React. |
-| `actions/` | Server Actions for UI-triggered mutations only. Profile save, profile update, auth operations. |
-| `components/` | UI only. No data fetching logic. No direct DB calls. |
-| `lib/` | Third party client initialisation and shared utilities only. |
+| `agent/` | All Kimi prompt construction and response parsing — question generation, answer evaluation, feedback aggregation, resume extraction. Nothing here touches React. |
+| `actions/` | Server Actions for UI-triggered mutations — auth, profile, settings, and writing interview/question rows. |
+| `components/` | UI only. No data fetching logic, no direct DB or Kimi calls. |
+| `lib/` | Third-party client initialization, proctoring listeners, and shared utilities only. |
 | `types/` | TypeScript types shared across the project. |
 
 ---
@@ -138,58 +171,71 @@ PostgreSQL DB write
 Revalidate or redirect
 ```
 
-### Agent Operations (API Routes)
+### Question Generation (API Route, streaming)
 
 ```
-User clicks Find Jobs
+User completes Start New Interview wizard, clicks "Start Interview"
         ↓
-API route in app/api/agent/find
+actions/interview.ts creates `interviews` row (status: in_progress)
         ↓
-Calls agent/adzuna.ts
+API route app/api/interview/generate (streamed)
         ↓
-Adzuna API returns job listings
+agent/interviewer.ts builds prompt from profile + resume/JD context + wizard config
         ↓
-GPT-4o scores each job against user profile
+Kimi 2.6 streams questions dynamically based on context (temperature 0.7)
         ↓
-Agent writes results to PostgreSQL DB
+Questions written to `interview_questions` rows as they are generated
         ↓
-Page data revalidated
+Client renders questions progressively in QuestionsPanel
 ```
 
-### Company Research (API Routes)
+### Session Completion & Evaluation (API Route)
 
 ```
-User clicks Research Company on job details page
+User finishes interview or timer expires
         ↓
-API route in app/api/agent/research
+API route app/api/interview/complete
         ↓
-Calls agent/research.ts
+agent/evaluator.ts evaluates all answers together
+        → generates per-question scores/feedback + overall score,
+          per-dimension averages, strengths[], areas_to_improve[],
+          speaking_pace_rating, confidence_trend_data
         ↓
-Single Browserbase session opens with Stagehand
+Row written to `interview_questions` (ai_feedback, scores_json) and `interview_analytics`
         ↓
-Navigates to company homepage + sub pages
+interviews.status = 'completed', completed_at set, score = overall_score
         ↓
-GPT-4o synthesizes dossier from extracted content
+Dashboard / History / Analytics pages revalidated
+```
+
+### Proctoring Violation (Client-side)
+
+```
+ProctoringGuard detects: fullscreen exit | tab switch | window minimize | screenshot attempt
         ↓
-Dossier saved to jobs.company_research
+Client immediately stops local recording state (no video stored)
         ↓
-Page data revalidated
+Client calls app/api/interview/[id]/abandon
+        ↓
+interviews.status = 'abandoned', completed_at set
+        ↓
+Redirect to /dashboard with proctoring violation status message
 ```
 
 ### Resume Operations (API Routes)
 
 ```
-User uploads resume or clicks Generate
+User uploads resume (PDF/DOCX) and selects "Extract from Resume"
         ↓
-API route in app/api/resume/
+API route app/api/resume/extract
         ↓
-GPT-4o processes content
+PDF → pdf-parse text / DOCX → mammoth text
         ↓
-@react-pdf/renderer renders PDF buffer
+agent/resume-extractor.ts → Kimi 2.6 structures text into profile fields
         ↓
-New PDF uploaded to InsForge Storage
+Extracted fields returned to client for user review/edit
         ↓
-URL saved to profiles table
+actions/profile.ts saves confirmed fields + uploads original file to InsForge Storage
 ```
 
 ---
@@ -209,82 +255,66 @@ URL saved to profiles table
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| id | uuid | References users(id) |
-| full_name | text | |
+| id | uuid | References users(id), `ON DELETE CASCADE` |
+| name | text | |
 | email | text | Pre-filled from user account |
-| phone | text | |
-| location | text | City, country |
-| current_title | text | Most recent job title |
-| experience_level | text | junior / mid / senior / lead |
-| years_experience | integer | |
-| skills | text[] | Array of skill tags |
-| industries | text[] | Industries worked in |
-| work_experience | jsonb | Array of up to 3 roles |
-| education | jsonb | Degree, field, institution, year |
-| job_titles_seeking | text[] | Roles they want |
-| remote_preference | text | remote / onsite / hybrid / any |
-| preferred_locations | text[] | Optional preferred locations |
-| salary_expectation | text | Optional |
-| cover_letter_tone | text | formal / casual / enthusiastic |
-| linkedin_url | text | |
-| portfolio_url | text | |
-| work_authorization | text | citizen / permanent_resident / visa_required |
-| resume_pdf_url | text | InsForge Storage URL of current resume |
-| is_complete | boolean | True when all required fields filled |
+| avatar | text | Optional avatar URL |
+| target_role | text | e.g. "Frontend Developer" |
+| experience_level | text | junior / mid / senior |
+| primary_skills | text[] | Array of skill tags |
+| resume_url | text | InsForge Storage URL of current resume |
+| job_description_text | text | Most recently pasted JD, used for context |
+| plan | text | free / pro / team / enterprise |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
-### `agent_runs`
+### `interviews`
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| id | uuid | |
-| user_id | uuid | References profiles |
-| status | text | running / completed / failed |
-| job_title_searched | text | |
-| location_searched | text | |
-| jobs_found | integer | Total jobs discovered |
+| id | uuid | Primary Key |
+| user_id | uuid | References profiles(id), `ON DELETE CASCADE` |
+| role | text | |
+| experience_level | text | junior / mid / senior |
+| interview_type | text | technical / behavioral / mixed |
+| skills | text[] | |
+| sections | text[] | technical / behavioral / system_design / coding_challenge |
+| question_focus | text | conceptual / practical / problem_solving / mixed |
+| duration | integer | Minutes (15/30/45/60) |
+| questions_attempted | integer | |
+| status | text | in_progress / completed / abandoned / incomplete |
+| score | integer | Overall score 0-100, set on completion |
 | started_at | timestamptz | |
 | completed_at | timestamptz | |
 
-### `jobs`
+### `interview_questions`
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| id | uuid | |
-| run_id | uuid | References agent_runs — null if from URL input |
-| user_id | uuid | References profiles |
-| source | text | search / url |
-| source_url | text | Original job listing URL |
-| external_apply_url | text | Direct company apply URL |
-| title | text | |
-| company | text | |
-| location | text | |
-| salary | text | If available |
-| job_type | text | fulltime / parttime / contract |
-| about_role | text | 2-3 sentence summary |
-| responsibilities | text[] | Bullet points |
-| requirements | text[] | Bullet points |
-| nice_to_have | text[] | Optional |
-| benefits | text[] | Optional |
-| about_company | text | Brief company description |
-| match_score | integer | 0-100 scored against main profile |
-| match_reason | text | GPT-4o explanation |
-| matched_skills | text[] | Skills user has that match |
-| missing_skills | text[] | Skills user lacks |
-| company_research | jsonb | Company dossier from research agent |
-| found_at | timestamptz | |
+| interview_id | uuid | References interviews(id), `ON DELETE CASCADE` |
+| question_number | integer | Compound PK with interview_id |
+| question_text | text | |
+| user_answer | text | Text or Web Speech API transcript |
+| ai_feedback | text | Per-question Kimi feedback |
+| scores_json | jsonb | { clarity, relevance, technical_depth, confidence, overall } |
+| duration_seconds | integer | Time taken to answer |
+| created_at | timestamptz | |
 
-### `agent_logs`
+### `interview_analytics`
 
 | Column | Type | Notes |
 | --- | --- | --- |
-| id | uuid | |
-| run_id | uuid | References agent_runs |
-| user_id | uuid | References profiles |
-| message | text | Human readable log entry |
-| level | text | info / success / warning / error |
-| job_id | uuid | Optional — related job |
+| id | uuid | Primary Key |
+| interview_id | uuid | References interviews(id), `ON DELETE CASCADE`, unique (1-to-1) |
+| overall_score | integer | |
+| clarity_score | integer | |
+| relevance_score | integer | |
+| technical_depth_score | integer | |
+| confidence_score | integer | |
+| strengths | text[] | |
+| areas_to_improve | text[] | |
+| speaking_pace_rating | text | e.g. "Good" / "Average" / "Excellent" |
+| confidence_trend_data | jsonb | Array of {question_number, confidence_score} for line chart |
 | created_at | timestamptz | |
 
 ---
@@ -293,26 +323,24 @@ URL saved to profiles table
 
 | Bucket | Path | Contents |
 | --- | --- | --- |
-| resumes | resumes/{user_id}/resume.pdf | Current active resume PDF |
+| resumes | resumes/{user_id}/uploaded.pdf or .docx | User-uploaded resume (for extraction) |
 
-Access: authenticated users only, own files only.
+Access: authenticated users only, own files only. If InsForge limits become a blocker, swap to Cloudinary behind `lib/storage.ts` — no other files should reference the storage provider directly.
 
 ---
 
 ## Authentication
 
 - System: Session-based cookie authentication
-- Methods: Email & password login and registration
-- Protected routes: /dashboard, /profile, /find-jobs, /find-jobs/[id]
-- Public routes: /, /login, /register
-- Middleware in middleware.ts checks user session cookie on every protected route
-- On login → redirect to /dashboard
+- Methods: Email & password login and registration only (no OAuth for MVP)
+- Protected routes: `/dashboard`, `/interview/*`, `/history`, `/analytics`, `/resources`, `/settings`
+- Public routes: `/`, `/login`, `/register`
+- `middleware.ts` checks the session cookie on every protected route
+- On login → redirect to `/dashboard`
 
 ---
 
 ## PostgreSQL Client Pattern
-
-All database connections use a pooled `pg` connection pattern managed server-side:
 
 ```typescript
 // lib/db.ts
@@ -327,7 +355,6 @@ export const query = async (text: string, params?: any[]) => {
   const start = Date.now();
   const res = await pool.query(text, params);
   const duration = Date.now() - start;
-  // Performance logging if query duration is slow
   if (duration > 100) {
     console.warn(`[db] Slow query: ${text} (${duration}ms)`);
   }
@@ -337,78 +364,74 @@ export const query = async (text: string, params?: any[]) => {
 
 ---
 
-## Browserbase Session Pattern
+## Kimi 2.6 Client Pattern
 
 ```typescript
-// Company research session — single session, sequential page visits
-const session = await bb.sessions.create({
-  projectId: process.env.BROWSERBASE_PROJECT_ID!,
-  timeout: 120, // 2 minute session — visits 3-4 pages max
+// lib/kimi.ts
+import OpenAI from "openai";
+
+export const kimi = new OpenAI({
+  apiKey: process.env.KIMI_API_KEY!,
+  baseURL: process.env.KIMI_BASE_URL!, // Kimi's OpenAI-compatible endpoint
 });
 ```
 
+**Question generation (creative)** — `agent/interviewer.ts`, temperature `0.7`, `stream: true`.
+
+**Answer evaluation & feedback (deterministic)** — `agent/evaluator.ts` and `agent/feedback.ts`, temperature `0.2`, `stream: true`.
+
 ---
 
-## Job Discovery Pattern
-
-**Adzuna API — job search**
+## Web Speech API Pattern (Voice Answer Input)
 
 ```typescript
-const response = await fetch(
-  `https://api.adzuna.com/v1/api/jobs/us/search/1?` +
-    `app_id=${process.env.ADZUNA_APP_ID}&` +
-    `app_key=${process.env.ADZUNA_APP_KEY}&` +
-    `what=${encodeURIComponent(jobTitle)}&` +
-    `where=${encodeURIComponent(location)}&` +
-    `category=it-jobs&` +
-    `results_per_page=10&` +
-    `content-type=application/json`,
-);
-const data = await response.json();
-// data.results — array of job listings
-// Each job: title, company.display_name, location.display_name,
-//           salary_min, salary_max, description, redirect_url, created
+// components/interview-session/AnswerInput.tsx (client component)
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.continuous = true;
+recognition.interimResults = true;
+recognition.lang = "en-US"; // English-only for MVP
+
+recognition.onresult = (event) => {
+  const transcript = Array.from(event.results)
+    .map((r) => r[0].transcript)
+    .join(" ");
+  // Append/update answer textarea state with transcript
+};
+
+// Fallback: if SpeechRecognition is unsupported, hide "Speak Answer"
+// button and show text input only — never block submission.
 ```
 
+No audio is sent to the server. All speech-to-text happens in the browser.
+
 ---
 
-## Company Research Pattern
+## Proctoring Pattern (Client-side only)
 
 ```typescript
-// Single session — visits company homepage and sub pages sequentially
-const stagehand = new Stagehand({
-  env: "BROWSERBASE",
-  apiKey: process.env.BROWSERBASE_API_KEY!,
-  projectId: process.env.BROWSERBASE_PROJECT_ID!,
-  browserbaseSessionID: session.id,
-  modelName: "gpt-4o",
-  modelClientOptions: { apiKey: process.env.OPENAI_API_KEY! },
+// lib/proctoring.ts — registered by ProctoringGuard on session mount
+
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement) triggerViolation("fullscreen_exit");
 });
 
-await stagehand.init();
-const page = stagehand.page;
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) triggerViolation("tab_switch_or_minimize");
+});
 
-// Clean company name and construct homepage URL
-const cleanName = companyName
-  .replace(/\s*(Inc\.?|LLC|Ltd\.?|Corp\.?|Co\.?).*$/i, "")
-  .trim()
-  .toLowerCase()
-  .replace(/\s+/g, "");
+// Best-effort screenshot detection (e.g. keydown for PrintScreen / OS shortcuts)
+window.addEventListener("keydown", (e) => {
+  if (e.key === "PrintScreen") triggerViolation("screenshot_attempt");
+});
 
-const homepageUrl = `https://www.${cleanName}.com`;
-
-// Navigate and extract — graceful fallback if page not found
-try {
-  await page.goto(homepageUrl);
-  await page.waitForLoadState("networkidle");
-  const content = await stagehand.extract({ instruction: "..." });
-} catch (error) {
-  // Log and continue — GPT-4o will synthesize from what was found
-  await logAgentError(jobId, error);
+async function triggerViolation(reason: string) {
+  // No recording is stored — only the violation event is sent
+  await fetch(`/api/interview/${interviewId}/abandon`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+  window.location.href = "/dashboard?proctoring=violation";
 }
-
-// Always close session when done
-await stagehand.close();
 ```
 
 ---
@@ -417,14 +440,15 @@ await stagehand.close();
 
 Rules the AI agent must never violate:
 
-- API routes contain no UI logic. Components contain no DB logic.
+- API routes contain no UI logic. Components contain no DB or Kimi logic.
 - Agent code in `/agent` never imports from `/components` or `/actions`.
-- Server Actions never call agent functions. Agent functions are only called from API routes.
+- Server Actions never call Kimi directly — Kimi calls only happen in `/agent`, invoked from API routes.
 - All database operations use the PostgreSQL connection pool from `lib/db.ts`.
-- No hardcoded hex values or raw Tailwind color classes in components — use CSS variables from ui-tokens.md.
-- Every Stagehand action is wrapped in try/catch. Failures are logged to agent_logs, never thrown to crash the run.
-- Company research always returns a dossier — even if browser research fails, GPT-4o synthesizes from company name and job description alone. Never return empty.
-- Browserbase sessions are always closed with stagehand.close() when done — never leave sessions open.
-- Always scope database queries to the current user_id — never query without a user filter.
-- Adzuna API always includes category=it-jobs — never search without this filter.
-- jobs.source is always 'search' or 'url' — never any other value.
+- No hardcoded hex values or raw Tailwind color classes in components — use CSS variables from `ui-tokens.md`.
+- Question generation always uses temperature `0.7`; answer evaluation and feedback aggregation always use temperature `0.2`.
+- Every interview session must produce a row in `interviews`, `interview_questions` (one per question), and `interview_analytics` on completion — never partial writes left dangling.
+- Proctoring violations never store video or screenshots — only a violation reason and timestamp are recorded via the abandon endpoint.
+- Voice input never leaves the browser — no audio is uploaded or sent to any API.
+- Always scope database queries to the current `user_id` — never query without a user filter.
+- `interviews.status` is always one of `in_progress`, `completed`, `abandoned`, `incomplete` — never any other value.
+- Resume extraction (`/api/resume/extract`) never auto-saves to the profile — extracted fields are returned for user review/edit before `actions/profile.ts` persists them.

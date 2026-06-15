@@ -1,6 +1,6 @@
 # UI Tokens
 
-Design tokens for JobPilot. All colors, typography, spacing, and component values extracted from the delivered design. Use these exact values throughout the codebase — never hardcode colors or use raw Tailwind color classes in components.
+Design tokens for **Interv AI** — AI Mock Interview Platform. All colors, typography, spacing, and component values extracted directly from the delivered UI screenshots. Use these exact values throughout the codebase — never hardcode colors or use raw Tailwind color classes in components.
 
 ---
 
@@ -25,13 +25,9 @@ className="bg-[#F6F7FB] text-[#101828]"
 
 // Never — raw Tailwind color classes
 className="bg-purple-500 text-gray-600"
-```
-
 ---
 
 ## globals.css — Complete Token Definition
-
-```css
 @import "tailwindcss";
 
 @theme {
@@ -39,11 +35,11 @@ className="bg-purple-500 text-gray-600"
   --font-sans: "Inter", sans-serif;
 
   /* Page and surface backgrounds */
-  --color-background: #f6f7fb;
+  --color-background: #f6f4fd;
   --color-surface: #ffffff;
-  --color-surface-secondary: #f9fafb;
-  --color-surface-tertiary: #f2f5f7;
-  --color-surface-muted: #f4f5fb;
+  --color-surface-secondary: #f9f8fe;
+  --color-surface-tertiary: #f3f0fe;
+  --color-surface-muted: #f5f0fd;
 
   /* Borders */
   --color-border: #e7eaf3;
@@ -62,10 +58,13 @@ className="bg-purple-500 text-gray-600"
   --color-text-slate-medium: #666d80;
 
   /* Primary accent — purple */
-  --color-accent: #7c5cfc;
-  --color-accent-dark: #5e4cff;
-  --color-accent-light: #f3e8ff;
-  --color-accent-muted: #faf5ff;
+  --color-accent: #6740fa;
+  --color-accent-hover: #7c5cfc;
+  --color-accent-dark: #5a29f5;
+  --color-accent-darker: #4621e7;
+  --color-accent-light: #e8e2fd;
+  --color-accent-lighter: #f3f0fe;
+  --color-accent-muted: #f9f7fc;
   --color-accent-foreground: #ffffff;
 
   /* Success — green */
@@ -86,13 +85,25 @@ className="bg-purple-500 text-gray-600"
   --color-info-foreground: #155dfc;
   --color-info-muted: #94a2c5;
 
-  /* Warning — orange */
+  /* Warning — orange/amber */
   --color-warning: #ff8904;
-  --color-warning-foreground: #ffffff;
+  --color-warning-light: #fef3c7;
+  --color-warning-foreground: #92400e;
 
   /* Error — red */
   --color-error: #ef4444;
+  --color-error-light: #fee2e2;
   --color-error-foreground: #ffffff;
+
+  /* Behavioral — pink */
+  --color-behavioral: #ec4899;
+  --color-behavioral-light: #fce7f3;
+  --color-behavioral-foreground: #be185d;
+
+  /* Technical — amber/yellow */
+  --color-technical: #f59e0b;
+  --color-technical-light: #fef3c7;
+  --color-technical-foreground: #92400e;
 
   /* LinkedIn brand */
   --color-linkedin: #0a66c2;
@@ -108,30 +119,30 @@ className="bg-purple-500 text-gray-600"
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 20px;
   --radius-full: 9999px;
 }
-```
 
-Tailwind v4 generates utility classes automatically from every `--color-*` token above:
-
-- `bg-accent`, `text-accent`, `border-accent`
-- `bg-surface`, `text-surface-secondary`
-- `bg-success-light`, `text-text-muted`
-- etc.
-
----
+Tailwind v4 generates utility classes automatically from every --color-* token above:
+bg-accent, text-accent, border-accent
+bg-surface, text-surface-secondary
+bg-success-light, text-text-muted
+bg-behavioral-light, text-technical
+etc.
 
 ## Color Usage Guide
 
 ### Page Layout
 
-| Element           | Token                  |
-| ----------------- | ---------------------- |
-| Page background   | `bg-background`        |
-| Card / surface    | `bg-surface`           |
-| Secondary surface | `bg-surface-secondary` |
-| Default border    | `border-border`        |
-| Light border      | `border-border-light`  |
+| Element            | Token                            |
+| ------------------ | -------------------------------- |
+| Page background    | `bg-background` (#f6f4fd)        |
+| Card / surface     | `bg-surface` (#ffffff)           |
+| Secondary surface  | `bg-surface-secondary` (#f9f8fe) |
+| Sidebar background | `bg-surface-tertiary` (#f3f0fe)  |
+| Default border     | `border-border`                  |
+| Light border       | `border-border-light`            |
+
 
 ### Typography
 
@@ -141,19 +152,25 @@ Tailwind v4 generates utility classes automatically from every `--color-*` token
 | Secondary text, labels | `text-text-secondary` (#6A7282) |
 | Placeholder, muted     | `text-text-muted` (#99A1AF)     |
 | Dark labels            | `text-text-dark` (#364153)      |
+| Accent text (AI, etc.) | `text-accent-dark` (#5a29f5)    |
+
 
 ### Accent (Primary Purple)
 
 Used for: primary buttons, active nav items, match score bars, tailored badge, focus rings
 
-| Element                | Token                    |
-| ---------------------- | ------------------------ |
-| Button background      | `bg-accent`              |
-| Button text            | `text-accent-foreground` |
-| Light badge background | `bg-accent-light`        |
-| Subtle background      | `bg-accent-muted`        |
+| Element                | Token                         |
+| ---------------------- | ----------------------------- |
+| Button background      | `bg-accent` (#6740fa)         |
+| Button hover           | `bg-accent-hover` (#7c5cfc)   |
+| Button text            | `text-accent-foreground`      |
+| Dark accent text       | `text-accent-dark` (#5a29f5)  |
+| Active nav background  | `bg-accent-muted` (#f9f7fc)   |
+| Light badge background | `bg-accent-light` (#e8e2fd)   |
+| Subtle background      | `bg-accent-lighter` (#f3f0fe) |
 
-### Match Score Colors
+
+### Score Colors
 
 Match score bars and indicators use gradient stops based on score range:
 
@@ -161,15 +178,29 @@ Match score bars and indicators use gradient stops based on score range:
 | ----------- | ------ | -------------------------------------- |
 | 90-100%     | Green  | `text-success` / `bg-success-lightest` |
 | 70-89%      | Green  | `text-success` / `bg-success-light`    |
-| 50-69%      | Orange | `text-warning`                         |
-| Below 50%   | Gray   | `text-text-muted`                      |
+| 50-69%      | Orange | `text-warning` / `bg-warning-light`    |
+| Below 50%   | Red    | `text-error` / `bg-error-light`        |
 
-### Skills Badges
 
-| Type          | Background            | Text                      |
-| ------------- | --------------------- | ------------------------- |
-| Matched skill | `bg-success-lightest` | `text-success-foreground` |
-| Missing skill | `bg-accent-muted`     | `text-accent`             |
+### Interview Status Badges
+
+| Status      | Background             | Text                      |
+| ----------- | ---------------------- | ------------------------- |
+| Answered    | `bg-success-lightest`  | `text-success-foreground` |
+| Current     | `bg-accent-light`      | `text-accent`             |
+| Pending     | `bg-surface-secondary` | `text-text-muted`         |
+| Completed   | `bg-success-lightest`  | `text-success-foreground` |
+| Incomplete  | `bg-info-lightest`     | `text-info-foreground`    |
+| In Progress | `bg-accent-light`      | `text-accent`             |
+
+
+###Interview Type Badges
+| Type       | Background            | Text                         |
+| ---------- | --------------------- | ---------------------------- |
+| Technical  | `bg-technical-light`  | `text-technical-foreground`  |
+| Behavioral | `bg-behavioral-light` | `text-behavioral-foreground` |
+
+
 
 ### Source Badges
 
@@ -178,13 +209,7 @@ Match score bars and indicators use gradient stops based on score range:
 | LinkedIn | `bg-linkedin-light`    | `text-linkedin`       |
 | URL      | `bg-surface-secondary` | `text-text-secondary` |
 
-### Status Badges
 
-| Status     | Background             | Text                      |
-| ---------- | ---------------------- | ------------------------- |
-| Tailored   | `bg-accent-light`      | `text-accent`             |
-| High Match | `bg-success-lightest`  | `text-success-foreground` |
-| Low Match  | `bg-surface-secondary` | `text-text-secondary`     |
 
 ---
 
@@ -193,18 +218,21 @@ Match score bars and indicators use gradient stops based on score range:
 | Element              | Size | Weight | Line height | Color token           |
 | -------------------- | ---- | ------ | ----------- | --------------------- |
 | Logo text            | 19px | 700    | 28px        | `text-text-darkest`   |
+| Page heading         | 28px | 700    | 36px        | `text-text-primary`   |
+| Section heading      | 20px | 600    | 28px        | `text-text-primary`   |
+| Card title           | 16px | 600    | 24px        | `text-text-primary`   |
 | Stat number          | 30px | 600    | 36px        | `text-text-primary`   |
-| Section heading      | 16px | 600    | 24px        | `text-text-primary`   |
 | Nav item (active)    | 14px | 500    | 20px        | `text-accent`         |
 | Nav item (inactive)  | 14px | 500    | 20px        | `text-text-dark`      |
 | Card label           | 14px | 500    | 20px        | `text-text-secondary` |
 | Body / activity text | 14px | 500    | 20px        | `text-text-primary`   |
-| Trend badge text     | 12px | 500    | 16px        | `text-success-darker` |
+| Badge text           | 12px | 500    | 16px        | varies by type        |
 | Timestamp / muted    | 12px | 400    | 16px        | `text-text-muted`     |
-| Chart axis labels    | 12px | 400    | 15px        | `#9CA3AF`             |
+| Trend badge text     | 12px | 500    | 16px        | `text-success-darker` |
 | Stat subtitle        | 12px | 400    | 16px        | `text-text-muted`     |
 
-Font family: **Inter** — import from Google Fonts or use next/font/google.
+
+Font family: Inter — import from Google Fonts or use next/font/google.
 
 ---
 
@@ -222,6 +250,7 @@ Font family: **Inter** — import from Google Fonts or use next/font/google.
 | `p-6`       | 24px       | Large card padding    |
 | `px-4 py-2` | 16px / 8px | Button padding        |
 | `px-3 py-1` | 12px / 4px | Badge padding         |
+
 
 ---
 
@@ -247,6 +276,7 @@ text: text-accent-foreground
 border-radius: rounded-md
 padding: px-4 py-2
 font-weight: font-medium
+hover: bg-accent-hover
 ```
 
 **Secondary:**
@@ -289,20 +319,29 @@ font-size: text-xs
 font-weight: font-medium
 ```
 
-### Match Score Bar
+### Score Ring / Progress Circle
 
 ```
-background track: bg-border-light
-fill: varies by score range (see Match Score Colors above)
-height: 4px
+background track: bg-surface-secondary
+fill: bg-accent
+stroke: var(--color-accent)
+stroke-width: 6px
 border-radius: rounded-full
 ```
 
+### Progress Bar
+
+```
+background track: bg-surface-secondary
+fill: bg-accent
+height: 6px
+border-radius: rounded-full
+```
 ### Trend Badges (stat cards)
 
 ```
-background: #ECFDF5 (success-lightest)
-text color: #009966 (success-darker)
+background: bg-success-lightest
+text color: text-success-darker
 border-radius: 4px (rounded-sm)
 padding: 2px 8px
 font-size: 12px
@@ -311,40 +350,164 @@ font-weight: 500
 
 ### Activity Dots
 
-Each activity type has a specific dot color:
-| Activity Type | Outer ring | Inner dot |
-|---|---|---|
-| Resume tailored | `#F3E8FF` (accent-light) | `#7C5CFC` (accent) |
-| Cover letter | `#DBEAFE` (info-light) | `#61A8FF` (info) |
-| Job found | `#D0FAE5` (success-light) | `#00BC7D` (success-alt) |
-Dot size: 8px inner, 16px outer with white border
-
-### Dashboard Chart Colors
-
-| Chart                            | Color                                                           |
-| -------------------------------- | --------------------------------------------------------------- |
-| Jobs Found Over Time (line)      | `#7C5CFC` stroke, 3px width, gradient fill rgba(124,92,252,0.2) |
-| Resume Tailoring Activity (bars) | `#61A8FF`                                                       |
-| Match Score Distribution (bars)  | `#10B981`                                                       |
-| Chart grid lines                 | `1px dashed #E7EAF3`                                            |
-| Chart axis labels                | `#9CA3AF`, 12px                                                 |
+| Activity Type                                     | Outer ring                | Inner dot               |
+| ------------------------------------------------- | ------------------------- | ----------------------- |
+| Resume tailored                                   | `#E8E2FD` (accent-light)  | `#6740FA` (accent)      |
+| Cover letter                                      | `#DBEAFE` (info-light)    | `#61A8FF` (info)        |
+| Job found                                         | `#D0FAE5` (success-light) | `#00BC7D` (success-alt) |
+| Dot size: 8px inner, 16px outer with white border |                           |                         |
 
 ### Logo
 
 ```
-background: linear-gradient(45deg, #7C5CFC 0%, #4A2EC5 100%)
+background: linear-gradient(45deg, #6740FA 0%, #5A29F5 100%)
 border-radius: 10px
 size: 36x36px
+text: "INTERV" + "AI" badge
 ```
 
 ---
 
+## Interview Page Specific Tokens
+
+### AI Interviewer Avatar
+
+```
+background: bg-accent-light
+icon color: text-accent
+size: 48x48px
+border-radius: rounded-full
+```
+
+### Question List Sidebar
+
+```
+background: bg-surface
+border-left: border-l border-border
+width: 320px
+```
+
+### Question Status Indicators
+
+| Status   | Number Circle                          | Badge Background      | Badge Text                |
+| -------- | -------------------------------------- | --------------------- | ------------------------- |
+| Pending  | `bg-surface-secondary text-text-muted` | —                     | —                         |
+| Current  | `bg-accent text-accent-foreground`     | `bg-accent-light`     | `text-accent`             |
+| Answered | `bg-success text-success-foreground`   | `bg-success-lightest` | `text-success-foreground` |
+
+### Answer Input Area
+
+```
+background: bg-surface
+border: border border-border
+border-radius: rounded-lg
+padding: p-4
+min-height: 120px
+```
+
+---
+
+## Pricing Page Tokens
+
+### Plan Cards
+
+**Standard Card:**
+```
+background: bg-surface
+border: border border-border
+border-radius: rounded-2xl
+padding: p-6
+```
+
+**Pro Card (Most Popular):**
+```
+border: 2px solid var(--color-accent)
+header-background: bg-accent
+header-text: text-accent-foreground
+background: bg-surface
+border-radius: rounded-2xl
+padding: p-6
+```
+
+### Toggle Switch
+
+```
+background: bg-accent
+knob: bg-surface
+inactive-background: bg-surface-secondary
+```
+
+---
+
+## Login Page Tokens
+
+### Split Layout
+
+```
+left-panel-background: bg-surface-tertiary
+right-panel-background: bg-surface
+divider: none
+```
+
+### Social Login Buttons
+
+```
+background: bg-surface
+border: border border-border
+text: text-text-primary
+border-radius: rounded-md
+padding: px-4 py-2
+```
+
+---
+
+## Start Interview Page Tokens
+
+### Section Cards
+
+```
+background: bg-surface
+border: border border-border
+border-radius: rounded-xl
+padding: p-6
+```
+
+### Skill Tags
+
+```
+background: bg-accent-light
+text: text-accent
+border-radius: rounded-md
+padding: px-2 py-1
+font-size: text-sm
+```
+
+### Checkbox
+
+```
+checked-background: bg-accent
+checked-icon: text-accent-foreground
+unchecked-border: border-border
+border-radius: rounded-sm
+```
+
+### Summary Panel
+
+```
+background: bg-surface-secondary
+border: border border-border
+border-radius: rounded-xl
+padding: p-6
+```
+---
+
 ## Invariants
 
-- Never use hex values directly in components — always use CSS variables via Tailwind tokens
-- Font is Inter — always import via next/font/google, never use a fallback system font
-- Never use raw Tailwind color classes like `bg-purple-500` or `text-gray-600` — use project tokens only
-- `--accent` (#7C5CFC) is the only purple — never use Tailwind's built-in purple scale
-- Match score bars always use color tokens based on score range — never hardcoded colors
-- LinkedIn badge always uses `--linkedin` (#0A66C2) — never generic blue
-- All borders default to `--border` (#E7EAF3) — never use `border-gray-*`
+Never use hex values directly in components — always use CSS variables via Tailwind tokens
+Font is Inter — always import via next/font/google, never use a fallback system font
+Never use raw Tailwind color classes like bg-purple-500 or text-gray-600 — use project tokens only
+--accent (#6740FA) is the only purple — never use Tailwind's built-in purple scale
+Score indicators always use color tokens based on score range — never hardcoded colors
+All borders default to --border (#E7EAF3) — never use border-gray-*
+Interview type badges use --technical and --behavioral tokens exclusively
+Status badges use semantic tokens (success, info, accent, warning, error)

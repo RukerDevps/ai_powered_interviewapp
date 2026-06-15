@@ -21,7 +21,7 @@ The platform includes a marketing landing page with pricing tiers, a comprehensi
 ### AI Integration
 
 - **API Interface**: Called using the official OpenAI Node.js SDK (or OpenAI-compatible API client) configured with a custom `baseURL` (pointing to Kimi API endpoint) and `apiKey`.
-- **Streaming Support**: Real-time response streaming (`stream: true`) is utilized for generating questions and feedback to reduce Time to First Token (TTFT) and provide a smoother user experience.
+- **Streaming Support**: Real-time response streaming (`stream: true`) is utilized for generating AI interviewer questions during the session to reduce Time to First Token (TTFT) and provide a smoother live interaction.
 - **Model Parameters**: Temperature is set to 0.7 for creative and adaptive interview question generation, and 0.2 for structured, deterministic grading and feedback evaluation.
 
 ### Key Constraints
@@ -47,8 +47,8 @@ IntervAI solves this by providing realistic, AI-driven mock interviews that simu
 /                          → Landing page (marketing site)
 /login                     → Auth page (Email Authentication)
 /dashboard                 → Overview, stats, continue interview, recent performance, tips
-/interview/new             → Start New Interview — configure role, skills, duration, question types
-/interview/[id]            → Live interview session — AI interviewer chat, answer input, real-time feedback
+/interview/new             → Start New Interview — configure role, skills, duration
+/interview/[id]            → Live interview session — AI interviewer chat, answer input
 /history                   → Interview history — past sessions, scores, filters, pagination
 /analytics                 → Detailed analytics — score breakdowns, strengths, areas to improve, charts
 /resume-builder            → Resume builder — generate professional PDF from profile data
@@ -91,7 +91,7 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 ### Homepage
 
 - Hero section with "Ace Every Interview with AI" headline
-- Features grid: AI Mock Interviews, Real-time Feedback, Detailed Analytics, Custom Interviews, Resume & JD Support
+- Features grid: AI Mock Interviews, Detailed Analytics, Custom Interviews, Resume & JD Support
 - How it Works: 4-step process (Choose Your Role → Add Your Context → Start Interview → Get Insights & Improve)
 - Testimonials section: "Loved by Job Seekers"
 - Pricing section with monthly/yearly toggle
@@ -131,10 +131,8 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 - Step 3 — Customize Interview:
   - Select question sections: Technical Questions, Behavioral Questions, System Design, Coding Challenge
   - Question Focus dropdown: Mix of Conceptual, Practical, and Problem Solving
-- Step 4 — Set Duration & Questions:
+- Step 4 — Set Duration:
   - Total Duration: 15 / 30 / 45 / 60 Minutes
-  - Number of Questions: 5 / 8-10 / 12-15 / 20
-  - Time per Question (Average): 1-2 / 2-3 / 3-5 Minutes
 - Right sidebar shows live Interview Summary with all selections
 - User clicks "Start Interview" → launches live interview session
 
@@ -150,23 +148,21 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
   - "Speak Answer" button for voice input
   - "Submit Answer" button to send response
 - Contextual tip below input: "Take your time. Think clearly before answering."
-- Right sidebar: Questions panel showing all questions with status
-  - Progress indicator: "3 / 8"
-  - Status states: Answered (green check), Current (purple highlight), Pending (gray)
+- Right sidebar: Questions panel showing conversation history/questions asked so far
+  - Progress indicator: "Attempted: 3" (showing only the count of questions answered so far, not a total count)
+  - Status states: Answered (green check), Current (purple highlight)
 - Bottom action bar:
-  - Live Analysis → opens real-time feedback panel
   - Interview Notes → add personal notes during session
   - Settings → adjust interview settings
 - "End Interview" button available at all times
-- Timer counts down automatically; interview ends when time expires or all questions answered
+- Timer counts down automatically; interview ends when time expires or AI concludes the interview
 - Strict proctoring and security rules:
   - User is strictly prohibited from escaping full screen mode, minimizing the application, opening a new tab, or taking screenshots.
   - If any of these actions are detected, the screen recorder automatically stops and the user is immediately exited from the interview.
 
-### Live Analysis (Real-time Feedback)
+### Interview Analysis (Post-interview Feedback)
 
-- Accessible during and after the interview
-- Back to Interview button returns to live session
+- Accessible only after the interview is completed (to optimize API costs and avoid real-time response latency)
 - Score cards with circular progress indicators:
   - Overall Score /100
   - Clarity /100
@@ -177,7 +173,7 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 - Strengths section: bulleted list of what the user did well
 - Areas to Improve section: bulleted actionable suggestions
 - Detailed Feedback per question:
-  - Shows current question number (e.g., "Question 3 of 8")
+  - Shows question number (e.g., "Question 3")
   - AI-generated feedback on the specific answer
   - "View Answer" button to review what was submitted
 - Speaking Pace analysis: waveform visualization + qualitative rating
@@ -192,7 +188,7 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 - Columns: Interview Name, Role, Type, Date, Duration, Score, Status, Action
 - Each row shows:
   - Interview icon (varies by type: code, brain, JS, etc.)
-  - Interview name and question count (e.g., "Frontend Developer Interview — 8 Questions")
+  - Interview name and attempted questions count (e.g., "Frontend Developer Interview — 8 Attempted")
   - Role badge
   - Type badge (Technical / Behavioral / Mixed)
   - Date and time
@@ -228,7 +224,7 @@ Full-width layout on all dashboard pages. Sidebar persists across all app pages.
 ### Analytics Page
 
 - Deep-dive performance analytics (post-interview or historical)
-- Same layout as Live Analysis but for completed sessions
+- Same layout as Interview Analysis but for completed sessions
 - Score breakdowns with visual indicators
 - Strengths and areas to improve
 - Per-question feedback with viewable answers
@@ -258,7 +254,7 @@ erDiagram
 
 ### Interview Session Data (`interviews` table)
 
-- **Fields**: id (UUID, Primary Key), user_id (UUID, Foreign Key), role, experience_level, interview_type, skills[], duration, question_count, time_per_question, sections[], status, score, started_at, completed_at
+- **Fields**: id (UUID, Primary Key), user_id (UUID, Foreign Key), role, experience_level, interview_type, skills[], duration, questions_attempted, sections[], status, score, started_at, completed_at
 - **Relationships**:
   - `user_id` references `profiles(id)` with `ON DELETE CASCADE`.
 - **Notes**: Generated per interview when user clicks "Start Interview". Status enum: `in_progress`, `completed`, `abandoned`, `incomplete`. Score calculated upon completion based on AI evaluation of all answers.
@@ -284,7 +280,7 @@ erDiagram
 
 - Landing page with hero, features, how it works, pricing, testimonials, FAQ, footer
 - Top navbar on landing page: Features, How it Works, Pricing, Testimonials, FAQ, Log in, Get Started
-- Left sidebar navigation on dashboard: Interview, Dashboard, History, Analytics, Resume Builder, Resources, Settings
+- Left sidebar navigation on dashboard: Interview, Dashboard, History, Analytics, Resources, Settings
 - Email authentication (no OAuth 2.0)
 - Redirect to /dashboard after login
 - User profile setup with role, experience level, and skills
@@ -297,8 +293,8 @@ erDiagram
 - AI interviewer avatar with speaking status indicator
 - Text and voice answer input methods
 - Real-time timer with countdown
-- Question progress sidebar with status indicators (Answered, Current, Pending)
-- Live Analysis panel with 5 score dimensions (Overall, Clarity, Relevance, Technical Depth, Confidence)
+- Question history sidebar with status indicators for completed/current questions (Answered, Current)
+- Post-Interview Analysis panel with 5 score dimensions (Overall, Clarity, Relevance, Technical Depth, Confidence) generated upon session completion
 - AI-generated strengths and areas to improve
 - Per-question detailed feedback with answer review
 - Speaking pace visualization and rating
@@ -349,11 +345,11 @@ erDiagram
 ## PostHog Events
 
 ```typescript
-interview_started; // { userId, role, experienceLevel, interviewType, duration, questionCount, sections[] }
+interview_started; // { userId, role, experienceLevel, interviewType, duration, sections[] }
 question_answered; // { userId, interviewId, questionNumber, durationSeconds, inputMethod: 'text' | 'voice' }
 interview_completed; // { userId, interviewId, overallScore, clarityScore, relevanceScore, technicalDepthScore, confidenceScore, totalDuration }
-interview_abandoned; // { userId, interviewId, questionsAnswered, totalQuestions, reason: 'user_ended' | 'timeout' }
-analysis_viewed; // { userId, interviewId, viewType: 'live' | 'post_interview' }
+interview_abandoned; // { userId, interviewId, questionsAnswered, reason: 'user_ended' | 'timeout' }
+analysis_viewed; // { userId, interviewId }
 history_filter_used; // { userId, filterType: 'role' | 'type' | 'time', filterValue }
 resume_uploaded; // { userId, fileType, usedForExtraction: boolean }
 job_description_pasted; // { userId, interviewId, descriptionLength }
@@ -367,7 +363,7 @@ settings_updated; // { userId, settingType: 'profile' | 'preferences' | 'notific
 
 | Persona | Description | Key Needs |
 | :--- | :--- | :--- |
-| **Free Tier User** (Job Seekers & Students) | Individuals practicing interview basics, standard Q&A, and evaluating the platform. | <ul><li>Access to standard question configuration (up to 5 questions).</li><li>Basic text and voice response input options.</li><li>Immediate overall session score with clarity rating.</li><li>Access to basic interview preparation tips.</li></ul> |
+| **Free Tier User** (Job Seekers & Students) | Individuals practicing interview basics, standard Q&A, and evaluating the platform. | <ul><li>Access to standard timed session configuration.</li><li>Basic text and voice response input options.</li><li>Immediate overall session score with clarity rating.</li><li>Access to basic interview preparation tips.</li></ul> |
 | **Pro Tier User** (Active Job Seekers) | High-intent candidates with active/upcoming job interviews who need high-fidelity simulations. | <ul><li>Context-aware questions tailored to uploaded resume (PDF/DOCX) or pasted job descriptions.</li><li>Multi-dimensional evaluation (Overall, Clarity, Relevance, Depth, Speaking Pace).</li><li>Full progress analytics dashboard with confidence trends.</li><li>One-click professional PDF resume generation.</li></ul> |
 
 ---
@@ -375,11 +371,11 @@ settings_updated; // { userId, settingType: 'profile' | 'preferences' | 'notific
 ## Success Criteria
 
 1. **Fast-path Onboarding**: A new user can complete email authentication, basic profile configuration, and launch a new mock interview session within 180 seconds.
-2. **AI-Driven Personalization**: The Kimi 2.6 API successfully generates a list of N questions (where N is the configured question count) matching the chosen role, difficulty level, and skills.
-3. **Multi-Dimensional Evaluation**: Every answered question receives an AI feedback payload containing five numeric metrics (Overall, Clarity, Relevance, Depth, Pace) in the range 0-100.
+2. **AI-Driven Personalization**: The Kimi 2.6 API successfully dynamically generates adaptive questions matching the chosen role, difficulty level, resume, and skills based on the candidate's responses in real-time.
+3. **Multi-Dimensional Evaluation**: The entire session receives an AI feedback payload containing overall metrics (Overall, Clarity, Relevance, Depth, Pace) in the range 0-100 upon completion.
 4. **State Persistence**: Saving a completed interview writes records to the `interviews`, `interview_questions`, and `interview_analytics` tables, making them immediately retrievable via history API filters.
 5. **Context Integration**: Uploading a PDF resume or pasting a job description modifies the generated interview questions to reference specific candidate experience/skills.
-6. **Interview Stability**: The session timer accurately counts down, and the user can step sequentially through all N questions without state loss or application crashes.
+6. **Interview Stability**: The session timer accurately counts down, and the user can step sequentially through all generated questions until the interview concludes without state loss or application crashes.
 7. **Proctoring Enforcement**: Exiting browser fullscreen mode, switching active browser tabs, minimizing the browser window, or pressing screenshot hotkeys immediately invokes the `stopRecording` function and redirects the user to `/dashboard` with a proctoring violation status.
 8. **Responsive Visualization**: Analytics charts render without visual clipping or overflow on screens ranging from 375px (mobile) to 1920px (desktop) width.
 9. **Telemetry Completeness**: The application fires PostHog events (`interview_started`, `question_answered`, `interview_completed`, `interview_abandoned`, `analysis_viewed`) matching the exact payload schema for every corresponding user action.
