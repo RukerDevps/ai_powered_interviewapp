@@ -71,12 +71,12 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
-### 2026-06-15: Initial Setup & Alignment
+### 2026-06-15: Landing Page & Pricing Setup
 - **Decisions Made**:
-  - Confirmed the migration of all context documentation from JobPilot to the **IntervAI** Mock Interview Platform specifications.
-  - Standardized the database schemas, proctoring invariants (strict fullscreen & visibility checks), and Kimi 2.6 LLM SDK usage.
-  - Completed formatting of the design tokens in `ui-tokens.md`.
-  - Initialized `ui-rules.md`, `ui-registry.md`, `code-standards.md`, `library-docs.md`, `build-plan.md`, and `progress-tracker.md` to be fully compliant.
+  - Initiated coding for the landing page UI design based on delivered screenshots.
+  - Aligned on integration of the separate pricing section with billing toggle into the marketing homepage layout flow.
 - **Next Steps**:
-  - Proceed with Phase 1 database migrations (creating SQL setup script for tables: `users`, `profiles`, `interviews`, `interview_questions`, `interview_analytics`).
-  - Initialize `@theme` variables inside `app/globals.css` with the values defined in `ui-tokens.md`.
+  - Review implementation plan and obtain approval.
+  - Initialize CSS design tokens inside `src/app/globals.css` and font styling in `src/app/layout.tsx`.
+  - Implement full responsive HTML/Tailwind mockup components for all landing sections, navbar, and footer.
+
