@@ -10,6 +10,7 @@ export const Testimonials = () => {
       role: "Software Engineer at Google",
       initials: "PS",
       bgGradient: "from-pink-500 to-rose-500",
+      srclink:"/images/image 18.png",
     },
     {
       quote: "The feedback is so detailed and helpful. It's like having a real mentor for interviews.",
@@ -17,6 +18,7 @@ export const Testimonials = () => {
       role: "Frontend Developer",
       initials: "RV",
       bgGradient: "from-purple-500 to-indigo-500",
+      srclink:"/images/image 22.png",
     },
     {
       quote: "Best AI interview platform I've used. Super realistic and easy to use.",
@@ -24,6 +26,7 @@ export const Testimonials = () => {
       role: "Product Manager",
       initials: "AS",
       bgGradient: "from-blue-500 to-cyan-500",
+      srclink:"/images/image 49.png",
     },
   ];
 
@@ -47,11 +50,6 @@ export const Testimonials = () => {
               key={t.name}
               className="relative bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-[0px_1px_3px_rgba(0,0,0,0.1),_0px_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-md transition-all duration-300 flex flex-col justify-between"
             >
-              {/* Quote Mark icon */}
-              <div className="absolute top-6 left-6 text-accent/10">
-                <Quote className="h-10 w-10 fill-current" />
-              </div>
-
               {/* Quote text */}
               <div className="relative z-10 pt-4 mb-6">
                 <p className="text-sm sm:text-base text-text-dark font-medium leading-relaxed italic">
@@ -62,7 +60,7 @@ export const Testimonials = () => {
               {/* User Bio */}
               <div className="flex items-center gap-3 border-t border-border-light pt-4">
                 <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${t.bgGradient} flex items-center justify-center text-xs font-bold text-white shadow-sm`}>
-                  {t.initials}
+                  <img src={t.srclink} alt="" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-text-primary">{t.name}</h4>
