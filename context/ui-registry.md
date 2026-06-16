@@ -101,6 +101,26 @@ Status: `Completed`
 - This is the canonical shadcn-style action menu for row-level overflow controls.
 - Destructive actions use token-based error styling so table menus stay consistent with the rest of the IntervAI palette.
 
+#### Dialog
+File: `src/components/ui/dialog.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, overlay `bg-overlay/45` |
+| Border | `border border-border` |
+| Border radius | `rounded-2xl` shell, close button `rounded-lg` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | Shell `p-6`, footer `mt-6 gap-3` |
+| Hover state | `hover:bg-surface-secondary`, `hover:text-text-primary` |
+| Shadow | `shadow-[0_24px_80px_rgba(16,24,40,0.18)]` |
+| Accent usage | relies on shared button variants inside the footer |
+
+**Pattern notes:**
+- This is the canonical shadcn-style modal surface for focused editing tasks such as job-description entry.
+- The overlay and centered surface stay lightweight and token-based so the modal can be reused for settings, notes, or confirmation flows without introducing a second visual system.
+
 #### Table
 File: `src/components/ui/table.tsx`
 Status: `Completed`
@@ -289,6 +309,8 @@ Status: `Completed`
 - Every setup section is a tokenized card with a short heading block, then dense form-like rows built from bordered surfaces rather than introducing new primitives.
 - Icon-leading fields, upload panels, dropdown selectors, and selectable options all reuse the same rounded-xl + border-border + shadow-sm treatment so the full page reads as one system.
 - Skill chips are removable inside the dropdown trigger without breaking the overall field chrome, which is the preferred pattern for future multi-select controls.
+- Resume upload uses a hidden native file input behind a shadcn-style action card, and the selected filename becomes the persisted context label.
+- Job description entry uses the shared dialog primitive with textarea editing plus save/clear actions, then reflects the saved text back into the context card and summary preview.
 - Summary metadata uses compact icon chips plus split label/value rows, and the primary action stays isolated in its own bordered footer zone.
 
 ---

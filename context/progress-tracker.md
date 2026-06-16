@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 4: Interview Setup Wizard`
-- **Overall Completion**: `36%`
+- **Overall Completion**: `40%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -247,3 +247,21 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - **Next Steps**:
   - Replace local state with TanStack Form + Zod when the interview creation flow is wired.
   - Connect resume and job description controls to the real upload and text-entry flows.
+
+### 2026-06-16: Interview Context Upload and JD Modal
+- **Decisions Made**:
+  - Replaced the placeholder Add Context toggles with a real hidden file-input flow for PDF and DOCX resumes, including filename reflection in the card and summary panel.
+  - Added a reusable shadcn-style dialog primitive in `src/components/ui/dialog.tsx` so focused edit flows can open as modal surfaces inside the dashboard experience.
+  - Wired the job-description card to open that modal, capture textarea content, and persist the saved description back into the setup preview.
+  - Kept both flows UI-local for now so the future upload and interview-creation actions can be connected without reworking the screen structure.
+- **Next Steps**:
+  - Connect resume uploads to the real storage and extraction pipeline.
+  - Replace the job description textarea’s local save with validated wizard form state and submit handling.
+
+### 2026-06-16: Add Context UI Polish
+- **Decisions Made**:
+  - Removed the extra preview block from the job-description dialog so the modal stays focused on text entry only.
+  - Reduced the Add Context action controls to a smaller inline button treatment so editing a job description no longer stretches or visually dominates the entire card.
+  - Updated the interview summary’s Job Description row to support a `More` / `Less` expansion pattern with wrapped text so long descriptions stay inside the summary card instead of overflowing.
+- **Next Steps**:
+  - Keep the same expandable summary treatment in mind for any future long-form wizard fields.

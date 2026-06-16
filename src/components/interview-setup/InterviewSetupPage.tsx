@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import type { ComponentType } from "react";
 import {
   BriefcaseBusiness,
@@ -24,6 +25,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -31,6 +40,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type FieldTone = "accent" | "success" | "warning" | "info";
@@ -60,13 +71,15 @@ interface SetupFieldProps {
 interface ContextCardProps {
   title: string;
   description: string;
-  buttonLabel: string;
+  primaryActionLabel: string;
+  secondaryActionLabel?: string;
   activeLabel: string;
   inactiveLabel: string;
   icon: ComponentType<{ className?: string }>;
   tone?: FieldTone;
   isAdded: boolean;
-  onToggle: () => void;
+  onPrimaryAction: () => void;
+  onSecondaryAction?: () => void;
 }
 
 interface SectionOptionProps {
@@ -84,6 +97,7 @@ interface SummaryItem {
   value: string;
   icon: ComponentType<{ className?: string }>;
   tone?: FieldTone;
+  expandable?: boolean;
 }
 
 interface SectionDefinition {
@@ -191,6 +205,26 @@ const sectionDefinitions: SectionDefinition[] = [
     tone: "accent",
   },
 ];
+
+const allowedResumeTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
+const formatJobDescriptionPreview = (jobDescription: string) => {
+  const normalized = jobDescription.trim().replace(/\s+/g, " ");
+
+  if (!normalized) {
+    return "Not Added";
+  }
+
+  if (normalized.length <= 44) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, 44)}...`;
+};
 
 const SetupField = ({
   label,
@@ -315,35 +349,54 @@ const SetupField = ({
 const ContextCard = ({
   title,
   description,
-  buttonLabel,
+  primaryActionLabel,
+  secondaryActionLabel,
   activeLabel,
   inactiveLabel,
   icon: Icon,
   tone = "accent",
   isAdded,
-  onToggle,
+  onPrimaryAction,
+  onSecondaryAction,
 }: ContextCardProps) => {
   return (
     <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-      <div className="flex h-full flex-col gap-4 sm:flex-row sm:items-center">
-        <span
-          className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
-            toneStyles[tone]
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </span>
-        <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="text-base font-semibold text-text-primary">{title}</h3>
-          <p className="text-sm text-text-secondary">{description}</p>
-          <p className="text-sm font-medium text-text-dark">
-            {isAdded ? activeLabel : inactiveLabel}
-          </p>
+      <div className="flex h-full flex-col gap-4">
+        <div className="flex items-start gap-4">
+          <span
+            className={cn(
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
+              toneStyles[tone]
+            )}
+          >
+            <Icon className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1 space-y-1">
+            <h3 className="text-base font-semibold leading-6 text-text-primary">{title}</h3>
+            <p className="text-sm leading-6 text-text-secondary">{description}</p>
+            <p className="text-sm font-medium leading-6 text-text-dark">
+              {isAdded ? activeLabel : inactiveLabel}
+            </p>
+          </div>
         </div>
-        <Button variant="outline" className="h-10 px-4 text-sm font-medium" onClick={onToggle}>
-          {isAdded ? `Remove ${buttonLabel}` : buttonLabel}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            className="h-9 px-3 text-sm font-medium"
+            onClick={onPrimaryAction}
+          >
+            {primaryActionLabel}
+          </Button>
+          {isAdded && secondaryActionLabel && onSecondaryAction ? (
+            <Button
+              variant="ghost"
+              className="h-9 px-2 text-sm font-medium text-text-secondary"
+              onClick={onSecondaryAction}
+            >
+              {secondaryActionLabel}
+            </Button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -397,8 +450,17 @@ const SectionOption = ({
   );
 };
 
-const SummaryValue = ({ item }: { item: SummaryItem }) => {
+const SummaryValue = ({
+  item,
+  expanded = false,
+  onToggleExpand,
+}: {
+  item: SummaryItem;
+  expanded?: boolean;
+  onToggleExpand?: () => void;
+}) => {
   const Icon = item.icon;
+  const isExpandable = item.expandable && item.value !== "Not Added";
 
   return (
     <div className="flex items-start gap-3">
@@ -410,17 +472,36 @@ const SummaryValue = ({ item }: { item: SummaryItem }) => {
       >
         <Icon className={iconSizes} />
       </span>
-      <div className="flex min-w-0 flex-1 items-start justify-between gap-4">
-        <p className="text-sm text-text-dark">{item.label}</p>
-        <p className="max-w-[160px] text-right text-sm font-medium leading-6 text-text-primary">
-          {item.value}
-        </p>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-sm text-text-dark">{item.label}</p>
+          <div className="min-w-0 max-w-[170px] text-right">
+            <p
+              className={cn(
+                "text-sm font-medium leading-6 text-text-primary",
+                isExpandable ? "break-words text-left sm:text-right" : "break-words"
+              )}
+            >
+              {isExpandable && !expanded ? formatJobDescriptionPreview(item.value) : item.value}
+            </p>
+            {isExpandable && onToggleExpand ? (
+              <button
+                type="button"
+                onClick={onToggleExpand}
+                className="mt-1 text-xs font-semibold text-accent transition-colors hover:text-accent-dark"
+              >
+                {expanded ? "Less" : "More"}
+              </button>
+            ) : null}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export const InterviewSetupPage = () => {
+  const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedRole, setSelectedRole] = useState(roleOptions[0].value);
   const [selectedExperience, setSelectedExperience] = useState(experienceOptions[1].value);
   const [selectedInterviewType, setSelectedInterviewType] = useState(interviewTypeOptions[0].value);
@@ -430,8 +511,12 @@ export const InterviewSetupPage = () => {
     "TypeScript",
     "CSS",
   ]);
-  const [hasResume, setHasResume] = useState(true);
-  const [hasJobDescription, setHasJobDescription] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeError, setResumeError] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [jobDescriptionDraft, setJobDescriptionDraft] = useState("");
+  const [isJobDescriptionDialogOpen, setIsJobDescriptionDialogOpen] = useState(false);
+  const [isJobDescriptionExpanded, setIsJobDescriptionExpanded] = useState(false);
   const [selectedSections, setSelectedSections] = useState<SectionId[]>([
     "technical",
     "behavioral",
@@ -463,6 +548,66 @@ export const InterviewSetupPage = () => {
     );
   };
 
+  const handleResumeButtonClick = () => {
+    resumeInputRef.current?.click();
+  };
+
+  const handleResumeFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+
+    if (!selectedFile) {
+      return;
+    }
+
+    const fileName = selectedFile.name.toLowerCase();
+    const isValidType =
+      allowedResumeTypes.includes(selectedFile.type) ||
+      fileName.endsWith(".pdf") ||
+      fileName.endsWith(".doc") ||
+      fileName.endsWith(".docx");
+
+    if (!isValidType) {
+      setResumeError("Please upload a PDF or DOCX resume.");
+      event.target.value = "";
+      return;
+    }
+
+    setResumeFile(selectedFile);
+    setResumeError("");
+  };
+
+  const removeResumeFile = () => {
+    setResumeFile(null);
+    setResumeError("");
+
+    if (resumeInputRef.current) {
+      resumeInputRef.current.value = "";
+    }
+  };
+
+  const openJobDescriptionDialog = () => {
+    setJobDescriptionDraft(jobDescription);
+    setIsJobDescriptionDialogOpen(true);
+  };
+
+  const closeJobDescriptionDialog = () => {
+    setJobDescriptionDraft(jobDescription);
+    setIsJobDescriptionDialogOpen(false);
+  };
+
+  const saveJobDescription = () => {
+    setJobDescription(jobDescriptionDraft.trim());
+    setIsJobDescriptionExpanded(false);
+    setIsJobDescriptionDialogOpen(false);
+  };
+
+  const clearJobDescription = () => {
+    setJobDescription("");
+    setJobDescriptionDraft("");
+    setIsJobDescriptionExpanded(false);
+    setIsJobDescriptionDialogOpen(false);
+  };
+
   const selectedSectionLabels = sectionDefinitions
     .filter((section) => selectedSections.includes(section.id))
     .map((section) => section.title);
@@ -481,20 +626,29 @@ export const InterviewSetupPage = () => {
     },
     {
       label: "Resume",
-      value: hasResume ? "frontend_resume.pdf" : "Not Added",
+      value: resumeFile?.name ?? "Not Added",
       icon: FileBadge2,
-      tone: hasResume ? "success" : "warning",
+      tone: resumeFile ? "success" : "warning",
     },
     {
       label: "Job Description",
-      value: hasJobDescription ? "Added" : "Not Added",
+      value: jobDescription.trim() || "Not Added",
       icon: FileText,
-      tone: hasJobDescription ? "success" : "warning",
+      tone: jobDescription.trim() ? "success" : "warning",
+      expandable: true,
     },
   ];
 
   return (
     <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6">
+      <input
+        ref={resumeInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        className="hidden"
+        onChange={handleResumeFileChange}
+      />
+
       <div className="space-y-2">
         <h1 className="text-[28px] font-bold leading-9 text-text-primary">Start New Interview</h1>
         <p className="text-base text-text-secondary">
@@ -566,26 +720,39 @@ export const InterviewSetupPage = () => {
               <ContextCard
                 title="Upload Resume"
                 description="Upload your resume (PDF, DOCX)"
-                buttonLabel="Upload Resume"
-                activeLabel="frontend_resume.pdf attached"
+                primaryActionLabel={resumeFile ? "Replace Resume" : "Upload Resume"}
+                secondaryActionLabel="Remove"
+                activeLabel={resumeFile ? `${resumeFile.name} attached` : "Resume attached"}
                 inactiveLabel="No resume attached"
                 icon={Upload}
                 tone="success"
-                isAdded={hasResume}
-                onToggle={() => setHasResume((current) => !current)}
+                isAdded={Boolean(resumeFile)}
+                onPrimaryAction={handleResumeButtonClick}
+                onSecondaryAction={removeResumeFile}
               />
               <ContextCard
                 title="Paste Job Description"
                 description="Paste the job description or requirements"
-                buttonLabel="Add Job Description"
-                activeLabel="Job description added"
+                primaryActionLabel={jobDescription.trim() ? "Edit Job Description" : "Add Job Description"}
+                secondaryActionLabel="Remove"
+                activeLabel={
+                  jobDescription.trim()
+                    ? `${jobDescription.trim().split(/\s+/).length} words added`
+                    : "Job description added"
+                }
                 inactiveLabel="No job description added"
                 icon={FileText}
                 tone="warning"
-                isAdded={hasJobDescription}
-                onToggle={() => setHasJobDescription((current) => !current)}
+                isAdded={Boolean(jobDescription.trim())}
+                onPrimaryAction={openJobDescriptionDialog}
+                onSecondaryAction={clearJobDescription}
               />
             </CardContent>
+            {resumeError ? (
+              <div className="px-6 pb-6">
+                <p className="text-sm font-medium text-error">{resumeError}</p>
+              </div>
+            ) : null}
           </Card>
 
           <Card className="rounded-xl">
@@ -687,7 +854,16 @@ export const InterviewSetupPage = () => {
           <CardContent className="space-y-5 pt-6">
             <div className="space-y-4">
               {summaryItems.map((item) => (
-                <SummaryValue key={item.label} item={item} />
+                <SummaryValue
+                  key={item.label}
+                  item={item}
+                  expanded={item.label === "Job Description" ? isJobDescriptionExpanded : false}
+                  onToggleExpand={
+                    item.label === "Job Description"
+                      ? () => setIsJobDescriptionExpanded((current) => !current)
+                      : undefined
+                  }
+                />
               ))}
             </div>
 
@@ -748,6 +924,54 @@ export const InterviewSetupPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isJobDescriptionDialogOpen} onOpenChange={setIsJobDescriptionDialogOpen}>
+        <DialogContent className="max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Add Job Description</DialogTitle>
+            <DialogDescription>
+              Paste the job description, requirements, or responsibilities you want the interview to focus on.
+            </DialogDescription>
+          </DialogHeader>
+
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="job-description-title" className="text-sm font-medium text-text-dark">
+                  Reference Label
+              </label>
+              <Input
+                id="job-description-title"
+                value={selectedRole}
+                readOnly
+                className="bg-surface-secondary"
+              />
+            </div>
+
+              <div className="space-y-2">
+                <label htmlFor="job-description-content" className="text-sm font-medium text-text-dark">
+                  Job Description
+              </label>
+              <Textarea
+                id="job-description-content"
+                value={jobDescriptionDraft}
+                onChange={(event) => setJobDescriptionDraft(event.target.value)}
+                placeholder="Paste the full job description, key responsibilities, required skills, and any must-have experience..."
+                  className="min-h-[220px] rounded-xl bg-surface"
+                />
+              </div>
+            </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closeJobDescriptionDialog}>
+              Cancel
+            </Button>
+            <Button variant="secondary" onClick={clearJobDescription}>
+              Clear
+            </Button>
+            <Button onClick={saveJobDescription}>Save Job Description</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

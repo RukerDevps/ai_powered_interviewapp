@@ -22,6 +22,7 @@ import {
   usernameSchema,
 } from "./auth-validation";
 import { AuthTextField } from "./AuthTextField";
+import { useRouter } from "next/navigation";
 
 interface AuthFormPanelProps {
   mode: AuthMode;
@@ -32,6 +33,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const reduceMotion = useReducedMotion();
+  const router = useRouter();
 
   const isLogin = mode === "login";
   const activeSchema = isLogin ? loginSchema : registerSchema;
@@ -89,7 +91,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
           <p className="mt-2 text-sm text-text-secondary sm:text-base lg:text-sm">{subtitle}</p>
         </div>
 
-        <div className="mt-6 space-y-3 xl:mt-7">
+        {/* <div className="mt-6 space-y-3 xl:mt-7">
           {socialButtons.map((button, index) => (
             <motion.button
               key={button.label}
@@ -125,7 +127,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
             Or
           </span>
           <div className="h-px flex-1 bg-border" />
-        </div>
+        </div> */}
 
         <form
           onSubmit={(event) => {
@@ -363,6 +365,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
 
           <motion.button
             type="submit"
+            onClick={() => router.push('/dashboard')}
             whileHover={reduceMotion ? undefined : { y: -1, scale: 1.01 }}
             whileTap={reduceMotion ? undefined : { scale: 0.99 }}
             aria-disabled={isSubmitting}
