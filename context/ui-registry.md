@@ -266,6 +266,31 @@ Status: `Completed`
 - The header includes the mobile menu button that opens the sidebar drawer on tablet and mobile breakpoints.
 - The menu button is the only trigger for the drawer on small screens, keeping the interaction predictable.
 
+### Interview Setup
+
+#### Start New Interview Page
+File: `src/components/interview-setup/InterviewSetupPage.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, page shell inside `DashboardShell` |
+| Border | `border border-border`, section dividers `border-b border-border`, `border-t border-border` |
+| Border radius | Section cards `rounded-xl`, inner field/icon shells `rounded-xl`, tags `rounded-md`, CTA `rounded-lg` |
+| Text — primary | `text-text-primary`, headings `text-[28px] font-bold`, section titles `text-[18px] font-semibold` |
+| Text — secondary | `text-text-secondary`, labels `text-text-dark`, muted security/help copy `text-text-secondary` |
+| Spacing | Page stack `gap-6`, cards `p-6`, fields `px-3 py-2` or `px-4 py-3`, summary stack `space-y-5` |
+| Hover state | Buttons inherit shadcn token states: `hover:bg-accent-hover`, `hover:bg-surface-secondary`; selected option cards use `border-accent bg-accent-muted/40` |
+| Shadow | `shadow-sm` throughout page surfaces and input-like rows |
+| Accent usage | `bg-accent`, `bg-accent-light`, `bg-accent-lighter`, `text-accent`, success/warning/info token icon chips, selected checks `border-accent bg-accent` |
+
+**Pattern notes:**
+- The interview setup page uses a two-column dashboard composition: a flexible form stack on the left and a sticky summary card on desktop.
+- Every setup section is a tokenized card with a short heading block, then dense form-like rows built from bordered surfaces rather than introducing new primitives.
+- Icon-leading fields, upload panels, dropdown selectors, and selectable options all reuse the same rounded-xl + border-border + shadow-sm treatment so the full page reads as one system.
+- Skill chips are removable inside the dropdown trigger without breaking the overall field chrome, which is the preferred pattern for future multi-select controls.
+- Summary metadata uses compact icon chips plus split label/value rows, and the primary action stays isolated in its own bordered footer zone.
+
 ---
 
 #### History Filters
@@ -610,66 +635,6 @@ Status: `Completed`
 | Border Separators | `divide-y divide-border` |
 | Score Badge Colors | `bg-success-lightest text-success-foreground`, `bg-warning-light text-warning-foreground`, `bg-error-light text-error` |
 | Spacing | Row `py-3.5 gap-4`, card `p-5 lg:p-6` |
-
----
-
-### Interview Setup (Start New Interview)
-
-#### Step 1: Interview Details
-File: `components/interview-setup/StepInterviewDetails.tsx`
-Status: `Pending`
-
-| Property | Class |
-| :--- | :--- |
-| Form Label | |
-| Input / Select | |
-| Tag Input Shell | |
-
----
-
-#### Step 2: Add Context (Resume & JD)
-File: `components/interview-setup/StepContext.tsx`
-Status: `Pending`
-
-| Property | Class |
-| :--- | :--- |
-| Drag & Drop Zone | |
-| Upload Icon / Ring | |
-| JD Textarea | |
-
----
-
-#### Step 3: Customize Interview
-File: `components/interview-setup/StepCustomize.tsx`
-Status: `Pending`
-
-| Property | Class |
-| :--- | :--- |
-| Option Grid | |
-| Custom Selectors | |
-
----
-
-#### Step 4: Set Duration
-File: `components/interview-setup/StepDuration.tsx`
-Status: `Pending`
-
-| Property | Class |
-| :--- | :--- |
-| Slider / Toggle Track | |
-| Active Value Badge | |
-
----
-
-#### Interview Summary Sidebar
-File: `components/interview-setup/InterviewSummary.tsx`
-Status: `Pending`
-
-| Property | Class |
-| :--- | :--- |
-| Background | |
-| List Rows | |
-| Start Button | |
 
 ---
 

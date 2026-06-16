@@ -6,8 +6,8 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Overall Status
 
-- **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
-- **Overall Completion**: `27%`
+- **Current Phase**: `Phase 4: Interview Setup Wizard`
+- **Overall Completion**: `36%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -38,9 +38,9 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Settings Page tabs (Profile, Preferences, Billing)
 
 ### Phase 4: Interview Setup Wizard
-- [ ] 4-Step Setup Wizard container (`/interview/new`)
-- [ ] Wizard forms: Job Details, Context attachments, Section selections, and Timer duration
-- [ ] Wizard Live Summary sidebar card
+- [x] 4-Step Setup Wizard container (`/interview/new`)
+- [x] Wizard forms: Job Details, Context attachments, Section selections, and Timer duration
+- [x] Wizard Live Summary sidebar card
 - [ ] DB interview creation handler (`actions/interview.ts`)
 
 ### Phase 5: Live Interview Session
@@ -227,3 +227,23 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Captured the animated drawer behavior in the living UI docs for future dashboard work.
 - **Next Steps**:
   - Reuse the same motion recipe for any future off-canvas panels in the app.
+
+### 2026-06-16: Start New Interview Page UI Build
+- **Decisions Made**:
+  - Built the `/interview/new` route inside the shared `DashboardShell`, keeping the existing sidebar and header untouched as requested.
+  - Implemented the page as a static UI-first interview setup screen using the existing shadcn-style `Card` and `Button` primitives plus token-based custom field rows.
+  - Matched the provided mockup with four setup sections on the left and a sticky interview summary panel on the right for desktop layouts.
+  - Kept the existing dashboard CTA path to `/interview/new`, so the dashboard already serves as the entry point into this screen.
+- **Next Steps**:
+  - Add real form state, upload interactions, and start-interview submission logic when the interview action layer is ready.
+  - Extract any repeated field/select patterns into smaller shared primitives if the settings or future wizard steps need the same chrome.
+
+### 2026-06-16: Start New Interview Option Selection
+- **Decisions Made**:
+  - Converted `InterviewSetupPage.tsx` into a client component so the setup screen can manage local wizard selections without touching the server layer yet.
+  - Added interactive option selection for role, experience, interview type, primary skills, question focus, duration, question count, time-per-question, and included sections using the existing shadcn-style dropdown menu primitives.
+  - Made resume and job description cards toggleable so optional context state also feeds the preview.
+  - Switched the right-side summary panel from hardcoded content to derived values, so every option change is reflected immediately in the preview.
+- **Next Steps**:
+  - Replace local state with TanStack Form + Zod when the interview creation flow is wired.
+  - Connect resume and job description controls to the real upload and text-entry flows.

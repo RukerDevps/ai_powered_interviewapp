@@ -103,11 +103,7 @@
 │   │   ├── InterviewTips.tsx
 │   │   └── RecentInterviews.tsx
 │   ├── interview-setup/
-│   │   ├── StepInterviewDetails.tsx       → Step 1: role, experience, type, skills
-│   │   ├── StepContext.tsx                → Step 2: resume upload, JD paste
-│   │   ├── StepCustomize.tsx              → Step 3: question sections, focus
-│   │   ├── StepDuration.tsx               → Step 4: session duration
-│   │   └── InterviewSummary.tsx           → Right sidebar live summary
+│   │   └── InterviewSetupPage.tsx         → Client-side setup UI with selectable options and live summary preview
 │   ├── interview-session/
 │   │   ├── InterviewerAvatar.tsx          → AI avatar + speaking indicator + waveform
 │   │   ├── AnswerInput.tsx                → Text + Web Speech API voice input
@@ -210,6 +206,27 @@ local delete action removes rows from client state for now
 **Boundary rule:** server page data must stay plain and serializable. For example, history rows pass an icon key string such as `"code"` or `"brain"`; `HistoryTable.tsx` maps that key to the actual Lucide icon inside the client component. Do not pass React components, class instances, or objects with methods from `app/history/page.tsx` into `HistoryTable`.
 
 Future database-backed history should replace the sample row array in `app/history/page.tsx` with server-fetched rows, while keeping filtering/pagination client-side unless the result set becomes large enough to require URL/search-param-backed server queries.
+
+### Interview Setup Preview State (Client-side UI State)
+
+```
+app/interview/new/page.tsx (Server Component)
+        ↓
+renders dashboard shell only
+        ↓
+components/interview-setup/InterviewSetupPage.tsx (Client Component)
+        ↳
+local React state stores selected role, experience, type, skills,
+context attachments, included sections, focus, duration, and timing
+        ↳
+shadcn dropdown-menu primitives manage option selection UI
+        ↳
+derived summary values render immediately in the right-side preview card
+        ↳
+future submit action can serialize this state into actions/interview.ts
+```
+
+**Boundary rule:** keep the interview setup page UI-first and client-local until the interview creation action is wired. Do not move prompt-building, persistence, or upload processing into the component; those belong in `actions/`, `agent/`, or `lib/`.
 
 ### Question Generation (API Route, streaming)
 
