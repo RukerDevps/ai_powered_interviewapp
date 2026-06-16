@@ -1,11 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { collectValidationMessages } from "./auth-validation";
 
 interface AuthTextFieldProps {
   autoComplete?: string;
   endAdornment?: ReactNode;
-  errorMessages: string[];
+  errorMessages: unknown;
   icon: ReactNode;
   id: string;
   label: string;
@@ -33,6 +34,8 @@ export const AuthTextField = ({
   type,
   value,
 }: AuthTextFieldProps) => {
+  const visibleErrorMessages = collectValidationMessages(errorMessages);
+
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-text-dark">
@@ -49,13 +52,13 @@ export const AuthTextField = ({
           value={value}
           onBlur={onBlur}
           onChange={(event) => onChange(event.target.value)}
-          aria-invalid={errorMessages.length > 0}
+          aria-invalid={visibleErrorMessages.length > 0}
           className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
         />
         {endAdornment}
       </div>
-      {showError && errorMessages.length > 0 ? (
-        <p className="mt-1.5 text-xs font-medium text-error">{errorMessages.join(", ")}</p>
+      {showError && visibleErrorMessages.length > 0 ? (
+        <p className="mt-1.5 text-xs font-medium text-error">{visibleErrorMessages.join(", ")}</p>
       ) : null}
     </div>
   );

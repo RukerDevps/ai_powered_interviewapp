@@ -46,8 +46,8 @@ export const defaultAuthValues = {
   email: "",
   password: "",
   confirmPassword: "",
-  rememberMe: false,
-  agreeToTerms: false,
+  rememberMe: false as boolean,
+  agreeToTerms: false as boolean,
 } satisfies AuthFormValues;
 
 export const collectValidationMessages = (error: unknown): string[] => {
@@ -63,7 +63,11 @@ export const collectValidationMessages = (error: unknown): string[] => {
     return error.flatMap((item) => collectValidationMessages(item));
   }
 
-  if (typeof error === "object") {
+  if (typeof error === "object" && error !== null) {
+    if ("message" in error && typeof (error as any).message === "string") {
+      return [(error as any).message];
+    }
+
     return Object.values(error as Record<string, unknown>).flatMap((item) =>
       collectValidationMessages(item)
     );
