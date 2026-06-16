@@ -28,6 +28,9 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 - Left Sidebar: collapsible on mobile, includes "Powered by Kimi 2.6 AI" card
 - Top Header: height 64px, includes Kimi 2.6 badge, theme toggle, "Hello, [Name]" user dropdown with avatar
 - Main content area: full-width layout, padding `p-6` (24px) or `p-8` (32px), gap between page sections: `gap-6` (24px)
+- The dashboard shell should use a fixed-height viewport rail on desktop: sidebar remains stationary at `h-dvh`, and the main content column owns vertical scrolling.
+- Dashboard pages should use reusable section components with `rounded-xl border border-border bg-surface shadow-sm`; keep stats, performance, tips, and recent lists as separate components so they can later receive server data without changing layout.
+- Dashboard score and progress visuals must use semantic tokens or CSS variables such as `var(--color-accent)` rather than hardcoded colors.
 
 ### Live Interview Layout
 - Automatically enters/enlarges to full screen mode on launch

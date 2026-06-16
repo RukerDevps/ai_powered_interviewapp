@@ -65,31 +65,40 @@ Status: `Completed`
 
 #### Dashboard Left Sidebar
 File: `components/layout/Sidebar.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Border | |
-| Text | |
-| Spacing | |
-| Hover State | |
-| Accent Usage | |
+| Background | `bg-surface`, powered card `bg-accent-muted` |
+| Border | `border-r border-border`, card `border border-border` |
+| Text | `text-text-dark`, active `text-accent`, muted `text-text-secondary` |
+| Spacing | Shell `w-[280px]`, logo area `px-8 py-7`, nav `px-6 py-7`, links `px-4 py-4 gap-4` |
+| Hover State | `hover:bg-accent-lighter hover:text-accent` |
+| Accent Usage | Active link `bg-accent-muted text-accent`, CTA `bg-accent text-accent-foreground` |
+
+**Pattern notes:**
+- Sidebar is hidden below `lg` and acts as the persistent dashboard navigation on desktop.
+- The rail is locked to the viewport height with the content column handling scrolling, so the navigation and Kimi card remain stationary while dashboard sections move.
+- The Kimi promotion card uses the same accent-muted surface as active navigation to keep the dashboard palette consistent.
 
 ---
 
 #### Dashboard Top Header
 File: `components/layout/Header.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Border | |
-| Text | |
-| Spacing | |
-| Hover State | |
-| Accent/Theme Toggle | |
+| Background | `bg-surface` |
+| Border | `border-b border-border` |
+| Text | `text-text-primary`, `text-text-secondary`, `text-accent` |
+| Spacing | `h-20 px-4 sm:px-6`, desktop `lg:h-[92px] lg:px-8` |
+| Hover State | `hover:bg-surface-secondary` |
+| Accent/Theme Toggle | Kimi badge icon `text-accent`, avatar `bg-accent text-accent-foreground` |
+
+**Pattern notes:**
+- Header mirrors the dashboard screenshot with a right-aligned Kimi badge and user menu on desktop.
+- On mobile it shows a compact product label while the full sidebar is hidden.
 
 ---
 
@@ -238,74 +247,80 @@ Status: `Pending`
 
 #### Welcome Header
 File: `components/dashboard/WelcomeHeader.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Welcome Typography | |
-| CTA Button | |
+| Background | none |
+| Welcome Typography | `text-3xl font-bold tracking-normal text-text-primary`, subtitle `text-base text-text-secondary` |
+| CTA Button | `rounded-lg bg-accent px-6 py-5 text-accent-foreground hover:bg-accent-hover` |
 
 ---
 
 #### Quick Stats Row
 File: `components/dashboard/QuickStats.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Card Background | |
-| Border / Radius | |
-| Value Typography | |
-| Label Typography | |
+| Card Background | `bg-surface` |
+| Border / Radius | `border border-border rounded-xl` |
+| Value Typography | `text-sm font-bold text-text-primary` |
+| Label Typography | `text-xs font-medium text-text-secondary` |
+| Icon Treatments | `bg-accent-light`, `bg-success-light`, `bg-warning-light`, `bg-behavioral-light` |
 
 ---
 
 #### Continue Interview Card
 File: `components/dashboard/ContinueInterviewCard.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Progress Bar Track/Fill | |
-| Resume Button | |
+| Background | `bg-surface` |
+| Progress Bar Track/Fill | Track `bg-surface-secondary`, fill `bg-accent` |
+| Resume Button | `bg-accent text-accent-foreground hover:bg-accent-hover` |
+| Border / Radius | `border border-border rounded-xl` |
+| Badge | `bg-accent-light text-accent rounded-full` |
 
 ---
 
 #### Recent Performance Section
 File: `components/dashboard/RecentPerformance.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Score Chart Circle | |
-| Dropdown Trigger | |
+| Background | `bg-surface` |
+| Score Chart Circle | CSS `conic-gradient` using `var(--color-accent)` and `var(--color-surface-secondary)` |
+| Dropdown Trigger | `border border-border bg-surface hover:bg-surface-secondary rounded-md` |
+| Metric Rows | `divide-y divide-border`, icon pills use semantic token backgrounds |
 
 ---
 
 #### Upcoming Interview Tips
 File: `components/dashboard/InterviewTips.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Tip List Spacing | |
-| Icon Accents | |
+| Background | `bg-surface` |
+| Tip List Spacing | `divide-y divide-border`, row `py-4 gap-4` |
+| Icon Accents | `bg-success-lightest`, `bg-accent-lighter`, `bg-warning-light` |
+| Hover State | `hover:bg-surface-secondary` |
 
 ---
 
 #### Recent Interviews List
 File: `components/dashboard/RecentInterviews.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| List Row Background | |
-| Border Separators | |
-| Score Badge Colors | |
+| List Row Background | `bg-surface`, hover `hover:bg-surface-secondary` |
+| Border Separators | `divide-y divide-border` |
+| Score Badge Colors | `bg-success-lightest text-success-foreground`, `bg-warning-light text-warning-foreground`, `bg-error-light text-error` |
+| Spacing | Row `py-3.5 gap-4`, card `p-5 lg:p-6` |
 
 ---
 

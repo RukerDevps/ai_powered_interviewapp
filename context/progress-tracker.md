@@ -6,9 +6,8 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Overall Status
 
-- **Current Phase**: `Phase 1: Foundation & Database Setup`
-- **Current Phase**: `Phase 2: Authentication & Profile Setup`
-- **Overall Completion**: `12%`
+- **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
+- **Overall Completion**: `18%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -34,8 +33,8 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ### Phase 3: Layouts & Marketing Dashboard
 - [ ] Marketing Homepage sections (Hero, Features, Pricing with annual toggles)
 - [ ] Landing page Navbar and Footer
-- [ ] Dashboard layout Shell (collapsible left Sidebar + Header)
-- [ ] Dashboard Page metrics, quick stats, and list grids
+- [x] Dashboard layout Shell (collapsible left Sidebar + Header)
+- [x] Dashboard Page metrics, quick stats, and list grids
 - [ ] Settings Page tabs (Profile, Preferences, Billing)
 
 ### Phase 4: Interview Setup Wizard
@@ -129,3 +128,20 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Reused the existing public icon assets in the hero cards instead of introducing new artwork, keeping the visual system tied to the current asset set.
 - **Next Steps**:
   - If you want the same pattern on the register page or other auth variants, the shared logo and hero card structure are ready to reuse.
+
+### 2026-06-16: Dashboard Page Build
+- **Decisions Made**:
+  - Created the `/dashboard` route as a reusable component composition matching the supplied dashboard UI design.
+  - Added separate dashboard shell, sidebar, top header, welcome header, quick stats, continue interview, recent performance, interview tips, and recent interviews components.
+  - Used typed sample data in the page module for now so the components can later accept database-backed props without a layout rewrite.
+  - Updated `ui-registry.md` and `ui-rules.md` with the new dashboard shell and section-card patterns.
+- **Next Steps**:
+  - Wire dashboard components to real profile, interview, and analytics data after auth/session and database helpers are ready.
+
+### 2026-06-16: Dashboard Scroll Behavior Tweak
+- **Decisions Made**:
+  - Locked the dashboard sidebar to the viewport height on desktop so the navigation and Kimi card stay stationary.
+  - Moved vertical scrolling into the dashboard content column, keeping the header and section stack in the scrollable region.
+  - Documented the fixed-rail behavior in the living UI rules and registry so future dashboard sections preserve the same shell.
+- **Next Steps**:
+  - Reuse the same shell pattern for analytics and history pages so the app feels consistent across the dashboard suite.
