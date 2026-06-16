@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,13 +19,7 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 h-16 w-full border-b border-border bg-surface/90 backdrop-blur-md">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex flex-shrink-0 items-center gap-2 whitespace-nowrap">
-          <div className="flex h-9 items-center justify-center rounded-[10px] bg-gradient-to-br from-accent to-accent-dark px-3 py-1 font-bold text-accent-foreground shadow-sm">
-            <span className="text-sm font-extrabold tracking-wider">INTERV</span>
-            <span className="ml-1 rounded bg-white px-1 py-0.5 text-[10px] font-black text-accent">AI</span>
-          </div>
-
-        </Link>
+        <BrandLogo href="/" />
 
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-6 lg:flex xl:gap-8">

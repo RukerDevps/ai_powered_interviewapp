@@ -37,6 +37,29 @@ Status: `Completed`
 - Full desktop links and auth CTAs are revealed at `lg` and above.
 - Tablet widths fall back to the hamburger menu to avoid wrapped nav text and broken alignment.
 - Anchor links rely on native smooth scrolling, with section scroll offsets set globally for the sticky navbar.
+- The brand mark now comes from the shared `BrandLogo` component so auth and marketing surfaces stay visually identical.
+
+---
+
+#### Brand Logo
+File: `components/layout/BrandLogo.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-gradient-to-br from-accent to-accent-dark` |
+| Border | none |
+| Border radius | `rounded-[10px]` |
+| Text â€” primary | `text-accent-foreground` |
+| Text â€” secondary | `text-accent` on the AI badge, `text-text-secondary` for subtitle |
+| Spacing | `h-9 px-3 py-1`, optional subtitle `mt-1` |
+| Hover state | none |
+| Shadow | `shadow-sm` |
+| Accent usage | `bg-accent`, `bg-accent-dark`, `text-accent-foreground` |
+
+**Pattern notes:**
+- This is the canonical IntervAI brand lockup used in both the navbar and auth hero.
+- The subtitle is optional so the same component can stay compact in navigation but explanatory in the auth shell.
 
 ---
 
@@ -101,9 +124,10 @@ Status: `Completed`
 | Accent usage | `bg-accent`, `focus:ring-accent`, `text-accent`, `bg-accent-light/40` |
 
 **Pattern notes:**
-- The left panel reuses the provided login mockup image as the main visual attraction.
+- The left panel now recreates the provided login mockup as a coded hero composition with the shared brand logo, floating insight cards, and the central AI illustration.
 - Entrance motion uses Framer Motion spring/tween combos with reduced-motion fallback.
-- Social auth actions are styled as secondary buttons with consistent icon containers.
+- Social auth actions are styled as secondary buttons with consistent icon containers and now use the actual provider logo assets from `public/images`.
+- The left-side cards intentionally reuse the existing public icon assets so the visual language stays tied to the current asset set.
 - Desktop spacing is compressed to fit the shell into the viewport height without introducing page scroll.
 - Register mode uses the field order `username`, `email`, `create new password`, `confirm password` while keeping the same visual system as login.
 

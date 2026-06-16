@@ -48,6 +48,8 @@ Items: Features, How it Works, Pricing, Testimonials, FAQ. Plus "Log in" link an
 ### Auth Pages
 - Use a split-screen shell with the illustration panel on the left and the form card on the right.
 - The left panel should be treated as the visual hero of the page and should use the provided mockup artwork directly when available.
+- Reuse the shared `BrandLogo` component in both the navbar and auth shell so the IntervAI wordmark stays identical across surfaces.
+- When the mockup calls for it, the left panel can be rebuilt as coded floating cards, but it should preserve the same visual hierarchy as the provided design: brand lockup, headline, central illustration, and supporting insight cards.
 - Right-side form controls should use rounded-xl inputs, motion-based entrance, and the accent-colored primary action button.
 - On desktop, the auth shell should fit the viewport height without page scrolling; tighten vertical spacing before expanding the page height.
 - Register mode should present fields in this order: username, email, create new password, confirm password.

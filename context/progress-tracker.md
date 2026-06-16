@@ -9,7 +9,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - **Current Phase**: `Phase 1: Foundation & Database Setup`
 - **Current Phase**: `Phase 2: Authentication & Profile Setup`
 - **Overall Completion**: `12%`
-- **Last Updated**: `2026-06-15`
+- **Last Updated**: `2026-06-16`
 
 ---
 
@@ -114,3 +114,18 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - **Next Steps**:
   - Wire the form to real auth actions once the backend session utilities are ready.
   - Optional: refine the register page copy if you want it to follow a separate design later.
+
+### 2026-06-16: Auth Social Button Logo Swap
+- **Decisions Made**:
+  - Swapped the placeholder Google and Microsoft social button marks for the actual logo images stored in `public/images`.
+  - Kept the existing secondary button styling so the buttons still match the auth shell spacing and border treatment.
+- **Next Steps**:
+  - If you want OAuth later, the buttons are now visually ready for provider wiring without another UI pass.
+
+### 2026-06-16: Auth Hero Card Stack & Shared Logo
+- **Decisions Made**:
+  - Extracted the navbar wordmark into a shared `BrandLogo` component so the branding stays consistent across the site.
+  - Rebuilt the left auth panel as a coded hero composition that mirrors the supplied login mockup with floating insight cards and a central AI illustration.
+  - Reused the existing public icon assets in the hero cards instead of introducing new artwork, keeping the visual system tied to the current asset set.
+- **Next Steps**:
+  - If you want the same pattern on the register page or other auth variants, the shared logo and hero card structure are ready to reuse.
