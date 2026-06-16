@@ -38,7 +38,7 @@ const getScoreClasses = (score: number) => {
 
 export const RecentInterviews = ({ interviews }: RecentInterviewsProps) => {
   return (
-    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm lg:p-6">
+    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm lg:p-6 w-[90vw] sm:w-full">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-base font-bold text-text-primary">Your Recent Interviews</h2>
         <Link href="/history" className="text-sm font-semibold text-accent hover:text-accent-hover">

@@ -81,6 +81,26 @@ Status: `Completed`
 - Card primitives match the existing dashboard surface language and use the same rounded-2xl shell as the feature cards already in the app.
 - Header, content, and footer spacing intentionally mirrors the existing section-card rhythm so feature screens can mix custom cards and shadcn cards without visual drift.
 
+#### Dropdown Menu
+File: `src/components/ui/dropdown-menu.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface` |
+| Border | `border border-border` |
+| Border radius | `rounded-xl` container, `rounded-md` items |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-muted` |
+| Spacing | `p-1` content, `px-2 py-2` items |
+| Hover state | `focus:bg-surface-secondary` |
+| Shadow | `shadow-[0_18px_40px_rgba(16,24,40,0.14)]` |
+| Accent usage | `text-error` for destructive items |
+
+**Pattern notes:**
+- This is the canonical shadcn-style action menu for row-level overflow controls.
+- Destructive actions use token-based error styling so table menus stay consistent with the rest of the IntervAI palette.
+
 #### Table
 File: `src/components/ui/table.tsx`
 Status: `Completed`
@@ -274,19 +294,19 @@ Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | table rows on `bg-surface` |
+| Background | `bg-surface` card shell, table rows on `bg-surface` |
 | Border | `border-b border-border` |
-| Border radius | none |
+| Border radius | `rounded-2xl` shell, `rounded-md` actions |
 | Text — primary | `text-text-primary` |
 | Text — secondary | `text-text-secondary` |
-| Spacing | Headings `px-6 py-4`, rows `px-6 py-5` |
+| Spacing | Toolbar `p-4`, head cells `px-6 py-4`, rows `px-6 py-5`, footer `px-6 py-5` |
 | Hover state | `hover:bg-surface-secondary` |
-| Shadow | none |
-| Accent usage | score/status/type badges, action outline button |
+| Shadow | `shadow-sm` |
+| Accent usage | score/status/type badges, action outline button, filter chips |
 
 **Pattern notes:**
-- History rows reuse the same badge language as the dashboard cards while matching the mockup&apos;s dense table layout.
-- The action column keeps a primary outline button plus a trailing overflow button for future row actions.
+- History now uses a real TanStack Table with global search, role/type/time filtering, pagination, and a destructive delete action in the row overflow menu.
+- The action column keeps a primary outline button plus a shadcn dropdown menu so row actions stay consistent with the rest of the dashboard UI.
 
 #### History Pagination
 File: `src/components/history/HistoryPagination.tsx`

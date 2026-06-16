@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
-- **Overall Completion**: `26%`
+- **Overall Completion**: `27%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -59,7 +59,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Strengths, weaknesses, and individual question feedback accordions
 - [ ] Recharts confidence chart & speaking pace indicators
 - [ ] Performance Analytics Dashboard (`/analytics`)
-- [x] Session History table with score badge highlights (`/history`)
+- [x] Session History table with search, filters, pagination, score badges, and row actions (`/history`)
 
 ### Phase 7: Telemetry & Polish
 - [ ] PostHog events instrumentation
@@ -77,6 +77,17 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Kept the table dense and horizontally scrollable on smaller screens so it still behaves well even though the design is optimized for desktop.
 - **Next Steps**:
   - Wire the page to real interview records, filters, and pagination state when the data layer is ready.
+
+### 2026-06-16: History Table Interaction Upgrade
+- **Decisions Made**:
+  - Replaced the static history table rendering with a TanStack Table-powered client component so search, role filtering, type filtering, and time filtering all update the visible rows.
+  - Added a shadcn-style dropdown menu primitive for the row overflow action so the Delete option lives behind the same three-dot interaction shown in the mockup.
+  - Kept delete behavior local for now so the row disappears immediately without requiring backend wiring.
+  - Updated the server/client boundary so `/history` passes plain serializable row data only; Lucide icons are now selected inside the client table from string keys.
+- **Next Steps**:
+  - Hook the delete action to the real mutation layer when interview records are backed by the database.
+  - Swap the sample data to live data once the history API is ready.
+  - Decide whether to remove the older `HistoryFilters` and `HistoryPagination` files or reuse them as thin wrappers around the TanStack table state.
 
 ### 2026-06-16: Auth Screen Refactor
 - **Decisions Made**:

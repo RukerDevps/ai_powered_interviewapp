@@ -15,6 +15,7 @@
 | PDF/DOCX parsing | pdf-parse (PDF) + mammoth (DOCX) | Extract text from uploaded resumes before sending to Kimi for profile auto-fill |
 | Analytics | PostHog | Event tracking and dashboard charts |
 | Forms | TanStack Form + Zod | Schema-driven auth, settings, and wizard validation |
+| Data tables | TanStack Table v8 | Client-side history table filtering, search, pagination, and row model management |
 | Styling | Tailwind CSS v4 + shadcn/ui | UI components and styling |
 | Language | TypeScript strict | Throughout |
 
@@ -54,7 +55,7 @@
 │   │       └── analysis/
 │   │           └── page.tsx               → Live/post analysis panel for this interview
 │   ├── history/
-│   │   └── page.tsx                       → Interview history — search, filters, pagination
+│   │   └── page.tsx                       → Interview history shell — passes serializable sample/session rows into client table
 │   ├── analytics/
 │   │   └── page.tsx                       → Analytics — score breakdowns, trends, per-question review
 │   ├── resources/
@@ -81,7 +82,7 @@
 │   └── settings.ts                        → Preferences, theme, notification settings updates
 ├── components/
 │   ├── ui/                                → shadcn/ui components only
-│   │   ├── alert.tsx, button.tsx, card.tsx, input.tsx, label.tsx, textarea.tsx
+│   │   ├── alert.tsx, button.tsx, card.tsx, dropdown-menu.tsx, input.tsx, label.tsx, table.tsx, textarea.tsx
 │   ├── layout/
 │   │   ├── Navbar.tsx                     → Landing page top nav
 │   │   ├── Sidebar.tsx                    → Dashboard left sidebar
@@ -121,9 +122,9 @@
 │   │   ├── SpeakingPaceChart.tsx
 │   │   └── ConfidenceTrendChart.tsx
 │   ├── history/
-│   │   ├── HistoryFilters.tsx
-│   │   ├── HistoryTable.tsx
-│   │   └── HistoryPagination.tsx
+│   │   ├── HistoryTable.tsx               → TanStack Table client component with search, filters, pagination, and row actions
+│   │   ├── HistoryFilters.tsx             → Legacy/static filter component kept until removed or reused
+│   │   └── HistoryPagination.tsx          → Legacy/static pagination component kept until removed or reused
 │   ├── resume/
 │   │   ├── ResumeUpload.tsx
 │   │   ├── ResumePreview.tsx
@@ -186,6 +187,29 @@ Client shows inline field errors plus a top-level alert summary
         ↳
 Server action or route handler receives normalized payload
 ```
+
+### Interview History Table (Client-side UI State)
+
+```
+app/history/page.tsx (Server Component)
+        ↓
+passes serializable interview rows only
+        ↓
+components/history/HistoryTable.tsx (Client Component)
+        ↳
+TanStack Table manages global search, role/type/time column filters,
+pagination state, and filtered row models
+        ↳
+shadcn table primitives render the table
+        ↳
+shadcn dropdown-menu renders row overflow actions
+        ↳
+local delete action removes rows from client state for now
+```
+
+**Boundary rule:** server page data must stay plain and serializable. For example, history rows pass an icon key string such as `"code"` or `"brain"`; `HistoryTable.tsx` maps that key to the actual Lucide icon inside the client component. Do not pass React components, class instances, or objects with methods from `app/history/page.tsx` into `HistoryTable`.
+
+Future database-backed history should replace the sample row array in `app/history/page.tsx` with server-fetched rows, while keeping filtering/pagination client-side unless the result set becomes large enough to require URL/search-param-backed server queries.
 
 ### Question Generation (API Route, streaming)
 

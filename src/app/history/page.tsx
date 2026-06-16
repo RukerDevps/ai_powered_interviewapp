@@ -1,18 +1,4 @@
-import {
-  BrainCircuit,
-  Code2,
-  Database,
-  FileCode2,
-  MessageSquareMore,
-  PenTool,
-  Sigma,
-  SquareCode,
-} from "lucide-react";
-
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { Card } from "@/components/ui/card";
-import { HistoryFilters } from "@/components/history/HistoryFilters";
-import { HistoryPagination } from "@/components/history/HistoryPagination";
 import { HistoryTable, type HistoryInterviewRow } from "@/components/history/HistoryTable";
 
 const historyInterviews: HistoryInterviewRow[] = [
@@ -22,14 +8,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "8 Questions",
     role: "Frontend Developer",
     type: "Technical",
-    date: "May 18, 2025",
+    date: "May 18, 2026",
     time: "10:30 AM",
     duration: "30 Min",
     score: 78,
     status: "Completed",
     action: "View Details",
     href: "/interview/1/analysis",
-    icon: Code2,
+    icon: "code",
     iconTone: "success",
   },
   {
@@ -38,14 +24,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "10 Questions",
     role: "React Developer",
     type: "Technical",
-    date: "May 16, 2025",
+    date: "May 16, 2026",
     time: "02:15 PM",
     duration: "30 Min",
     score: 65,
     status: "Completed",
     action: "View Details",
     href: "/interview/2/analysis",
-    icon: BrainCircuit,
+    icon: "brain",
     iconTone: "accent",
   },
   {
@@ -54,14 +40,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "8 Questions",
     role: "Frontend Developer",
     type: "Technical",
-    date: "May 15, 2025",
+    date: "May 15, 2026",
     time: "11:45 AM",
     duration: "25 Min",
     score: 64,
     status: "Completed",
     action: "View Details",
     href: "/interview/3/analysis",
-    icon: SquareCode,
+    icon: "square-code",
     iconTone: "warning",
   },
   {
@@ -70,14 +56,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "8 Questions",
     role: "Backend Developer",
     type: "Technical",
-    date: "May 12, 2025",
+    date: "May 12, 2026",
     time: "09:20 AM",
     duration: "30 Min",
     score: 48,
     status: "Completed",
     action: "View Details",
     href: "/interview/4/analysis",
-    icon: Database,
+    icon: "database",
     iconTone: "info",
   },
   {
@@ -86,14 +72,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "12 Questions",
     role: "Software Engineer",
     type: "Technical",
-    date: "May 10, 2025",
+    date: "May 10, 2026",
     time: "04:00 PM",
     duration: "45 Min",
     score: undefined,
     status: "Incomplete",
     action: "Continue",
     href: "/interview/5",
-    icon: FileCode2,
+    icon: "file-code",
     iconTone: "success",
   },
   {
@@ -102,14 +88,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "8 Questions",
     role: "Frontend Developer",
     type: "Behavioral",
-    date: "May 8, 2025",
+    date: "May 8, 2026",
     time: "01:30 PM",
     duration: "20 Min",
     score: 85,
     status: "Completed",
     action: "View Details",
     href: "/interview/6/analysis",
-    icon: MessageSquareMore,
+    icon: "message",
     iconTone: "behavioral",
   },
   {
@@ -118,14 +104,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "15 Questions",
     role: "Full Stack Developer",
     type: "Technical",
-    date: "May 5, 2025",
+    date: "May 5, 2026",
     time: "10:00 AM",
     duration: "60 Min",
     score: 72,
     status: "Completed",
     action: "View Details",
     href: "/interview/7/analysis",
-    icon: PenTool,
+    icon: "pen-tool",
     iconTone: "accent",
   },
   {
@@ -134,14 +120,14 @@ const historyInterviews: HistoryInterviewRow[] = [
     questions: "8 Questions",
     role: "Backend Developer",
     type: "Technical",
-    date: "May 3, 2025",
+    date: "May 3, 2026",
     time: "03:45 PM",
     duration: "30 Min",
     score: 70,
     status: "Completed",
     action: "View Details",
     href: "/interview/8/analysis",
-    icon: Sigma,
+    icon: "sigma",
     iconTone: "success",
   },
 ];
@@ -157,14 +143,7 @@ export default function HistoryPage() {
           </p>
         </div>
 
-        <HistoryFilters />
-
-        <Card className="overflow-hidden shadow-sm">
-          <HistoryTable interviews={historyInterviews} />
-          <div className="border-t border-border px-6 py-5">
-            <HistoryPagination start={1} end={8} total={12} currentPage={1} totalPages={2} />
-          </div>
-        </Card>
+        <HistoryTable interviews={historyInterviews} />
       </div>
     </DashboardShell>
   );
