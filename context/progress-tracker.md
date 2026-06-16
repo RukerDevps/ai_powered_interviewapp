@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
-- **Overall Completion**: `24%`
+- **Overall Completion**: `26%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -59,7 +59,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Strengths, weaknesses, and individual question feedback accordions
 - [ ] Recharts confidence chart & speaking pace indicators
 - [ ] Performance Analytics Dashboard (`/analytics`)
-- [ ] Session History table with score badge highlights (`/history`)
+- [x] Session History table with score badge highlights (`/history`)
 
 ### Phase 7: Telemetry & Polish
 - [ ] PostHog events instrumentation
@@ -67,9 +67,16 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Tailwind v4 smooth Dark Mode toggle support
 - [ ] Verification checklist runs
 
----
-
 ## Session Handoff Notes
+
+### 2026-06-16: History Page UI Build
+- **Decisions Made**:
+  - Built the `/history` route as a dashboard-shell page with the same left rail and top header used elsewhere in the app.
+  - Reused the shared UI primitives for the search field, filter triggers, action buttons, and a new shadcn-style table primitive so the page stays visually consistent.
+  - Made the sidebar active state route-aware so the History nav item highlights automatically when the page is open.
+  - Kept the table dense and horizontally scrollable on smaller screens so it still behaves well even though the design is optimized for desktop.
+- **Next Steps**:
+  - Wire the page to real interview records, filters, and pagination state when the data layer is ready.
 
 ### 2026-06-16: Auth Screen Refactor
 - **Decisions Made**:

@@ -81,6 +81,26 @@ Status: `Completed`
 - Card primitives match the existing dashboard surface language and use the same rounded-2xl shell as the feature cards already in the app.
 - Header, content, and footer spacing intentionally mirrors the existing section-card rhythm so feature screens can mix custom cards and shadcn cards without visual drift.
 
+#### Table
+File: `src/components/ui/table.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | none |
+| Border | row borders via `border-border` |
+| Border radius | none |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | Header cells `px-6 py-4`, body cells `px-6 py-5` |
+| Hover state | `hover:bg-surface-secondary` |
+| Shadow | none |
+| Accent usage | none |
+
+**Pattern notes:**
+- This is the canonical shadcn-style table primitive for dense dashboard data views.
+- The component keeps row separators, hover states, and spacing token-based so history and analytics tables can stay consistent.
+
 #### Input
 File: `src/components/ui/input.tsx`
 Status: `Completed`
@@ -203,6 +223,7 @@ Status: `Completed`
 - The Kimi promotion card uses the same accent-muted surface as active navigation to keep the dashboard palette consistent.
 - On mobile and tablet widths, the same sidebar content is exposed through a slide-in drawer so the navigation stays reachable without collapsing the desktop rail.
 - The mobile drawer uses a spring-based `AnimatePresence` slide from the left with a fading overlay for a smoother open/close transition.
+- Active sidebar state now follows the current route path, so `/dashboard`, `/history`, `/analytics`, and `/settings` each highlight correctly without per-page props.
 
 ---
 
@@ -224,6 +245,68 @@ Status: `Completed`
 - On mobile it shows a compact product label while the full sidebar is hidden.
 - The header includes the mobile menu button that opens the sidebar drawer on tablet and mobile breakpoints.
 - The menu button is the only trigger for the drawer on small screens, keeping the interaction predictable.
+
+---
+
+#### History Filters
+File: `src/components/history/HistoryFilters.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-card` |
+| Border | `border border-border` |
+| Border radius | `rounded-2xl` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | Shell `p-4`, search field `h-12 pl-11`, filter buttons `h-12 px-4` |
+| Hover state | `hover:bg-surface-secondary` on filter controls |
+| Shadow | `shadow-sm` |
+| Accent usage | `text-accent` only through shared button/input primitives |
+
+**Pattern notes:**
+- This is the standard history-page filter strip with a search field and three dropdown-style triggers.
+- The controls are static right now, but the layout is ready for real filter state without changing the visual surface.
+
+#### History Table
+File: `src/components/history/HistoryTable.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | table rows on `bg-surface` |
+| Border | `border-b border-border` |
+| Border radius | none |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | Headings `px-6 py-4`, rows `px-6 py-5` |
+| Hover state | `hover:bg-surface-secondary` |
+| Shadow | none |
+| Accent usage | score/status/type badges, action outline button |
+
+**Pattern notes:**
+- History rows reuse the same badge language as the dashboard cards while matching the mockup&apos;s dense table layout.
+- The action column keeps a primary outline button plus a trailing overflow button for future row actions.
+
+#### History Pagination
+File: `src/components/history/HistoryPagination.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | none |
+| Border | none |
+| Border radius | `rounded-md` on buttons |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | footer row `px-1 pt-2`, buttons `h-10` |
+| Hover state | `hover:bg-surface-secondary` |
+| Shadow | none |
+| Accent usage | current page `bg-accent-muted text-accent` |
+
+**Pattern notes:**
+- Pagination is intentionally lightweight and matches the compact footer treatment in the screenshot.
+- The current page chip uses the same accent-muted treatment as the active sidebar item.
 
 ---
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
   BarChart3,
@@ -14,10 +15,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BrandLogo } from "./BrandLogo";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, active: true },
-  { label: "History", href: "/history", icon: Clock3, active: false },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, active: false },
-  { label: "Settings", href: "/settings", icon: Settings, active: false },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "History", href: "/history", icon: Clock3 },
+  { label: "Analytics", href: "/analytics", icon: BarChart3 },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -26,6 +27,8 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ mobileOpen = false, onClose }: SidebarProps) => {
+  const pathname = usePathname();
+
   return (
     <>
       <aside className="hidden h-dvh w-[280px] shrink-0 overflow-hidden border-r border-border bg-surface lg:flex lg:flex-col">
@@ -36,13 +39,14 @@ export const Sidebar = ({ mobileOpen = false, onClose }: SidebarProps) => {
         <nav className="flex-1 space-y-5 overflow-hidden px-6 py-7">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
                 className={`flex items-center gap-4 rounded-xl px-4 py-4 text-sm font-semibold transition-colors ${
-                  item.active
+                  isActive
                     ? "bg-accent-muted text-accent"
                     : "text-text-dark hover:bg-accent-lighter hover:text-accent"
                 }`}
@@ -116,6 +120,7 @@ export const Sidebar = ({ mobileOpen = false, onClose }: SidebarProps) => {
               <nav className="flex-1 space-y-3 overflow-y-auto px-4 py-5">
                 {navItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
                   return (
                     <Link
@@ -123,7 +128,7 @@ export const Sidebar = ({ mobileOpen = false, onClose }: SidebarProps) => {
                       href={item.href}
                       onClick={onClose}
                       className={`flex items-center gap-4 rounded-xl px-4 py-4 text-sm font-semibold transition-colors ${
-                        item.active
+                        isActive
                           ? "bg-accent-muted text-accent"
                           : "text-text-dark hover:bg-accent-lighter hover:text-accent"
                       }`}
