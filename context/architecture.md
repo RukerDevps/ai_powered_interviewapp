@@ -14,6 +14,7 @@
 | Proctoring | Fullscreen API + Page Visibility API + Screen Capture detection (client-side only) | Detect fullscreen exit, tab switch, minimize, screenshot attempts. No video/screen recording is stored — violations are detected and acted on client-side only. |
 | PDF/DOCX parsing | pdf-parse (PDF) + mammoth (DOCX) | Extract text from uploaded resumes before sending to Kimi for profile auto-fill |
 | Analytics | PostHog | Event tracking and dashboard charts |
+| Forms | TanStack Form + Zod | Schema-driven auth, settings, and wizard validation |
 | Styling | Tailwind CSS v4 + shadcn/ui | UI components and styling |
 | Language | TypeScript strict | Throughout |
 
@@ -80,6 +81,7 @@
 │   └── settings.ts                        → Preferences, theme, notification settings updates
 ├── components/
 │   ├── ui/                                → shadcn/ui components only
+│   │   ├── alert.tsx, button.tsx, card.tsx, input.tsx, label.tsx, textarea.tsx
 │   ├── layout/
 │   │   ├── Navbar.tsx                     → Landing page top nav
 │   │   ├── Sidebar.tsx                    → Dashboard left sidebar
@@ -137,7 +139,7 @@
 │   ├── posthog-client.ts                  → PostHog browser client
 │   ├── posthog-server.ts                  → PostHog server client
 │   ├── proctoring.ts                      → Fullscreen/visibility/screenshot event listeners (client-only)
-│   └── utils.ts                           → Shared utility functions
+│   └── utils.ts                           → Shared utility functions (`cn`, class merging)
 └── types/
     └── index.ts                           → Global TypeScript types
 ```
@@ -169,6 +171,20 @@ Server Action in actions/
 PostgreSQL DB write
         ↓
 Revalidate or redirect
+```
+
+### Schema-Driven Forms (Client + Server Boundary)
+
+```
+User edits auth/settings/interview inputs in client form
+        ↳
+TanStack Form manages field state, touched state, and submit state
+        ↳
+Zod validates structure and user-facing constraints
+        ↳
+Client shows inline field errors plus a top-level alert summary
+        ↳
+Server action or route handler receives normalized payload
 ```
 
 ### Question Generation (API Route, streaming)

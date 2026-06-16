@@ -54,24 +54,24 @@ export const Footer = () => {
               <h3 className="text-xs font-semibold text-text-dark tracking-wider uppercase">Product</h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <a href="#features" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="#features" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Features
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#how-it-works" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="#how-it-works" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     How It Works
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#pricing" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="#pricing" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="/#features" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Roadmap
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -79,24 +79,24 @@ export const Footer = () => {
               <h3 className="text-xs font-semibold text-text-dark tracking-wider uppercase">Resources</h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <a href="#" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="/resources" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="/resources" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Interview Tips
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#faq" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="#faq" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-text-secondary hover:text-accent transition-colors">
+                  <Link href="/settings" className="text-sm text-text-secondary hover:text-accent transition-colors">
                     Help Center
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -126,10 +126,10 @@ export const Footer = () => {
         <div className="mt-12 border-t border-border pt-8 flex items-center justify-between">
           <p className="text-xs text-text-muted">&copy; 2025 IntervAI. All rights reserved.</p>
           <div className="flex space-x-6 text-xs text-text-muted">
-            <a href="#" className="hover:underline">About Us</a>
-            <a href="#" className="hover:underline">Contact</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
-            <a href="#" className="hover:underline">Terms of Service</a>
+            <Link href="/#features" className="hover:underline">About Us</Link>
+            <Link href="/contact" className="hover:underline">Contact</Link>
+            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline">Terms of Service</Link>
           </div>
         </div>
       </div>

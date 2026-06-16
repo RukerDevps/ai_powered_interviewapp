@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
-- **Overall Completion**: `20%`
+- **Overall Completion**: `24%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -70,6 +70,44 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ---
 
 ## Session Handoff Notes
+
+### 2026-06-16: Auth Screen Refactor
+- **Decisions Made**:
+  - Split the auth screen into a thin `AuthScreen` wrapper plus dedicated hero, form, and field-shell components to keep the layout readable and easier to maintain.
+  - Kept the shared validation stack in reusable helpers so TanStack Form + Zod rules can be extended without duplicating schema code.
+  - Recorded the new component boundaries in the living UI docs so future auth or onboarding screens can reuse the same structure.
+- **Next Steps**:
+  - Wire the auth submit handler to the real session/auth actions.
+  - Reuse the same form pattern in settings and interview setup screens.
+
+### 2026-06-16: Stack Strategy Update
+- **Decisions Made**:
+  - Standardized on TanStack Form plus Zod for schema-driven forms instead of ad hoc submit handling.
+  - Added a shared shadcn-style alert primitive so future validation summaries and notices stay consistent.
+  - Updated the architecture and library docs to capture the new form-validation boundary and package usage.
+- **Next Steps**:
+  - Reuse the same form stack in settings, interview setup, and any future user-input flows.
+  - Keep new context updates in sync whenever the package strategy changes again.
+
+### 2026-06-16: Auth Validation and Alert Feedback
+- **Decisions Made**:
+  - Added TanStack Form and Zod to the auth screen so login and registration now validate through the form state layer instead of raw submit prevention.
+  - Introduced a shared shadcn-style `Alert` primitive for prominent validation summaries above the form.
+  - Kept inline field messages beneath each control so users get both a top-level summary and precise field-level guidance.
+  - Updated the auth links to use Next.js navigation routes instead of hash placeholders where they represent app routes.
+- **Next Steps**:
+  - Wire the auth form submit handler to the real session/auth actions.
+  - Reuse the same validation pattern in settings and interview setup forms.
+
+### 2026-06-16: shadcn/ui Foundation Added
+- **Decisions Made**:
+  - Installed the shadcn/ui support packages needed for the shared primitive layer.
+  - Added the `components.json` baseline plus the shared `cn` helper in `src/lib/utils.ts`.
+  - Created the first reusable primitives in `src/components/ui/` for button, card, input, label, and textarea.
+  - Extended `globals.css` with shadcn-style alias tokens so the primitives map cleanly to the IntervAI palette instead of introducing a second visual system.
+- **Next Steps**:
+  - Swap future form and surface components over to the new primitives where it improves consistency.
+  - Add any missing primitives only when a screen needs them, rather than expanding the set preemptively.
 
 ### 2026-06-16: Dashboard Shell, Header, and Sidebar Polish
 - **Decisions Made**:

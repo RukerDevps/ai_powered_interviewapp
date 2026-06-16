@@ -18,6 +18,127 @@ After building any component — update this file with the component name, file 
 
 ## Component Registry
 
+### Core UI Primitives
+
+#### Alert
+File: `src/components/ui/alert.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, `bg-error-light/70` |
+| Border | `border border-border`, `border-error/20` |
+| Border radius | `rounded-lg` |
+| Text â€” primary | `text-text-primary` |
+| Text â€” secondary | `text-text-primary` |
+| Spacing | `px-4 py-3` |
+| Hover state | none |
+| Shadow | none |
+| Accent usage | `text-error` |
+
+**Pattern notes:**
+- This is the canonical shadcn-style alert surface for validation and other user-facing notices.
+- Use the destructive variant when the message should stand out above form fields, but keep the same token palette so alerts stay consistent with the app shell.
+
+#### Button
+File: `src/components/ui/button.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-primary`, `bg-secondary`, `bg-background` |
+| Border | `border border-border` |
+| Border radius | `rounded-md` |
+| Text — primary | `text-primary-foreground`, `text-secondary-foreground`, `text-text-primary` |
+| Text — secondary | `text-text-primary`, `text-text-secondary` |
+| Spacing | `h-10 px-4 py-2`, `h-9 px-3`, `h-11 px-8` |
+| Hover state | `hover:bg-accent-hover`, `hover:bg-surface-secondary`, `hover:underline` |
+| Shadow | `shadow-sm` |
+| Accent usage | `bg-primary`, `text-primary-foreground`, `bg-destructive` |
+
+**Pattern notes:**
+- This is the base shadcn-style button primitive for future forms and CTAs.
+- Variants stay aligned to the IntervAI token set by mapping shadcn aliases to the existing purple accent and surface palette.
+- The component supports `asChild` so links and compound controls can share the same visual treatment.
+
+#### Card
+File: `src/components/ui/card.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-card` |
+| Border | `border border-border` |
+| Border radius | `rounded-2xl` |
+| Text — primary | `text-card-foreground`, `text-text-primary` |
+| Text — secondary | `text-text-secondary` |
+| Spacing | Header/footer `p-6`, content `p-6 pt-0` |
+| Hover state | none |
+| Shadow | `shadow-sm` |
+| Accent usage | none |
+
+**Pattern notes:**
+- Card primitives match the existing dashboard surface language and use the same rounded-2xl shell as the feature cards already in the app.
+- Header, content, and footer spacing intentionally mirrors the existing section-card rhythm so feature screens can mix custom cards and shadcn cards without visual drift.
+
+#### Input
+File: `src/components/ui/input.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-background` |
+| Border | `border border-input` |
+| Border radius | `rounded-md` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `placeholder:text-text-muted` |
+| Spacing | `h-10 px-3 py-2` |
+| Hover state | none |
+| Shadow | none |
+| Accent usage | `focus-visible:ring-ring` |
+
+**Pattern notes:**
+- This is the default form field primitive for future auth, settings, and wizard inputs.
+- It intentionally uses the shadcn alias tokens in `globals.css` while still resolving to the IntervAI palette.
+
+#### Label
+File: `src/components/ui/label.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | none |
+| Border | none |
+| Border radius | none |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `peer-disabled:opacity-70` |
+| Spacing | none |
+| Hover state | none |
+| Shadow | none |
+| Accent usage | none |
+
+**Pattern notes:**
+- Label stays intentionally minimal so it can be paired with any future form control without adding extra visual weight.
+
+#### Textarea
+File: `src/components/ui/textarea.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-background` |
+| Border | `border border-input` |
+| Border radius | `rounded-md` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `placeholder:text-text-muted` |
+| Spacing | `min-h-24 px-3 py-2` |
+| Hover state | none |
+| Shadow | none |
+| Accent usage | `focus-visible:ring-ring` |
+
+**Pattern notes:**
+- Textarea mirrors the input primitive so long-form form fields keep the same focus and spacing behavior.
+
 ### Layout & Navigation
 
 #### Landing Navbar
@@ -143,6 +264,67 @@ Status: `Completed`
 - The left-side cards intentionally reuse the existing public icon assets so the visual language stays tied to the current asset set.
 - Desktop spacing is compressed to fit the shell into the viewport height without introducing page scroll.
 - Register mode uses the field order `username`, `email`, `create new password`, `confirm password` while keeping the same visual system as login.
+- The form now uses TanStack Form field state plus Zod validation schemas, with a destructive alert summary above the inputs and inline error text beneath each invalid control.
+
+#### Auth Hero Panel
+File: `src/components/auth/AuthHeroPanel.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface-secondary`, ambient glows `bg-accent-light/10`, `bg-accent-light/30`, `bg-success-light/30`, `bg-surface-tertiary/70` |
+| Border | `border-b border-border`, desktop divider `lg:border-r` |
+| Border radius | `rounded-none` shell composition, floating cards `rounded-2xl` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary`, `text-text-dark` |
+| Spacing | Shell `px-10 py-10 xl:px-12 xl:py-12`, hero stack `mt-16`, support rail `mt-8` |
+| Hover state | none |
+| Shadow | `shadow-[0_18px_40px_rgba(16,24,40,0.08)]`, `shadow-sm` on brand/support chip |
+| Accent usage | `bg-accent-light`, `bg-accent-lighter`, `text-accent`, `bg-accent-foreground/20` |
+
+**Pattern notes:**
+- This component owns the left auth illustration panel and keeps the shared brand lockup, central robot illustration, floating insight cards, and privacy chip together.
+- It is responsible for the motion-heavy hero half of the split screen, while the right panel stays focused on form interactions.
+
+#### Auth Form Panel
+File: `src/components/auth/AuthFormPanel.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface` |
+| Border | shared shell divider from `AuthScreen` |
+| Border radius | form controls `rounded-xl` |
+| Text — primary | `text-text-primary`, `text-text-dark` |
+| Text — secondary | `text-text-secondary`, `text-text-muted` |
+| Spacing | Shell `px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-10 xl:px-14 xl:py-12`, input rows `space-y-4 xl:space-y-5` |
+| Hover state | `hover:border-accent-light`, `hover:bg-surface-secondary`, `hover:text-accent-hover` |
+| Shadow | `shadow-sm`, `shadow-[0_16px_30px_rgba(103,64,250,0.25)]` on submit |
+| Accent usage | `bg-accent`, `focus:ring-accent`, `text-accent`, `border-error/20` for validation alert |
+
+**Pattern notes:**
+- This component owns TanStack Form state, Zod validation, the top-level destructive alert summary, and the login/register field arrangement.
+- Keep future auth or onboarding forms aligned to this layout pattern so validation and field messaging stay consistent.
+
+#### Auth Text Field
+File: `src/components/auth/AuthTextField.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface` |
+| Border | `border border-border` |
+| Border radius | `rounded-xl` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary`, `text-text-muted` |
+| Spacing | Shell `px-4 py-2.5`, desktop `xl:py-3` |
+| Hover state | focus-within `border-accent`, `focus-within:ring-1 focus-within:ring-accent` |
+| Shadow | none |
+| Accent usage | `text-accent` via icons and focus ring |
+
+**Pattern notes:**
+- This is the shared shell for auth text inputs so icon placement, label spacing, and inline error messaging stay identical across login and register modes.
+- Reuse it for any future auth field with an icon and optional trailing control, instead of rebuilding the wrapper inline.
 
 ---
 

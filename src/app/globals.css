@@ -1,11 +1,32 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 @theme {
   /* Font */
   --font-sans: "Inter", sans-serif;
 
-  /* Page and surface backgrounds */
+  /* shadcn/ui token aliases */
   --color-background: #f6f4fd;
+  --color-foreground: #101828;
+  --color-card: #ffffff;
+  --color-card-foreground: #101828;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #101828;
+  --color-primary: #6740fa;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f9f8fe;
+  --color-secondary-foreground: #101828;
+  --color-muted: #f5f0fd;
+  --color-muted-foreground: #6a7282;
+  --color-accent: #6740fa;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e7eaf3;
+  --color-input: #e7eaf3;
+  --color-ring: #6740fa;
+
+  /* Page and surface backgrounds */
   --color-surface: #ffffff;
   --color-surface-secondary: #f9f8fe;
   --color-surface-tertiary: #f3f0fe;

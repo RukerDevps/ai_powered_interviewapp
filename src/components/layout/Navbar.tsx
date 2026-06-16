@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { BrandLogo } from "./BrandLogo";
 
@@ -24,30 +25,30 @@ export const Navbar = () => {
         {/* Desktop Nav Links */}
         <div className="hidden items-center gap-6 lg:flex xl:gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
               href={link.href}
               className="text-sm font-medium text-text-dark transition-colors hover:text-accent"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* Desktop CTAs */}
         <div className="hidden items-center gap-4 lg:flex">
-          <a
+          <Link
             href="/login"
             className="text-sm font-semibold text-text-dark transition-colors hover:text-accent"
           >
             Log in
-          </a>
-          <a
+          </Link>
+          <Link
             href="/register"
             className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-sm transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
           >
             Get Started &rarr;
-          </a>
+          </Link>
         </div>
 
         {/* Mobile menu button */}
@@ -70,30 +71,30 @@ export const Navbar = () => {
         <div className="border-b border-border bg-surface shadow-lg lg:hidden" id="mobile-menu">
           <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
                 className="block rounded-md px-3 py-2 text-base font-medium text-text-dark hover:bg-surface-secondary hover:text-accent"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <div className="border-t border-border mt-4 pt-4 pb-2 px-3 flex flex-col gap-3">
-              <a
+              <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
                 className="block text-center text-base font-semibold text-text-dark hover:text-accent"
               >
                 Log in
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/register"
                 onClick={() => setIsOpen(false)}
                 className="block text-center rounded-md bg-accent px-4 py-2.5 text-base font-medium text-accent-foreground shadow-sm hover:bg-accent-hover"
               >
                 Get Started
-              </a>
+              </Link>
             </div>
           </div>
         </div>

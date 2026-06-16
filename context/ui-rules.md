@@ -56,6 +56,8 @@ Items: Features, How it Works, Pricing, Testimonials, FAQ. Plus "Log in" link an
 - Right-side form controls should use rounded-xl inputs, motion-based entrance, and the accent-colored primary action button.
 - On desktop, the auth shell should fit the viewport height without page scrolling; tighten vertical spacing before expanding the page height.
 - Register mode should present fields in this order: username, email, create new password, confirm password.
+- Split complex auth screens into a thin `AuthScreen` wrapper plus reusable hero, form, and field-shell components so validation logic and repeated input chrome stay maintainable.
+- Reuse the shared auth field shell for icon-led inputs and pair it with TanStack Form state plus Zod schemas for validation summaries and inline field messages.
 
 ### Dashboard Left Sidebar
 Items: Dashboard, History, Analytics, Settings.
@@ -80,6 +82,7 @@ box-shadow: 0px 1px 3px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1)
 **Variations:**
 - Start Interview / Settings Summary Panel / Plan Cards: Use `rounded-xl` (12px) border radius with `p-6` padding.
 - Pro Pricing Card: Highlights with `2px solid var(--color-accent)`.
+- Core shadcn/ui cards in `components/ui/card.tsx` should use the shared alias tokens (`bg-card`, `text-card-foreground`, `border-border`) but keep the same `rounded-2xl` / `shadow-sm` surface language as the dashboard cards.
 
 ---
 
@@ -161,6 +164,13 @@ placeholder: text-text-muted
 focus: ring-1 ring-accent border-accent
 ```
 
+## Form Validation Feedback
+
+- Use the shared `Alert` primitive for submit-level validation summaries above the form.
+- Keep field-level messages directly beneath the input or checkbox they belong to.
+- Validation summaries should use the destructive alert variant and token-based error colors only.
+- Prefer TanStack Form state for showing when the alert should appear, and use Zod schemas for the actual validation rules.
+
 ---
 
 ## Tables (Interview History)
@@ -208,6 +218,8 @@ Every section that can be empty must have an empty state:
 ## Tailwind v4 Note
 
 This project uses Tailwind v4. Tokens are defined with `@theme` in `app/globals.css`. Never define colors in a config file. Always use `@theme` for new tokens.
+
+The shadcn/ui foundation in `components/ui` is expected to map through those same tokens. Keep button, input, and textarea primitives aligned with the IntervAI palette even when they use shadcn alias classes such as `bg-card`, `bg-background`, `border-input`, and `ring-ring`.
 
 ---
 

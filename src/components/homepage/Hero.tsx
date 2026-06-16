@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { Sparkles, Mic, Play, CheckCircle, Clock, Check, HelpCircle, Briefcase, Award } from "lucide-react";
 
@@ -76,18 +77,18 @@ export const Hero = () => {
               Realistic mock interviews, personalized feedback, and smart insights to help you land your dream job.
             </p>
             <div className="animate-hero-item opacity-0 flex flex-wrap gap-4 w-full sm:w-auto">
-              <a
+              <Link
                 href="/register"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-base font-medium text-accent-foreground shadow-lg hover:bg-accent-hover hover:shadow-xl transition-all"
               >
                 Start Free Interview &rarr;
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#features"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-surface border border-border px-6 py-3 text-base font-medium text-text-primary hover:bg-surface-secondary transition-colors"
               >
                 View Features
-              </a>
+              </Link>
             </div>
 
             {/* Micro Benefits List */}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CheckCircle2, Play, Calendar, Check } from "lucide-react";
 
 export const WhyIntervAI = () => {
@@ -35,12 +36,12 @@ export const WhyIntervAI = () => {
             </ul>
 
             <div className="pt-4">
-              <a
+              <Link
                 href="/register"
                 className="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-base font-semibold text-accent-foreground shadow-lg hover:bg-accent-hover transition-all"
               >
                 Start Free Interview &rarr;
-              </a>
+              </Link>
             </div>
           </div>
 

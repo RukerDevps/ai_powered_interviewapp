@@ -117,3 +117,91 @@ if (typeof window !== "undefined") {
 
 export { posthog };
 ```
+
+---
+
+## 6. TanStack Form (`@tanstack/react-form`)
+
+Used for schema-driven client forms with field state, touched state, submit state, and form-level error handling.
+
+### Installation
+```bash
+npm install @tanstack/react-form
+```
+
+### Usage Pattern
+```typescript
+import { useForm, useStore } from "@tanstack/react-form";
+
+const form = useForm({
+  defaultValues: {
+    email: "",
+    password: "",
+  },
+  onSubmit: async ({ value }) => {
+    // Send normalized payload to server action or route handler
+  },
+  validators: {
+    onSubmit: ({ value }) => {
+      // Return a string for a form-level error or undefined when valid
+    },
+  },
+});
+
+const formErrorMap = useStore(form.store, (state) => state.errorMap);
+```
+
+### Constraints
+- Use field-level validators for inline messages and Zod for the underlying validation rules when the form needs structured schema checks.
+- Keep submit summaries in a top-level alert and use field state for per-input feedback.
+- Prefer `defaultValues` inference over explicit generic arguments unless the library version requires otherwise.
+
+---
+
+## 7. Zod (`zod`)
+
+Used for runtime validation schemas in auth, settings, and interview setup forms.
+
+### Installation
+```bash
+npm install zod
+```
+
+### Usage Pattern
+```typescript
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const result = authSchema.safeParse(formValue);
+if (!result.success) {
+  const messages = result.error.issues.map((issue) => issue.message);
+}
+```
+
+### Constraints
+- Use Zod for source-of-truth field constraints and cross-field checks.
+- Translate schema issues into human-readable alerts or inline field copy before rendering them to users.
+
+---
+
+## 8. shadcn/ui Alert Primitive (`src/components/ui/alert.tsx`)
+
+Used for validation summaries and lightweight user-facing notices.
+
+### Usage Pattern
+```tsx
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+<Alert variant="destructive">
+  <AlertTitle>Check the highlighted fields</AlertTitle>
+  <AlertDescription>Please enter a valid email address.</AlertDescription>
+</Alert>
+```
+
+### Constraints
+- Use the destructive variant for form validation summaries.
+- Keep the component token-based so it matches the rest of the IntervAI palette.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 export const CTA = () => {
@@ -28,12 +29,12 @@ export const CTA = () => {
 
             {/* CTA Action button */}
             <div className="shrink-0 w-full sm:w-auto text-center">
-              <a
+              <Link
                 href="/register"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-surface px-6 py-3.5 text-sm sm:text-base font-bold text-accent shadow-md hover:bg-surface-secondary transition-all"
               >
                 Get Started for Free &rarr;
-              </a>
+              </Link>
             </div>
           </div>
         </div>

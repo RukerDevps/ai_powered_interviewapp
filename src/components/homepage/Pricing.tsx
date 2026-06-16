@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check, Shield } from "lucide-react";
 
 export const Pricing = () => {
@@ -179,7 +180,7 @@ export const Pricing = () => {
 
                 {/* CTA Action */}
                 <div className="space-y-2 text-center mt-auto">
-                  <a
+                  <Link
                     href={plan.ctaHref}
                     className={`w-full inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold transition-all ${
                       plan.isPopular
@@ -188,7 +189,7 @@ export const Pricing = () => {
                     }`}
                   >
                     {plan.ctaText}
-                  </a>
+                  </Link>
                   {plan.trialText && (
                     <p className="text-[10px] text-text-muted font-medium uppercase tracking-wider">
                       {plan.trialText}
