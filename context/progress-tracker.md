@@ -7,7 +7,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ## Overall Status
 
 - **Current Phase**: `Phase 3: Layouts & Marketing Dashboard`
-- **Overall Completion**: `18%`
+- **Overall Completion**: `20%`
 - **Last Updated**: `2026-06-16`
 
 ---
@@ -70,6 +70,16 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 ---
 
 ## Session Handoff Notes
+
+### 2026-06-16: Dashboard Shell, Header, and Sidebar Polish
+- **Decisions Made**:
+  - Kept the desktop dashboard rail locked to the viewport while the main content column handles scrolling, so navigation stays stationary during long page views.
+  - Added the mobile and tablet drawer interaction to the shared dashboard sidebar, with a spring-based slide-in panel and overlay dismissal.
+  - Kept the header lean and responsive by using the mobile menu button as the only drawer trigger below `lg`, while preserving the desktop greeting and user controls.
+  - Reused the shared brand lockup and Kimi 2.6 promo card so the layout stays visually consistent across desktop and mobile shells.
+- **Next Steps**:
+  - Wire the dashboard shell to real session and profile data.
+  - Reuse the same responsive shell pattern for history and analytics pages.
 
 ### 2026-06-15: Landing Page, Pricing Setup & Hero/How-It-Works Animations
 - **Decisions Made**:
@@ -145,3 +155,19 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Documented the fixed-rail behavior in the living UI rules and registry so future dashboard sections preserve the same shell.
 - **Next Steps**:
   - Reuse the same shell pattern for analytics and history pages so the app feels consistent across the dashboard suite.
+
+### 2026-06-16: Dashboard Mobile Drawer Navigation
+- **Decisions Made**:
+  - Added a menu button in the dashboard header for tablet and mobile breakpoints.
+  - Reused the same sidebar content inside a slide-in drawer so navigation remains available on small screens without showing the desktop rail.
+  - Kept the desktop sidebar fixed at viewport height while the main dashboard content remains the scrollable region.
+- **Next Steps**:
+  - Apply the same responsive drawer behavior to any future dashboard pages that use the shared shell.
+
+### 2026-06-16: Dashboard Drawer Animation Polish
+- **Decisions Made**:
+  - Swapped the mobile sidebar from an instant mount to a spring-animated `AnimatePresence` drawer so open and close transitions feel smooth.
+  - Added a fading overlay transition in sync with the drawer slide so the backdrop no longer appears abruptly.
+  - Captured the animated drawer behavior in the living UI docs for future dashboard work.
+- **Next Steps**:
+  - Reuse the same motion recipe for any future off-canvas panels in the app.

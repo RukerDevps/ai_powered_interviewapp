@@ -80,6 +80,8 @@ Status: `Completed`
 - Sidebar is hidden below `lg` and acts as the persistent dashboard navigation on desktop.
 - The rail is locked to the viewport height with the content column handling scrolling, so the navigation and Kimi card remain stationary while dashboard sections move.
 - The Kimi promotion card uses the same accent-muted surface as active navigation to keep the dashboard palette consistent.
+- On mobile and tablet widths, the same sidebar content is exposed through a slide-in drawer so the navigation stays reachable without collapsing the desktop rail.
+- The mobile drawer uses a spring-based `AnimatePresence` slide from the left with a fading overlay for a smoother open/close transition.
 
 ---
 
@@ -99,6 +101,8 @@ Status: `Completed`
 **Pattern notes:**
 - Header mirrors the dashboard screenshot with a right-aligned Kimi badge and user menu on desktop.
 - On mobile it shows a compact product label while the full sidebar is hidden.
+- The header includes the mobile menu button that opens the sidebar drawer on tablet and mobile breakpoints.
+- The menu button is the only trigger for the drawer on small screens, keeping the interaction predictable.
 
 ---
 
