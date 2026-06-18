@@ -69,6 +69,14 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
+### 2026-06-18: Dashboard Scroll Stability Fix
+- **Decisions Made**:
+  - Tightened the shared dashboard shell so it is pinned to the viewport and keeps the desktop fixed-rail layout intact.
+  - Added a reserved scrollbar gutter and overscroll containment to the scrollable content column so long dashboard pages, including history, do not reflow or chain into a second body scroll.
+  - Documented the shell behavior in the living UI rules and registry so future dashboard pages preserve the same scroll contract.
+- **Next Steps**:
+  - Watch for any remaining page-specific overflow issues in history or analytics if new data makes the tables denser.
+
 ### 2026-06-18: Detailed Analysis UI QA Fix
 - **Decisions Made**:
   - Cross-checked the detail analysis page against the uploaded reference and tightened the score summary, mini score cards, question sidebar, communication cards, and next-step sections.

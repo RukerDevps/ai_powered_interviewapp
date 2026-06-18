@@ -244,6 +244,28 @@ Status: `Completed`
 
 ---
 
+#### Dashboard Shell
+File: `components/layout/DashboardShell.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface` |
+| Border | none |
+| Border radius | none |
+| Text | inherits dashboard surface tokens |
+| Spacing | Outer shell `fixed inset-0`, inner rail `flex h-full`, main content `px-4 py-6 sm:px-6 lg:px-8 lg:py-8` |
+| Hover State | none |
+| Shadow | none |
+| Accent usage | none |
+
+**Pattern notes:**
+- The dashboard shell keeps the sidebar and header fixed while the main content column owns vertical scrolling.
+- The shell stays pinned to the viewport so dashboard pages cannot create a second body scroll.
+- The shell uses a stable viewport height on smaller screens and reserves scrollbar gutter space in the scroll column so long dashboard pages do not reflow when the browser chrome or scrollbar state changes.
+- The main column uses overscroll containment so wheel and trackpad scrolling do not chain into the page body at the top or bottom of long dashboard views.
+- This is the shared wrapper for dashboard, history, analytics, and settings surfaces.
+
 #### Dashboard Left Sidebar
 File: `components/layout/Sidebar.tsx`
 Status: `Completed`

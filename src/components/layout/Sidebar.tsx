@@ -31,7 +31,7 @@ export const Sidebar = ({ mobileOpen = false, onClose }: SidebarProps) => {
 
   return (
     <>
-      <aside className="hidden h-dvh w-[280px] shrink-0 overflow-hidden border-r border-border bg-surface lg:flex lg:flex-col">
+      <aside className="hidden h-[100svh] w-[280px] shrink-0 overflow-hidden border-r border-border bg-surface lg:flex lg:h-dvh lg:flex-col">
         <div className="border-b border-border px-8 py-4">
           <BrandLogo showSubtitle />
         </div>

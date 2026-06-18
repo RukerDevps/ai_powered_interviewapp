@@ -29,6 +29,9 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 - Top Header: height 64px, includes Kimi 2.6 badge, theme toggle, "Hello, [Name]" user dropdown with avatar
 - Main content area: full-width layout, padding `p-6` (24px) or `p-8` (32px), gap between page sections: `gap-6` (24px)
 - The dashboard shell should use a fixed-height viewport rail on desktop: sidebar remains stationary at `h-dvh`, and the main content column owns vertical scrolling.
+- Keep the dashboard shell pinned to the viewport (`fixed inset-0`) so dashboard pages never create a second body scroll; the main content column remains the only vertical scroll region.
+- Use a stable viewport-height shell on smaller screens and keep a reserved scrollbar gutter on the scroll column so long history or analytics pages do not reflow when the browser chrome or scrollbar state changes.
+- Add overscroll containment to the scrollable dashboard column so scroll chaining does not spill into the page body at the top or bottom of long tables.
 - Dashboard pages should use reusable section components with `rounded-xl border border-border bg-surface shadow-sm`; keep stats, performance, tips, and recent lists as separate components so they can later receive server data without changing layout.
 - Dashboard score and progress visuals must use semantic tokens or CSS variables such as `var(--color-accent)` rather than hardcoded colors.
 
