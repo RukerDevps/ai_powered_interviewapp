@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ChevronDown, Menu, Sparkles } from "lucide-react";
 
 interface HeaderProps {
@@ -25,8 +26,8 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       <div className="flex items-center gap-3 sm:gap-5">
 
 
-        <button
-          type="button"
+        <Link
+          href="/settings"
           className="flex items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm font-semibold text-text-primary shadow-sm transition-colors hover:bg-surface-secondary sm:px-4 sm:py-3"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground">
@@ -34,7 +35,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           </span>
           <span className="hidden sm:inline">Hello, Alex</span>
           <ChevronDown className="h-4 w-4 text-text-secondary" />
-        </button>
+        </Link>
       </div>
     </header>
   );

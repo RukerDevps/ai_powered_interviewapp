@@ -125,7 +125,12 @@
 │   └── settings/
 │       ├── ProfileForm.tsx
 │       ├── PreferencesForm.tsx
-│       └── BillingSection.tsx
+│       ├── AIConfigForm.tsx
+│       ├── NotificationsForm.tsx
+│       ├── PrivacyForm.tsx
+│       ├── IntegrationsSection.tsx
+│       ├── BillingSection.tsx
+│       └── AppearanceForm.tsx
 ├── lib/
 │   ├── db.ts                              → PostgreSQL connection pool (pg client)
 │   ├── kimi.ts                            → Kimi 2.6 client (OpenAI SDK, custom baseURL + apiKey)
