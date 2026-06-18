@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import type { ComponentType } from "react";
+import { useRouter } from "next/navigation";
 import {
   BriefcaseBusiness,
   ChartColumn,
@@ -501,6 +502,7 @@ const SummaryValue = ({
 };
 
 export const InterviewSetupPage = () => {
+  const router = useRouter();
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedRole, setSelectedRole] = useState(roleOptions[0].value);
   const [selectedExperience, setSelectedExperience] = useState(experienceOptions[1].value);
@@ -913,7 +915,12 @@ export const InterviewSetupPage = () => {
             </div>
 
             <div className="border-t border-border pt-6">
-              <Button className="h-12 w-full justify-center rounded-lg text-base font-semibold">
+              <Button
+                onClick={() => {
+                  router.push("/interview?id=session");
+                }}
+                className="h-12 w-full justify-center rounded-lg text-base font-semibold"
+              >
                 Start Interview
               </Button>
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-text-secondary">

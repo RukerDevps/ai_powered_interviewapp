@@ -48,12 +48,9 @@
 │   ├── dashboard/
 │   │   └── page.tsx                       → Dashboard — stats, continue interview, recent performance, tips
 │   ├── interview/
-│   │   ├── new/
-│   │   │   └── page.tsx                   → Start New Interview — 4-step config wizard
-│   │   └── [id]/
-│   │       ├── page.tsx                   → Live interview session (fullscreen, AI chat)
-│   │       └── analysis/
-│   │           └── page.tsx               → Live/post analysis panel for this interview
+│   │   ├── page.tsx                       → Live interview session (fullscreen, AI chat, query param ?id=session)
+│   │   └── new/
+│   │       └── page.tsx                   → Start New Interview — 4-step config wizard
 │   ├── history/
 │   │   └── page.tsx                       → Interview history shell — passes serializable sample/session rows into client table
 │   ├── analytics/
@@ -463,31 +460,142 @@ No audio is sent to the server. All speech-to-text happens in the browser.
 
 ---
 
-## Proctoring Pattern (Client-side only)
+## Interview Page Interface Specification (Mockup-aligned)
 
+Based on the design mockup, the live interview page operates on a distraction-free grid that hides the primary dashboard sidebar/header and segments the session into two main columns:
+
+### 1. Left Column: Main Interview Session
+- **Welcome encouragement banner**: A top card displaying `Welcome back, [Name]!` with a waving hand illustration.
+- **Session Metadata row**: Displaying four bordered info blocks:
+  - **Role** (e.g., "Frontend Developer" with briefcase icon)
+  - **Difficulty** (e.g., "Medium" with bar chart icon)
+  - **Interview Type** (e.g., "Technical" with code `</>` icon)
+  - **Time Remaining** (countdown timer with clock icon)
+- **AI Interviewer Card**:
+  - Avatar representing the chatbot AI with a pulsing status badge (`Speaking...` when voice output or response playback is active).
+  - Outlined red `End Interview` action button on the top right.
+  - Chat bubble housing Kimi's current question text.
+  - A purple audio waveform visualization immediately below the chatbot bubble.
+- **Your Answer Input Card**:
+  - Textarea field with label `Your Answer` and placeholder text `Type or speak your answer here...`.
+  - Left-aligned `Speak Answer` microphone button (initiates Web Speech API local transcription).
+  - Right-aligned `Submit Answer` primary filled button (includes right arrow, styled with Accent theme variables).
+  - Bottom help text: `Tip: Take your time. Think clearly before answering.`
+- **Live Utility Tabs (Bottom Row)**:
+  - **Live Analysis** (chevron-right -> opens client-side sliding drawer with local speaking tips and metrics).
+  - **Interview Notes** (chevron-right -> opens text pane to jot down session thoughts).
+  - **Settings** (chevron-right -> opens audio input/volume configurator).
+
+### 2. Right Column: Questions Panel (Sidebar, 320px wide)
+- **Questions Header**: Displays title and a close `X` button.
+- **Progress indicators**: Displays attempt status text (e.g., `Progress: 3 / 8`) and a horizontal progress bar matching the score ratio.
+- **Questions list (scrollable stack)**: Displays cards for each generated question.
+  - **Answered status** (green circle with checkmark, light green background chip `Answered`, green check icon).
+  - **Current status** (purple circle with index, purple border around card, light purple background chip `Current`).
+  - **Pending status** (gray circle with index, light gray background chip `Pending`).
+- **Footer CTA**: `View Answered Questions` button (list icon).
+
+---
+
+## Proctoring & Security Protocols
+
+To maintain interview integrity and prevent plagiarism, the platform enforces a multi-layered security protocol crossing client and server boundaries:
+
+### 1. Hard Proctoring Violations (Immediate Termination)
+These actions represent clear intent to navigate away or copy content, resulting in immediate session termination. The client terminates voice transcription, halts the session, triggers the abandon endpoint, and redirects the user back to the dashboard with an error parameter:
+
+- **Fullscreen Exit**:
+  The interview forces browser fullscreen on launch. Exiting is tracked via `fullscreenchange`:
+  ```typescript
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      triggerHardViolation("fullscreen_exit");
+    }
+  });
+  ```
+- **Tab Switching or Window Minimization**:
+  Monitored via the Page Visibility API:
+  ```typescript
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      triggerHardViolation("tab_switch_or_minimize");
+    }
+  });
+  ```
+- **Screenshot Attempts**:
+  Keyboard event listeners intercept OS print-screen keybinds:
+  ```typescript
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "PrintScreen") {
+      triggerHardViolation("screenshot_attempt");
+    }
+  });
+  ```
+
+### 2. Soft Proctoring Violations (Warning Strike System)
+Accidental click-outs or window blurs (triggered by OS updates, calendar reminders, or low-battery alerts) utilize a grace period to prevent false positives:
+- **Focus Loss Detection**:
+  Listening to `window.onblur` and `window.onfocus` tracks window focus:
+  ```typescript
+  window.addEventListener("blur", () => {
+    triggerSoftViolationWarning();
+  });
+  ```
+- **Warning Modal & 10-Second Countdown**:
+  On focus loss, a full-screen warning overlay blocks the screen, pausing the countdown timer and voice input. It alerts the candidate and starts a 10-second countdown.
+  - If the candidate clicks **"Return to Interview"** and regains window focus within 10 seconds, the overlay clears, and fullscreen mode is re-requested.
+  - If focus is not restored in 10 seconds, or if the user accumulates **more than 3 strikes** during a single interview, it upgrades to a Hard Violation and aborts the session.
+
+### 3. Clipboard and Context Menu Lock
+To block copying question text or pasting pre-written solutions, the following browser defaults are prevented:
+- **Clipboard Block**:
+  ```typescript
+  // Block copy, cut, and paste on the input and page document
+  document.addEventListener("copy", (e) => e.preventDefault());
+  document.addEventListener("cut", (e) => e.preventDefault());
+  document.addEventListener("paste", (e) => e.preventDefault());
+  ```
+- **Context Menu Block**:
+  ```typescript
+  // Disable right-clicks
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+  ```
+
+### 4. Developer Tools & Source-Code Interception
+Keyboard listeners intercept common shortcut combinations to open inspector panel or view page source:
 ```typescript
-// lib/proctoring.ts — registered by ProctoringGuard on session mount
-
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement) triggerViolation("fullscreen_exit");
-});
-
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) triggerViolation("tab_switch_or_minimize");
-});
-
-// Best-effort screenshot detection (e.g. keydown for PrintScreen / OS shortcuts)
 window.addEventListener("keydown", (e) => {
-  if (e.key === "PrintScreen") triggerViolation("screenshot_attempt");
-});
+  const isInspector = 
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j")) ||
+    (e.metaKey && e.altKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j"));
+  
+  const isViewSource = 
+    (e.ctrlKey && (e.key === "U" || e.key === "u")) ||
+    (e.metaKey && e.altKey && (e.key === "U" || e.key === "u"));
 
-async function triggerViolation(reason: string) {
-  // No recording is stored — only the violation event is sent
+  if (isInspector || isViewSource) {
+    e.preventDefault();
+    triggerHardViolation("devtools_open_attempt");
+  }
+});
+```
+
+### 5. Backend-Enforced Submission Security
+Client-side blocks are reinforced by server-side verification:
+- **Order-of-Operations validation**: The server verifies that answers are submitted in order. An answer payload for Question $N$ is only accepted if the database tracks the current session's `questions_attempted` as $N - 1$. Out-of-order requests return a `400 Bad Request`.
+- **Duration / Timeout Check**: When an answer is submitted, the server compares the timestamp with the interview's `started_at` plus the total allowed duration (with a 60-second grace period). Submissions beyond this limit are blocked, and the session is compiled as-is.
+
+### 6. Abandonment API Endpoint Flow
+All violation paths call the same endpoint to log details without storing screen media:
+```typescript
+async function triggerHardViolation(reason: string) {
   await fetch(`/api/interview/${interviewId}/abandon`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reason }),
   });
-  window.location.href = "/dashboard?proctoring=violation";
+  window.location.href = `/dashboard?proctoring=violation&reason=${reason}`;
 }
 ```
 

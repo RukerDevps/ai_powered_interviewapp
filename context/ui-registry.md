@@ -664,60 +664,96 @@ Status: `Completed`
 
 #### AI Interviewer Avatar
 File: `components/interview-session/InterviewerAvatar.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Avatar Circle / Size | |
-| Speaking Pulse Animation| |
-| Audio Waveform SVG | |
+| Background | scale-125 pulsing overlay, `bg-success-lightest/30`, `bg-warning-light/20`, `bg-surface` |
+| Avatar Circle / Size | `h-24 w-24 border-4 rounded-full shadow-md` |
+| Speaking Pulse Animation| `animate-ping` for speaking, `animate-pulse` for thinking |
+| Audio Waveform SVG | `h-10 w-full max-w-[280px] gap-1 flex`, bar is `w-1 rounded-full bg-accent animate-[waveform_1s_ease-in-out_infinite]` |
+
+**Pattern notes:**
+- Visual avatar uses a simple robot icon layout styled dynamically using status colors (green/success for speaking, orange/warning for thinking, blue/info for listening).
+- Webkit waveform animation is injected via custom keyframe styles in the component.
 
 ---
 
 #### Answer Input Area
 File: `components/interview-session/AnswerInput.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Textarea Shell | |
-| Voice Button | |
-| Submit Button | |
+| Textarea Shell | `min-h-[140px] resize-none pr-3 pt-3 rounded-xl bg-surface border-border text-sm leading-relaxed focus:border-accent focus:ring-accent` |
+| Voice Button | `h-11 rounded-lg px-4 font-semibold text-sm transition-all flex items-center gap-2 border border-border bg-surface` or `bg-error text-destructive-foreground` |
+| Submit Button | `h-11 rounded-lg px-5 bg-accent hover:bg-accent-hover text-accent-foreground font-semibold flex items-center gap-2` |
+
+**Pattern notes:**
+- Textarea captures manual writing and appends client-side transcribed speech continuously.
+- Implements custom form shortcuts (`Ctrl+Enter` / `Cmd+Enter` to submit).
 
 ---
 
 #### Live Questions Panel (Sidebar)
 File: `components/interview-session/QuestionsPanel.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Background | |
-| Width | |
-| Number Badge States | |
+| Background | `border-l border-border bg-surface shadow-sm` |
+| Width | `w-full xl:w-[320px] shrink-0` |
+| Number Badge States | Current: `bg-accent text-white shadow-sm flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold`, Answered: `bg-success text-white flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold`, Pending: `bg-text-muted/40 text-text-secondary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold` |
+
+**Pattern notes:**
+- Scrollable panel containing vertical question cards.
+- Layout hides overflow text using flex sizing and includes custom progress indicators.
 
 ---
 
 #### Session Countdown Timer
 File: `components/interview-session/SessionTimer.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Timer Container | |
-| Warning / Red Alert | |
+| Timer Container | `flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold border-border bg-surface text-text-primary` |
+| Warning / Red Alert | `border-error/30 bg-error-light/10 text-error animate-pulse` |
+
+**Pattern notes:**
+- Pauses/re-starts countdown ticks dynamically to integrate with proctoring overlay blurs.
+- Triggers custom warning pulse layout at 3 minutes remaining.
 
 ---
 
 #### Proctoring Guard
 File: `components/interview-session/ProctoringGuard.tsx`
-Status: `Pending`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Screen Cover Overlay | |
-| Warning Copy | |
+| Screen Cover Overlay | `max-w-[480px] border-warning/30 bg-surface text-center shadow-[0_24px_80px_rgba(16,24,40,0.18)]`, overlay is `bg-overlay/45` |
+| Warning Copy | DialogTitle `text-xl font-bold text-text-primary`, DialogDescription `text-sm font-medium text-text-secondary`, countdown `text-4xl font-extrabold text-error` |
+
+**Pattern notes:**
+- Uses the project's shadcn-style dialog primitive.
+- Prevents closing the overlay via backdrop clicks to force re-entering fullscreen.
+
+---
+
+#### Session Action Bar
+File: `components/interview-session/SessionActionBar.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Container | `grid gap-4 sm:grid-cols-3 border-t border-border/60 bg-surface/50 pt-5` |
+| Tab Buttons | `flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-sm text-left transition-all duration-300 hover:border-accent hover:bg-surface-secondary hover:shadow-md` |
+| Icon Container | `flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-lighter text-accent` / `bg-success-lightest text-success-foreground` / `bg-warning-light text-warning-foreground` |
+
+**Pattern notes:**
+- Utility bar placed at the bottom of the main interview page layout.
+- Provides interactive triggers for speech metrics, audio settings, and notepad panels.
 
 ---
 

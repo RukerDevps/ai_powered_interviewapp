@@ -6,9 +6,9 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Overall Status
 
-- **Current Phase**: `Phase 4: Interview Setup Wizard`
-- **Overall Completion**: `40%`
-- **Last Updated**: `2026-06-16`
+- **Current Phase**: `Phase 6: Post-Interview Evaluation & Analytics`
+- **Overall Completion**: `70%`
+- **Last Updated**: `2026-06-18`
 
 ---
 
@@ -44,21 +44,21 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] DB interview creation handler (`actions/interview.ts`)
 
 ### Phase 5: Live Interview Session
-- [ ] Live interview layout view (`/interview/[id]`)
-- [ ] ProctoringGuard event listeners (Fullscreen & page visibility locks)
-- [ ] AI Interviewer Avatar waveform SVG & speak pulse animations
-- [ ] Text & Voice response inputs (Web Speech API transcription)
-- [ ] Dynamic Question sidebar listing with attempted badges
+- [x] Live interview layout view (`/interview/[id]`)
+- [x] ProctoringGuard event listeners (Fullscreen & page visibility locks)
+- [x] AI Interviewer Avatar waveform SVG & speak pulse animations
+- [x] Text & Voice response inputs (Web Speech API transcription)
+- [x] Dynamic Question sidebar listing with attempted badges
 - [ ] Live Kimi 2.6 question generator streaming (`agent/interviewer.ts`)
-- [ ] Session timer countdown component
+- [x] Session timer countdown component
 
 ### Phase 6: Post-Interview Evaluation & Analytics
 - [ ] Kimi 2.6 Multi-Dimensional grading engine (`agent/evaluator.ts`)
 - [ ] Post-interview Compilation route (`/api/interview/complete`)
-- [ ] Post-feedback metrics cards (circular progress visualizers)
-- [ ] Strengths, weaknesses, and individual question feedback accordions
-- [ ] Recharts confidence chart & speaking pace indicators
-- [ ] Performance Analytics Dashboard (`/analytics`)
+- [x] Post-feedback metrics cards (circular progress visualizers)
+- [x] Strengths, weaknesses, and individual question feedback accordions
+- [x] Recharts confidence chart & speaking pace indicators
+- [x] Performance Analytics Dashboard (`/analytics`)
 - [x] Session History table with search, filters, pagination, score badges, and row actions (`/history`)
 
 ### Phase 7: Telemetry & Polish
@@ -265,3 +265,38 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Updated the interview summary’s Job Description row to support a `More` / `Less` expansion pattern with wrapped text so long descriptions stay inside the summary card instead of overflowing.
 - **Next Steps**:
   - Keep the same expandable summary treatment in mind for any future long-form wizard fields.
+
+### 2026-06-18: Interview Page UI & Security Alignment
+- **Decisions Made**:
+  - Aligned the live interview page layout specifications with the delivered mockup (welcome banner, metadata row, avatar with waveform, question sidebar with three-state checklist, bottom utility tabs).
+  - Documented the strict multi-layered proctoring protocol in the architecture guidelines.
+  - Adopted a hybrid proctoring model: hard violations (fullscreen exit, tab switch, screenshots, devtools open) trigger immediate abandonment; soft violations (accidental window focus blur) trigger a warning overlay with a 10-second grace period and a 3-strike limit.
+  - Established browser locks (disabling context menus, copy-cut-paste events) to block plagiarism.
+  - Added server-side validation rules (sequential answer index checks, elapsed time validations) to prevent API tampering.
+- **Next Steps**:
+  - Build the database schema migrations and pg database pool utility (Phase 1 / Phase 2 database tasks).
+  - Implement `/interview/[id]` UI and its corresponding client-side locks and listeners as documented.
+
+### 2026-06-18: Live Interview Session UI & Security Implementation
+- **Decisions Made**:
+  - Created the dynamic `/interview/[id]/page.tsx` rendering a distraction-free split layout with responsive sizing.
+  - Implemented the full `ProctoringGuard` component enforcing fullscreen state, page focus/visibility events, and browser command overrides.
+  - Configured the Soft Violation strike system to display a full-screen warning dialog and 10-second countdown on window focus loss.
+  - Built the client-side voice response transcription module inside `AnswerInput` utilizing the browser's Web Speech API.
+  - Added the scrollable `QuestionsPanel` sidebar with attempt counts, dynamic progress bar, and badge states mapping exactly to the UI mockups.
+  - Created the bottom `SessionActionBar` drawer controls (live speech metrics, personal notes, audio setup).
+  - Wired the `InterviewSetupPage` wizard "Start Interview" button to transition candidates seamlessly to the active live session screen.
+- **Next Steps**:
+  - Implement the server-side AI evaluation engines and streaming question flows (Phase 6).
+
+### 2026-06-18: Post-Interview Analytics & Live Analysis UI
+- **Decisions Made**:
+  - Implemented the `/analytics` page inside the existing `DashboardShell`, keeping the left sidebar navigation and top header exactly as they are.
+  - Designed the main section with high visual fidelity, featuring five circular progress `ScoreCard` visualizers (Overall, Clarity, Relevance, Technical Depth, Confidence) and strengths & areas to improve checklists.
+  - Added a collapsible, interactive `PerQuestionFeedback` component that displays specific AI feedback for the selected question and toggles the user's mock submitted answer.
+  - Designed custom, responsive inline SVG/CSS spline area charts for the confidence trends and vertical wave bars for the speaking pace, avoiding heavy third-party client packages.
+  - Built an interactive question checklist sidebar on the right. Clicking on any question updates the active feedback selection in the center main view dynamically.
+  - Replaced the placeholder `Bot` icons in onboarding and greeting sections with the custom `/icons/Robot.png` image.
+  - Integrated browser-native SpeechSynthesis API into the live interview session to read questions aloud, fully syncing the voice speech duration with the robot avatar animations.
+- **Next Steps**:
+  - Integrate Kimi 2.6 evaluation engine to generate dynamic, real-time analytics data.
