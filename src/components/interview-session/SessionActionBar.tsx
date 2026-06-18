@@ -25,7 +25,7 @@ export const SessionActionBar = ({
         className
       )}
     >
-      {/* Live Analysis Tab */}
+      {/* Detail Analysis Tab */}
       <button
         type="button"
         disabled={isPaused}
@@ -37,8 +37,8 @@ export const SessionActionBar = ({
             <BarChart3 className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-text-primary">Live Analysis</p>
-            <p className="text-xs text-text-secondary mt-0.5 truncate">View real-time feedback</p>
+            <p className="text-sm font-semibold text-text-primary">Detail Analysis</p>
+            <p className="text-xs text-text-secondary mt-0.5 truncate">View detailed feedback</p>
           </div>
         </div>
         <ChevronRight className="h-4.5 w-4.5 text-text-secondary group-hover:translate-x-1 transition-transform shrink-0" />

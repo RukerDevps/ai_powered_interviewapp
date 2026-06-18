@@ -69,6 +69,38 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
+### 2026-06-18: Detailed Analysis UI QA Fix
+- **Decisions Made**:
+  - Cross-checked the detail analysis page against the uploaded reference and tightened the score summary, mini score cards, question sidebar, communication cards, and next-step sections.
+  - Replaced hardcoded question-review content with typed dummy question data so sidebar selection, previous/next navigation, answer visibility, filters, weak-question toggle, and report/share feedback all respond in the UI.
+  - Kept the page inside `DashboardShell` and used token-based rings, badges, and inline SVG charts to preserve design-system consistency.
+- **Next Steps**:
+  - Connect the dummy data model to completed interview analytics once the evaluation API and database records are ready.
+
+### 2026-06-18: Detailed Analysis Mockup Refresh
+- **Decisions Made**:
+  - Reworked the `/analytics/details` screen into a report-style layout that mirrors the uploaded design more closely.
+  - Added the large score summary, strengths/focus area cards, question review stack, communication metrics cards, and next-step CTAs shown in the new mockup.
+  - Kept the existing dashboard shell so the persistent navigation and header remain consistent with the rest of the app.
+- **Next Steps**:
+  - Replace the mock data with live interview analytics records once the backend evaluation flow is connected.
+
+### 2026-06-18: Live Analysis Label Alignment
+- **Decisions Made**:
+  - Renamed the live interview action card label from `Live Analysis` to `Detail Analysis` so the session drawer wording matches the detailed feedback surface.
+  - Updated the detailed analytics view header to use the same visible title, keeping the live-state badge and layout unchanged.
+- **Next Steps**:
+  - Keep any future analysis-related labels aligned between the live session drawer and the post-interview analysis view.
+
+### 2026-06-18: Analytics Page Split
+- **Decisions Made**:
+  - Preserved the existing single-session "Live Analysis" design by extracting it into `src/components/analysis/DetailedAnalyticsView.tsx` instead of redesigning it.
+  - Moved that detailed experience behind a dedicated child route at `/analytics/details`.
+  - Rebuilt `/analytics` as the true overall analytics summary page, focused on attended interviews, overall score, confidence trend, and a direct detailed-analysis CTA.
+  - Updated the detailed page flow so its back navigation now returns to the analytics overview instead of the dashboard.
+- **Next Steps**:
+  - Replace the mock analytics summary and detail data with real interview and analytics records once the backend evaluation layer is wired.
+
 ### 2026-06-16: History Page UI Build
 - **Decisions Made**:
   - Built the `/history` route as a dashboard-shell page with the same left rail and top header used elsewhere in the app.

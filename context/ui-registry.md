@@ -754,10 +754,32 @@ Status: `Completed`
 **Pattern notes:**
 - Utility bar placed at the bottom of the main interview page layout.
 - Provides interactive triggers for speech metrics, audio settings, and notepad panels.
+- The first utility card now reads `Detail Analysis` to match the detailed feedback drawer and avoid duplicate "Live Analysis" wording.
 
 ---
 
 ### Interview Analysis & Post-Feedback
+
+#### Detailed Analytics View
+File: `src/components/analysis/DetailedAnalyticsView.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, page shell inside `DashboardShell` |
+| Border | `border border-border`, active question state `border-accent/40` |
+| Border radius | `rounded-2xl`, question/status chips `rounded-full` / `rounded-md` |
+| Text — primary | `text-text-primary`, section labels `text-text-secondary`, emphasis `text-accent` |
+| Spacing | Page stack `gap-6`, cards `p-5` / `p-6`, sidebar list `space-y-3` |
+| Hover state | Question rows `hover:bg-surface-secondary/50`, links `hover:text-accent` |
+| Shadow | `shadow-sm`, selected question row `shadow-sm` |
+| Accent usage | Score cards, time remaining progress, selected question card, live badge |
+
+**Pattern notes:**
+- This component now matches the uploaded detailed-analysis mockup with a large summary rail, strengths/focus cards, a question review stack, a communication metrics section, and a right-side question navigator.
+- The page remains inside `DashboardShell`, so the persistent sidebar and header stay aligned with the rest of the app.
+- Token-based rings, chips, and SVG microcharts keep the detailed view consistent with the app's existing semantic color system.
+- The question navigator, all-questions filter, weak-question toggle, previous/next controls, answer visibility, and report/share actions are driven by typed dummy data until backend analytics are connected.
 
 #### Score Card Metrics
 File: `components/analysis/ScoreCard.tsx`
@@ -814,6 +836,26 @@ Status: `Pending`
 | :--- | :--- |
 | Recharts Line Chart | |
 | Tooltip styling | |
+
+#### Overall Analytics Summary
+File: `src/app/analytics/page.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, inset surfaces `bg-surface-secondary`, `bg-surface-secondary/60` |
+| Border | `border border-border` |
+| Border radius | `rounded-2xl`, nested stat surfaces `rounded-xl` |
+| Text — primary | `text-text-primary` |
+| Text — secondary | `text-text-secondary`, `text-text-dark`, `text-text-muted` |
+| Spacing | Page stack `gap-6`, cards `p-5` / `p-6`, inner rows `gap-4` |
+| Hover state | CTA buttons `hover:bg-accent-hover`, secondary actions `hover:bg-surface-secondary` |
+| Shadow | `shadow-sm` |
+| Accent usage | Hero badge `bg-accent-muted text-accent`, CTA button `bg-accent`, score bars use semantic token fills |
+
+**Pattern notes:**
+- This is the top-level analytics destination from the dashboard and sidebar.
+- The page pairs aggregate metric cards with a short attended-interviews list and a direct CTA into the preserved detailed analysis screen.
 
 ---
 

@@ -1,317 +1,362 @@
-"use client";
-
-import { useState } from "react";
+import type { ComponentType } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Clock,
-  Check,
-  CheckCircle2,
+  ArrowUpRight,
+  BarChart3,
+  BrainCircuit,
+  BriefcaseBusiness,
+  ChevronRight,
+  Clock3,
+  MessageSquareText,
   Sparkles,
-  MessageSquare,
   Target,
-  Code2,
-  Smile,
-  List,
+  TrendingUp,
 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ScoreCard } from "@/components/analysis/ScoreCard";
-import { StrengthsAndImprovements } from "@/components/analysis/StrengthsAndImprovements";
-import { PerQuestionFeedback } from "@/components/analysis/PerQuestionFeedback";
-import { SpeakingPaceChart } from "@/components/analysis/SpeakingPaceChart";
-import { ConfidenceTrendChart } from "@/components/analysis/ConfidenceTrendChart";
 
-// Type definitions matching mockup question status
-type QuestionStatus = "answered" | "current" | "pending";
-
-interface MockQuestion {
-  id: string;
-  number: number;
-  text: string;
-  status: QuestionStatus;
-  feedbackText: string;
-  submittedAnswer: string;
+interface AnalyticsMetric {
+  label: string;
+  value: string;
+  helper: string;
+  icon: ComponentType<{ className?: string }>;
+  tone: string;
 }
 
+interface InterviewInsight {
+  title: string;
+  role: string;
+  date: string;
+  score: number;
+  status: string;
+}
+
+const metrics: AnalyticsMetric[] = [
+  {
+    label: "Interviews Attended",
+    value: "12",
+    helper: "+3 from last month",
+    icon: BriefcaseBusiness,
+    tone: "bg-accent-lighter text-accent",
+  },
+  {
+    label: "Overall Score",
+    value: "74/100",
+    helper: "Good and improving",
+    icon: Sparkles,
+    tone: "bg-success-lightest text-success-foreground",
+  },
+  {
+    label: "Questions Answered",
+    value: "96",
+    helper: "Across all completed interviews",
+    icon: MessageSquareText,
+    tone: "bg-warning-light text-warning-foreground",
+  },
+  {
+    label: "Confidence Trend",
+    value: "+8%",
+    helper: "Stronger than last 5 sessions",
+    icon: TrendingUp,
+    tone: "bg-info-lightest text-info-foreground",
+  },
+];
+
+const attendedInterviews: InterviewInsight[] = [
+  {
+    title: "Frontend Developer Interview",
+    role: "Frontend Developer",
+    date: "June 18, 2026",
+    score: 72,
+    status: "Completed",
+  },
+  {
+    title: "React Performance Round",
+    role: "React Developer",
+    date: "June 16, 2026",
+    score: 78,
+    status: "Completed",
+  },
+  {
+    title: "JavaScript Fundamentals",
+    role: "Frontend Developer",
+    date: "June 14, 2026",
+    score: 69,
+    status: "Completed",
+  },
+];
+
+const scoreBreakdown = [
+  { label: "Clarity", score: 78, barClass: "bg-success" },
+  { label: "Relevance", score: 74, barClass: "bg-accent" },
+  { label: "Technical Depth", score: 65, barClass: "bg-warning" },
+  { label: "Confidence", score: 75, barClass: "bg-info" },
+];
+
+const focusAreas = [
+  "Add more concrete project examples in technical answers.",
+  "Expand tradeoff explanations to show senior-level depth.",
+  "Keep answers concise before going into implementation details.",
+];
+
 export default function AnalyticsPage() {
-  // Mock questions database for interactive sidebar selection
-  const [questions, setQuestions] = useState<MockQuestion[]>([
-    {
-      id: "q1",
-      number: 1,
-      text: "What is the virtual DOM in React?",
-      status: "answered",
-      feedbackText:
-        "Excellent explanation of the virtual DOM! You clearly described the reconciliation process and diffing algorithm. Your details about DOM batch updates were highly accurate. To make it even better, you could mention React Fiber's asynchronous rendering capabilities.",
-      submittedAnswer:
-        "The virtual DOM is a programming concept where an ideal representation of a UI is kept in memory and synced with the 'real' DOM by ReactDOM. This reconciliation process computes differences via a diffing algorithm and updates only the changed elements, rather than re-rendering the whole page, which optimizes UI rendering speeds.",
-    },
-    {
-      id: "q2",
-      number: 2,
-      text: "Explain the concept of closures in JavaScript.",
-      status: "answered",
-      feedbackText:
-        "Good structural explanation of closures and lexical scoping. Your example about private variables was spot on. Consider highlighting memory implications (retaining references) and how JS engines garbage collect closures for senior roles.",
-      submittedAnswer:
-        "A closure is the combination of a function bundled together with references to its surrounding state (the lexical environment). In other words, an inner function maintains access to variables in its outer function's scope even after the outer function has finished executing. It is key for data encapsulation.",
-    },
-    {
-      id: "q3",
-      number: 3,
-      text: "How does event delegation work in JavaScript?",
-      status: "current",
-      feedbackText:
-        "Good explanation! You understood the core concept of event delegation. To make it even better, try adding a real-world use case (like dynamic list items) and explain the event bubbling phase a bit more to show deep framework knowledge.",
-      submittedAnswer:
-        "Event delegation is a design pattern where a single event listener is attached to a parent element rather than attaching individual listeners to each child. It relies on event propagation (bubbling) where events bubble up to the parent. We then check event.target to inspect the source.",
-    },
-    {
-      id: "q4",
-      number: 4,
-      text: "What are the differences between var, let, and const?",
-      status: "pending",
-      feedbackText:
-        "Not yet answered. Please complete this section of the live interview wizard to view AI feedback, clarity ratings, and detailed code optimization metrics.",
-      submittedAnswer: "This question has not been attempted yet.",
-    },
-    {
-      id: "q5",
-      number: 5,
-      text: "Explain the box model in CSS.",
-      status: "pending",
-      feedbackText:
-        "Not yet answered. Please complete this section of the live interview wizard to view AI feedback, clarity ratings, and detailed code optimization metrics.",
-      submittedAnswer: "This question has not been attempted yet.",
-    },
-    {
-      id: "q6",
-      number: 6,
-      text: "What is the purpose of useEffect in React?",
-      status: "pending",
-      feedbackText:
-        "Not yet answered. Please complete this section of the live interview wizard to view AI feedback, clarity ratings, and detailed code optimization metrics.",
-      submittedAnswer: "This question has not been attempted yet.",
-    },
-    {
-      id: "q7",
-      number: 7,
-      text: "How does a browser render a web page?",
-      status: "pending",
-      feedbackText:
-        "Not yet answered. Please complete this section of the live interview wizard to view AI feedback, clarity ratings, and detailed code optimization metrics.",
-      submittedAnswer: "This question has not been attempted yet.",
-    },
-    {
-      id: "q8",
-      number: 8,
-      text: "How would you optimize a slow website?",
-      status: "pending",
-      feedbackText:
-        "Not yet answered. Please complete this section of the live interview wizard to view AI feedback, clarity ratings, and detailed code optimization metrics.",
-      submittedAnswer: "This question has not been attempted yet.",
-    },
-  ]);
-
-  // Selected question in detailed review
-  const [selectedQuestionId, setSelectedQuestionId] = useState("q3");
-
-  const selectedQuestion =
-    questions.find((q) => q.id === selectedQuestionId) || questions[2];
-
-  // Static strengths & areas of improvements lists
-  const strengthsList = [
-    "Explained concepts clearly with good examples.",
-    "Good understanding of core principles.",
-    "Structured your answers well.",
-  ];
-
-  const improvementsList = [
-    "Provide more real-world examples.",
-    "Deepen technical explanations.",
-    "Work on concise summarization.",
-  ];
-
   return (
     <DashboardShell>
-      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-        {/* Main Center Content Column */}
-        <div className="flex-1 space-y-6">
-          {/* Back button and Page Title header row */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-secondary transition-colors hover:text-accent"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Link>
-              <div className="flex items-center gap-2.5 mt-1">
-                <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">
-                  Live Analysis
+      <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6">
+        <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-2">
+              <span className="inline-flex w-fit items-center rounded-full border border-accent/10 bg-accent-muted px-3 py-1 text-xs font-semibold text-accent">
+                Analytics Overview
+              </span>
+              <div className="space-y-1">
+                <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+                  Measure how your interviews are trending
                 </h1>
-                <span className="inline-flex items-center rounded-full bg-success-lightest px-2.5 py-0.5 text-xs font-bold text-success border border-success/10">
-                  Live
+                <p className="max-w-2xl text-sm font-medium leading-relaxed text-text-secondary">
+                  Review attended interviews, overall performance, and the areas
+                  that need the most attention before your next mock session.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/history"
+                className="inline-flex items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+              >
+                View History
+              </Link>
+              <Link
+                href="/analytics/details"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-sm transition-colors hover:bg-accent-hover"
+              >
+                Detailed Analysis
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {metrics.map((metric) => {
+            const Icon = metric.icon;
+
+            return (
+              <article
+                key={metric.label}
+                className="rounded-2xl border border-border bg-surface p-5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-text-secondary">
+                      {metric.label}
+                    </p>
+                    <p className="text-3xl font-bold tracking-tight text-text-primary">
+                      {metric.value}
+                    </p>
+                  </div>
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${metric.tone}`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                </div>
+                <p className="mt-4 text-xs font-medium text-text-secondary">
+                  {metric.helper}
+                </p>
+              </article>
+            );
+          })}
+        </section>
+
+        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+          <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">
+                  Attended Interviews
+                </h2>
+                <p className="mt-1 text-sm text-text-secondary">
+                  A quick look at your most recent completed sessions.
+                </p>
+              </div>
+              <Link
+                href="/analytics/details"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent transition-colors hover:text-accent-hover"
+              >
+                Open detailed page
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {attendedInterviews.map((interview) => (
+                <article
+                  key={`${interview.title}-${interview.date}`}
+                  className="flex flex-col gap-4 rounded-xl border border-border bg-surface-secondary/60 p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="space-y-1">
+                    <h3 className="text-base font-semibold text-text-primary">
+                      {interview.title}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
+                      <span>{interview.role}</span>
+                      <span className="text-text-muted">•</span>
+                      <span>{interview.date}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex rounded-full bg-success-lightest px-2.5 py-1 text-xs font-semibold text-success-foreground">
+                      {interview.status}
+                    </span>
+                    <span className="inline-flex min-w-20 items-center justify-center rounded-lg bg-accent-muted px-3 py-2 text-sm font-bold text-accent">
+                      {interview.score}/100
+                    </span>
+                    <Link
+                      href="/analytics/details"
+                      className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-3 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-secondary"
+                    >
+                      Review
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-lighter text-accent">
+                <BarChart3 className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">
+                  Overall Performance
+                </h2>
+                <p className="text-sm text-text-secondary">
+                  Your aggregate interview readiness score.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-border bg-surface-secondary p-5">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-text-secondary">
+                    Composite Score
+                  </p>
+                  <p className="mt-1 text-4xl font-bold tracking-tight text-text-primary">
+                    74
+                  </p>
+                </div>
+                <span className="rounded-full bg-success-lightest px-3 py-1 text-xs font-semibold text-success-foreground">
+                  Strong progress
                 </span>
               </div>
-              <p className="text-sm font-medium text-text-secondary leading-relaxed">
-                Real-time feedback and analysis of your performance.
-              </p>
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-surface">
+                <div className="h-full w-[74%] rounded-full bg-accent" />
+              </div>
             </div>
 
-            {/* Time remaining indicator block */}
-            <div className="flex w-fit items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-sm">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-lighter text-accent">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">
-                  Time Remaining
-                </p>
-                <p className="text-xl font-black text-text-primary leading-tight mt-0.5">
-                  24:35
-                </p>
-                <div className="mt-1.5 h-1.5 w-24 rounded-full bg-surface-secondary overflow-hidden border border-border/30">
-                  <div className="h-full w-3/4 rounded-full bg-accent" />
+            <div className="mt-6 space-y-4">
+              {scoreBreakdown.map((item) => (
+                <div key={item.label} className="space-y-2">
+                  <div className="flex items-center justify-between text-sm font-medium">
+                    <span className="text-text-primary">{item.label}</span>
+                    <span className="text-text-secondary">{item.score}/100</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-surface-secondary">
+                    <div
+                      className={`h-full rounded-full ${item.barClass}`}
+                      style={{ width: `${item.score}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
-
-          {/* Grid of Circular progress score cards */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-            <ScoreCard
-              label="Overall Score"
-              score={72}
-              status="Good"
-              color="purple"
-              icon={Sparkles}
-            />
-            <ScoreCard
-              label="Clarity"
-              score={78}
-              status="Good"
-              color="green"
-              icon={MessageSquare}
-            />
-            <ScoreCard
-              label="Relevance"
-              score={70}
-              status="Good"
-              color="orange"
-              icon={Target}
-            />
-            <ScoreCard
-              label="Technical Depth"
-              score={65}
-              status="Average"
-              color="pink"
-              icon={Code2}
-            />
-            <ScoreCard
-              label="Confidence"
-              score={75}
-              status="Good"
-              color="blue"
-              icon={Smile}
-            />
-          </div>
-
-          {/* Strengths and Improvements side-by-side cards */}
-          <StrengthsAndImprovements
-            strengths={strengthsList}
-            improvements={improvementsList}
-          />
-
-          {/* Per Question Detailed Feedback Card */}
-          <PerQuestionFeedback
-            questionNumber={selectedQuestion.number}
-            totalQuestions={questions.length}
-            questionText={selectedQuestion.text}
-            feedbackText={selectedQuestion.feedbackText}
-            submittedAnswer={selectedQuestion.submittedAnswer}
-          />
-
-          {/* Speaking Pace & Confidence spline wave visualizers */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <SpeakingPaceChart paceWpm={135} status="Good" />
-            <ConfidenceTrendChart status="Good" />
-          </div>
+          </section>
         </div>
 
-        {/* Right Sidebar Column: Questions List Tracker */}
-        <div className="w-full xl:w-[380px] shrink-0">
-          <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3.5 mb-4">
-              <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">
-                Questions
-              </h3>
-              <span className="text-xs font-bold text-text-muted">
-                {questions.filter((q) => q.status === "answered").length} Answered
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.35fr]">
+          <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning-light text-warning-foreground">
+                <Target className="h-5 w-5" />
               </span>
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">
+                  Focus Areas
+                </h2>
+                <p className="text-sm text-text-secondary">
+                  The biggest opportunities across your recent sessions.
+                </p>
+              </div>
             </div>
 
-            {/* Questions Listing */}
-            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-              {questions.map((q) => {
-                const isSelected = q.id === selectedQuestionId;
-                
-                // Styling configurations based on question status
-                let numberBadgeClass = "bg-surface-secondary text-text-secondary border-border";
-                let statusBadgeClass = "bg-surface-secondary text-text-muted border-border/50";
-                let statusText = "Pending";
-                let statusIcon = null;
+            <ul className="mt-5 space-y-3">
+              {focusAreas.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-border bg-surface-secondary/60 p-4 text-sm font-medium leading-relaxed text-text-dark"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
 
-                if (q.status === "answered") {
-                  numberBadgeClass = "bg-success-lightest text-success border-success/15 font-bold";
-                  statusBadgeClass = "bg-success-lightest text-success border-success/15 font-semibold";
-                  statusText = "Answered";
-                  statusIcon = <Check className="h-3 w-3 inline mr-1" />;
-                } else if (q.status === "current") {
-                  numberBadgeClass = "bg-accent-lighter text-accent border-accent/20 font-bold";
-                  statusBadgeClass = "bg-accent-lighter text-accent border-accent/20 font-semibold";
-                  statusText = "Current";
-                }
-
-                return (
-                  <button
-                    key={q.id}
-                    onClick={() => setSelectedQuestionId(q.id)}
-                    className={`w-full text-left flex gap-4 rounded-xl border p-4 transition-all duration-200 ${
-                      isSelected
-                        ? "bg-accent-muted/40 border-accent/40 shadow-sm"
-                        : "border-border hover:bg-surface-secondary/50"
-                    }`}
-                  >
-                    {/* Circle Question Number Badge */}
-                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs ${numberBadgeClass}`}>
-                      {q.number}
-                    </span>
-
-                    {/* Question text and status badge */}
-                    <div className="space-y-1.5 min-w-0 flex-1">
-                      <p className={`text-sm font-bold leading-relaxed line-clamp-2 ${isSelected ? "text-text-primary" : "text-text-dark"}`}>
-                        {q.text}
-                      </p>
-                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-wide ${statusBadgeClass}`}>
-                        {statusIcon}
-                        {statusText}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+          <section className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-info-lightest text-info-foreground">
+                <BrainCircuit className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">
+                  Performance Snapshot
+                </h2>
+                <p className="text-sm text-text-secondary">
+                  A compact summary of consistency, pace, and readiness.
+                </p>
+              </div>
             </div>
 
-            {/* View Answered Questions footer button */}
-            <div className="border-t border-border/50 pt-4 mt-4">
-              <button className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary">
-                <List className="h-4.5 w-4.5" />
-                View Answered Questions
-              </button>
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-border bg-surface-secondary p-4">
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <Clock3 className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Avg. Session</span>
+                </div>
+                <p className="mt-3 text-2xl font-bold text-text-primary">28 min</p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Best results appear in focused mid-length interviews.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border bg-surface-secondary p-4">
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Momentum</span>
+                </div>
+                <p className="mt-3 text-2xl font-bold text-text-primary">Upward</p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Scores improved in 4 of the last 5 completed interviews.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border bg-surface-secondary p-4">
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Readiness</span>
+                </div>
+                <p className="mt-3 text-2xl font-bold text-text-primary">High</p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Communication and clarity are already in a strong range.
+                </p>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </DashboardShell>

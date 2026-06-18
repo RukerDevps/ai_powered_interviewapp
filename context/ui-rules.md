@@ -32,6 +32,12 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 - Dashboard pages should use reusable section components with `rounded-xl border border-border bg-surface shadow-sm`; keep stats, performance, tips, and recent lists as separate components so they can later receive server data without changing layout.
 - Dashboard score and progress visuals must use semantic tokens or CSS variables such as `var(--color-accent)` rather than hardcoded colors.
 
+### Analytics Detail Layout
+- The detailed analysis screen should keep the dashboard shell visible and use a two-column report layout on large screens.
+- Left column: summary score rail, mini score rings, strengths/focus cards, detailed question review, communication metrics, and next-step CTAs.
+- Right column: sticky question navigator with a filter control, per-question status chips, and a weak-question CTA.
+- Tokenized rings, chips, and inline SVG microcharts should be used for all analysis visuals so the palette stays aligned with the dashboard surfaces.
+
 ### Live Interview Layout
 - Automatically enters/enlarges to full screen mode on launch
 - Hidden dashboard sidebar and header to minimize distractions

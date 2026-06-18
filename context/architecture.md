@@ -465,6 +465,36 @@ No audio is sent to the server. All speech-to-text happens in the browser.
 
 ---
 
+## Analytics Detail Page Interface Specification (Mockup-aligned)
+
+The detailed analysis route at `/analytics/details` acts as a report-style deep dive into one completed interview and keeps the dashboard shell visible for navigation continuity.
+
+### Page Structure
+
+- **Top header block**: `Back to Analytics` link, `Detailed Analysis` title, completed status pill, short summary sentence, and session metadata chips for role, date, and duration.
+- **Primary actions**: `Download Report` and `Share` buttons aligned to the right of the page header.
+- **Main left column**:
+  - Overall score card with a large circular progress ring and summary copy.
+  - Four compact mini score rings for Clarity, Relevance, Technical Depth, and Confidence.
+  - Strengths and Focus Areas cards with tokenized list rows and semantic tags.
+  - Question detail card with score badge, previous/next controls, answer review, AI analysis, improvement suggestion, and a suggested practice row.
+  - Communication section with speaking pace waveform, confidence sparkline, filler word count, and pause metric cards.
+  - Next steps section with three recommendation cards and a retake CTA band.
+- **Right sidebar**:
+  - Question count header with an `All Questions` filter control.
+  - Scrollable question list with answered, current, skipped, and not reached states.
+  - Footer CTA to review only weak questions.
+- **Client-side dummy state**:
+  - Until real analytics records are wired, the detail page uses typed mock question data to drive question selection, previous/next controls, answer visibility, report/share feedback, and question filtering.
+
+### Visual Rules
+
+- Use the same `bg-surface`, `border-border`, `rounded-2xl`, and `shadow-sm` surface language as the dashboard.
+- Keep score and trend visuals token-based so they continue to use the semantic accent, success, warning, error, and info palette.
+- The sidebar should remain readable at roughly 320px wide and can stick near the top on wider screens when space allows.
+
+---
+
 ## Interview Page Interface Specification (Mockup-aligned)
 
 Based on the design mockup, the live interview page operates on a distraction-free grid that hides the primary dashboard sidebar/header and segments the session into two main columns:
