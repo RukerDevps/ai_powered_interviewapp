@@ -671,12 +671,12 @@ export function AnalyticsOverviewPage() {
               <Button asChild variant="outline" className="h-11 rounded-lg border-border bg-surface px-5 font-bold shadow-none">
                 <Link href="/history">View History</Link>
               </Button>
-              <Button asChild className="h-11 rounded-lg px-5 font-bold">
+              {/* <Button asChild className="h-11 rounded-lg px-5 font-bold">
                 <Link href="/analytics/details">
                   Detailed Analysis
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </section>
