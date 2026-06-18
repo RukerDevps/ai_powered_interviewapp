@@ -782,6 +782,28 @@ Status: `Completed`
 
 ### Interview Analysis & Post-Feedback
 
+#### Analytics Overview Page
+File: `src/components/analysis/AnalyticsOverviewPage.tsx`
+Status: `Completed`
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-surface`, page shell inside `DashboardShell` |
+| Border | `border border-border`, table rows `divide-y divide-border` |
+| Border radius | `rounded-2xl`, filter buttons `rounded-lg`, active range pills `rounded-full` |
+| Text — primary | `text-text-primary`, headings `text-[28px] font-bold` / `text-lg font-bold` |
+| Text — secondary | `text-text-secondary`, helper text `text-xs font-medium` |
+| Spacing | Page stack `gap-4`, cards `p-4` / `p-5`, chart panels `mt-4` / `mt-5` |
+| Hover state | Buttons `hover:bg-surface-secondary`, links `hover:text-accent-hover`, icon action `hover:bg-accent-muted` |
+| Shadow | `shadow-sm` |
+| Accent usage | Active range pills, score trend line, CTA buttons, topic badges, focus bars, recommended action icons |
+
+**Pattern notes:**
+- The overview mirrors the uploaded analysis mockup with a compact header control row, seven metric cards, score trend, radar skill breakdown, topic donut, duration scatter, recent-session table, focus areas, and recommended next steps.
+- Range and role controls are driven by local dummy state so the UI behaves like the final product while the analytics backend is still pending.
+- Charts are tokenized inline SVG or CSS-variable styles rather than a third-party chart dependency, keeping the palette aligned with the dashboard shell.
+- Dense tables and charts use horizontal overflow on smaller screens so text remains readable without breaking the dashboard layout.
+
 #### Detailed Analytics View
 File: `src/components/analysis/DetailedAnalyticsView.tsx`
 Status: `Completed`

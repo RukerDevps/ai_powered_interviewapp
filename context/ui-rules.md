@@ -41,6 +41,11 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 - Right column: sticky question navigator with a filter control, per-question status chips, and a weak-question CTA.
 - Tokenized rings, chips, and inline SVG microcharts should be used for all analysis visuals so the palette stays aligned with the dashboard surfaces.
 
+### Analytics Overview Layout
+- The analytics overview should use a dense dashboard layout: compact hero controls, stat cards, trend/radar/donut/scatter visuals, recent-session table, focus bars, and next-step cards.
+- Analytics charts should use inline SVG or a documented charting library with CSS variables for strokes/fills; do not introduce hardcoded chart colors.
+- Overview filters should be local dummy state until the backend is connected, with range and role controls visually matching the shared dropdown/button primitives.
+
 ### Live Interview Layout
 - Automatically enters/enlarges to full screen mode on launch
 - Hidden dashboard sidebar and header to minimize distractions

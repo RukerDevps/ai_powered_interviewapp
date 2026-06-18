@@ -69,6 +69,15 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
+### 2026-06-18: Analytics Overview Mockup Refresh
+- **Decisions Made**:
+  - Rebuilt `/analytics` to match the uploaded analysis overview mockup with header filters, seven metric cards, score trend, skill radar, topic coverage, duration scatter, recent sessions, focus areas, and recommended next steps.
+  - Moved the overview UI into `src/components/analysis/AnalyticsOverviewPage.tsx` and kept `src/app/analytics/page.tsx` as a thin route wrapper.
+  - Used local dummy data and client-side range/role state for the overview interactions until the backend analytics records are connected.
+  - Rendered the charts with tokenized inline SVG/CSS-variable styles instead of adding a new chart dependency.
+- **Next Steps**:
+  - Replace the dummy analytics arrays with real completed-interview aggregates once the evaluator and persistence layer are wired.
+
 ### 2026-06-18: Dashboard Scroll Stability Fix
 - **Decisions Made**:
   - Tightened the shared dashboard shell so it is pinned to the viewport and keeps the desktop fixed-rail layout intact.
