@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { validateActiveSession } from "@/lib/session";
 
 export async function POST(
   request: Request,
@@ -8,6 +10,16 @@ export async function POST(
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
     const { reason } = body;
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session || !(await validateActiveSession(session))) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     console.log(`[Proctoring Violation] Interview ${id} was abandoned. Reason: ${reason}`);
 

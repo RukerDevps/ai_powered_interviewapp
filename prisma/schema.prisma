@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  email         String    @unique
-  emailVerified Boolean
-  name          String?
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
+  id                 String    @id
+  email              String    @unique
+  emailVerified      Boolean
+  name               String?
+  image              String?
+  activeSessionToken String?
+  createdAt          DateTime
+  updatedAt          DateTime
 
   sessions Session[]
   accounts Account[]

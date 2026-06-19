@@ -23,6 +23,7 @@ import {
   type PerformanceMetric,
 } from "@/components/dashboard/RecentPerformance";
 import { WelcomeHeader } from "@/components/dashboard/WelcomeHeader";
+import { requireActiveSession } from "@/lib/session";
 
 const quickStats: QuickStat[] = [
   { label: "Role", value: "Frontend Developer", icon: BriefcaseBusiness, tone: "accent" },
@@ -87,7 +88,9 @@ const recentInterviews: RecentInterview[] = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await requireActiveSession();
+
   return (
     <DashboardShell>
       <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6">

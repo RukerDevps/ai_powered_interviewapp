@@ -1,5 +1,4 @@
 import { betterAuth } from "better-auth";
-import { APIError } from "better-auth/api";
 import { jwt } from "better-auth/plugins";
 import { dash } from "@better-auth/infra";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
@@ -73,22 +72,43 @@ export const auth = betterAuth({
     },
     session: {
       create: {
-        before: async (session) => {
-          const activeSession = await prisma.session.findFirst({
-            where: {
-              userId: session.userId,
-              expiresAt: { gt: new Date() },
+        after: async (session) => {
+          const latestSession = await prisma.session.findFirst({
+            where: { userId: session.userId },
+            orderBy: [
+              { createdAt: "desc" },
+              { updatedAt: "desc" },
+              { id: "desc" },
+            ],
+            select: {
+              id: true,
             },
           });
 
-          if (activeSession) {
-            throw new APIError("FORBIDDEN", {
-              message:
-                "This account already has an active session. Sign out before signing in again.",
-            });
+          if (latestSession?.id !== session.id) {
+            return;
           }
 
-          return true;
+          // Latest committed login wins: only the newest session row gets to
+          // publish its token as the active-session marker for the user.
+          await prisma.user.update({
+            where: { id: session.userId },
+            data: { activeSessionToken: session.token },
+          });
+
+          // Secondary cleanup: remove any older session rows for the same
+          // user now that the new session is finalized.
+          try {
+            await prisma.session.deleteMany({
+              where: {
+                userId: session.userId,
+                id: { not: session.id },
+              },
+            });
+          } catch (error) {
+            // Cleanup failures must not block a successful login.
+            console.error("Failed to clean up stale sessions:", error);
+          }
         },
       },
     },

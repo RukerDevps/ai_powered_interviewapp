@@ -397,7 +397,7 @@ Access: authenticated users only, own files only. If InsForge limits become a bl
 - System: [Better Auth](https://www.better-auth.com/) with PostgreSQL + Prisma persistence
 - Methods: Email/password and Google OAuth only
 - Tokens: JWT access token + Better Auth session/refresh token, both stored in HttpOnly cookies
-- Single-active-session policy: new login attempts are rejected if the account already has a non-expired session
+- Single-active-session policy: logging in on a new device invalidates any existing non-expired session for that user, so only the latest session remains active
 - Protected routes: `/dashboard`, `/interview/*`, `/history`, `/analytics`, `/resources`, `/settings`
 - Public routes: `/`, `/login`, `/register`
 - `middleware.ts` resolves the session via `/api/auth/get-session` and redirects unauthenticated users to `/login`; authenticated users are kept out of `/login` and `/register`

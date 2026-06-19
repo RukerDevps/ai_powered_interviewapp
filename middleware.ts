@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { validateActiveSession } from "@/lib/session";
 
 const protectedRoutes = [
   "/dashboard",
@@ -24,7 +25,12 @@ async function getSessionFromRequest(request: NextRequest) {
   }
 
   return response.json() as Promise<{
-    session?: { id: string; userId: string; expiresAt: string } | null;
+    session?: {
+      id: string;
+      userId: string;
+      expiresAt: string;
+      token?: string | null;
+    } | null;
     user?: { id: string; email: string; name?: string | null } | null;
   } | null>;
 }
@@ -40,8 +46,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = await getSessionFromRequest(request);
-  const isAuthenticated = !!session?.session && !!session?.user;
+  const sessionPayload = await getSessionFromRequest(request);
+  const isAuthenticated =
+    !!sessionPayload?.session &&
+    !!sessionPayload?.user &&
+    (await validateActiveSession(sessionPayload));
 
   if (isProtectedRoute && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
@@ -57,6 +66,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: "nodejs",
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)",
   ],

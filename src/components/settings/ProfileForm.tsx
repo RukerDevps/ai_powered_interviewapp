@@ -1,58 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Check, Globe, Clock3, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { Edit2, Check, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { updateProfileAction } from "@/actions/profile";
 
-const languageOptions = [
-  { label: "English", value: "english" },
-  { label: "Spanish", value: "spanish" },
-  { label: "French", value: "french" },
-  { label: "German", value: "german" },
-];
+export interface ProfileFormProps {
+  initialName: string;
+  email: string;
+  memberSince: string;
+  accountType: string;
+  avatar?: string | null;
+}
 
-const timezoneOptions = [
-  { label: "(GMT+05:30) Asia/Kolkata", value: "kolkata" },
-  { label: "GMT/UTC (London)", value: "gmt" },
-  { label: "EST (New York)", value: "est" },
-  { label: "PST (San Francisco)", value: "pst" },
-];
-
-export function ProfileForm() {
+export function ProfileForm({
+  initialName,
+  email,
+  memberSince,
+  accountType,
+  avatar,
+}: ProfileFormProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [name, setName] = useState(initialName);
 
-  // Form Fields
-  const [fullName, setFullName] = useState("Alex");
-  const [email, setEmail] = useState("alex@email.com");
-  const [language, setLanguage] = useState("english");
-  const [timezone, setTimezone] = useState("kolkata");
-  const [bio, setBio] = useState(
-    "AI enthusiast and developer focused on building intelligent products."
-  );
-
-  const handleSave = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaveStatus("saving");
-    setTimeout(() => {
+    setStatusMessage(null);
+
+    const formData = new FormData();
+    formData.set("name", name);
+
+    const result = await updateProfileAction(formData);
+
+    if (result.success) {
       setSaveStatus("saved");
       setIsEditing(false);
       setTimeout(() => setSaveStatus("idle"), 3000);
-    }, 1200);
+    } else {
+      setSaveStatus("error");
+      setStatusMessage(result.error);
+    }
+  };
+
+  const handleCancel = () => {
+    setName(initialName);
+    setIsEditing(false);
+    setSaveStatus("idle");
+    setStatusMessage(null);
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 animate-in fade-in duration-200">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-200">
       {/* Header section with Edit Profile button */}
       <div className="flex items-center justify-between border-b border-border/60 pb-4">
         <div className="space-y-0.5">
@@ -65,7 +68,7 @@ export function ProfileForm() {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => (isEditing ? handleCancel() : setIsEditing(true))}
           className="h-9 rounded-lg border-accent/20 text-accent font-semibold flex items-center gap-1.5 hover:bg-accent-lighter/50"
         >
           <Edit2 className="h-3.5 w-3.5" />
@@ -73,30 +76,55 @@ export function ProfileForm() {
         </Button>
       </div>
 
+      {/* Avatar */}
+      <div className="flex items-center gap-4">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-accent-foreground overflow-hidden">
+          {avatar ? (
+            <Image
+              src={avatar}
+              alt={name || email}
+              width={64}
+              height={64}
+              unoptimized
+              className="h-16 w-16 rounded-full object-cover"
+            />
+          ) : (
+            <User className="h-7 w-7" />
+          )}
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-text-primary">Profile Picture</p>
+          <p className="text-xs text-text-secondary">Avatar is managed through your account provider.</p>
+        </div>
+      </div>
+
       {/* Profile Form Grid */}
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2">
           {/* Full Name */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Full Name</label>
+            <label htmlFor="name" className="block text-sm font-medium text-text-dark">Full Name</label>
             <Input
+              id="name"
+              name="name"
               type="text"
-              value={fullName}
+              value={name}
               disabled={!isEditing}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               className="h-12 rounded-xl bg-surface border-border focus:border-accent disabled:bg-surface-secondary/50 disabled:text-text-secondary disabled:border-border/60 font-semibold"
             />
           </div>
 
           {/* Email Address */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Email Address</label>
+            <label htmlFor="email" className="block text-sm font-medium text-text-dark">Email Address</label>
             <Input
+              id="email"
               type="email"
               value={email}
-              disabled={!isEditing}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 rounded-xl bg-surface border-border focus:border-accent disabled:bg-surface-secondary/50 disabled:text-text-secondary disabled:border-border/60 font-semibold"
+              disabled
+              readOnly
+              className="h-12 rounded-xl bg-surface-secondary/50 border-border/60 text-text-secondary font-semibold cursor-not-allowed"
             />
           </div>
         </div>
@@ -104,98 +132,29 @@ export function ProfileForm() {
         <div className="grid gap-5 md:grid-cols-2">
           {/* Member Since (Read-only) */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Member Since</label>
+            <label htmlFor="memberSince" className="block text-sm font-medium text-text-dark">Member Since</label>
             <Input
+              id="memberSince"
               type="text"
-              value="May 2025"
+              value={memberSince}
               disabled
+              readOnly
               className="h-12 rounded-xl bg-surface-secondary/50 border-border/60 text-text-secondary font-semibold cursor-not-allowed"
             />
           </div>
 
           {/* Account Type (Read-only) */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Account Type</label>
+            <label htmlFor="accountType" className="block text-sm font-medium text-text-dark">Account Type</label>
             <Input
+              id="accountType"
               type="text"
-              value="Free Plan"
+              value={accountType}
               disabled
+              readOnly
               className="h-12 rounded-xl bg-surface-secondary/50 border-border/60 text-text-secondary font-semibold cursor-not-allowed"
             />
           </div>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          {/* Preferred Language */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Preferred Language</label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild disabled={!isEditing}>
-                <div className={cn(
-                  "flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2 text-left shadow-sm transition-colors cursor-pointer select-none",
-                  isEditing ? "hover:bg-surface-secondary" : "opacity-60 cursor-not-allowed bg-surface-secondary/50"
-                )}>
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-lighter text-accent">
-                    <Globe className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1 text-sm font-semibold text-text-primary">
-                    {languageOptions.find(opt => opt.value === language)?.label || language}
-                  </span>
-                  <ChevronDown className="h-4 w-4 shrink-0 text-text-secondary" />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                <DropdownMenuRadioGroup value={language} onValueChange={setLanguage}>
-                  {languageOptions.map((opt) => (
-                    <DropdownMenuRadioItem key={opt.value} value={opt.value} className="font-semibold text-text-primary">
-                      {opt.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Timezone */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-dark">Timezone</label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild disabled={!isEditing}>
-                <div className={cn(
-                  "flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2 text-left shadow-sm transition-colors cursor-pointer select-none",
-                  isEditing ? "hover:bg-surface-secondary" : "opacity-60 cursor-not-allowed bg-surface-secondary/50"
-                )}>
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-lighter text-accent">
-                    <Clock3 className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1 text-sm font-semibold text-text-primary">
-                    {timezoneOptions.find(opt => opt.value === timezone)?.label || timezone}
-                  </span>
-                  <ChevronDown className="h-4 w-4 shrink-0 text-text-secondary" />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                <DropdownMenuRadioGroup value={timezone} onValueChange={setTimezone}>
-                  {timezoneOptions.map((opt) => (
-                    <DropdownMenuRadioItem key={opt.value} value={opt.value} className="font-semibold text-text-primary">
-                      {opt.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Bio Textarea */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-text-dark">Bio</label>
-          <Textarea
-            value={bio}
-            disabled={!isEditing}
-            onChange={(e) => setBio(e.target.value)}
-            className="min-h-[120px] rounded-xl resize-none bg-surface border-border focus:border-accent disabled:bg-surface-secondary/50 disabled:text-text-secondary disabled:border-border/60 font-semibold leading-relaxed"
-          />
         </div>
       </div>
 
@@ -206,6 +165,11 @@ export function ProfileForm() {
             <div className="flex items-center gap-1.5 text-success text-sm font-semibold animate-in fade-in duration-300">
               <Check className="h-4 w-4" />
               Settings saved successfully!
+            </div>
+          )}
+          {saveStatus === "error" && statusMessage && (
+            <div className="text-error text-sm font-semibold animate-in fade-in duration-300">
+              {statusMessage}
             </div>
           )}
         </div>

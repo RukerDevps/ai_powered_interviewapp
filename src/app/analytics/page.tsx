@@ -1,5 +1,8 @@
 import { AnalyticsOverviewPage } from "@/components/analysis/AnalyticsOverviewPage";
+import { requireActiveSession } from "@/lib/session";
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
+  await requireActiveSession();
+
   return <AnalyticsOverviewPage />;
 }

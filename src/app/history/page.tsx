@@ -1,5 +1,6 @@
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { HistoryTable, type HistoryInterviewRow } from "@/components/history/HistoryTable";
+import { requireActiveSession } from "@/lib/session";
 
 const historyInterviews: HistoryInterviewRow[] = [
   {
@@ -132,7 +133,9 @@ const historyInterviews: HistoryInterviewRow[] = [
   },
 ];
 
-export default function HistoryPage() {
+export default async function HistoryPage() {
+  await requireActiveSession();
+
   return (
     <DashboardShell>
       <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6">

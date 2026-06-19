@@ -33,7 +33,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [x] Google OAuth sign-in button wired
 - [x] Header user dropdown with logout
 - [x] Auto-create Profile on user sign-up
-- [ ] Profile Save & Edit forms connected to real data
+- [x] Profile Save & Edit forms connected to real data
 - [ ] PDF & DOCX resume parser utilities
 - [ ] Kimi 2.6 resume structure extractor (`agent/resume-extractor.ts`)
 - [ ] InsForge Storage integration (`lib/storage.ts`)
@@ -76,6 +76,38 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Verification checklist runs
 
 ## Session Handoff Notes
+
+### 2026-06-19: Latest Login Wins Hardening
+- **Decisions Made**:
+  - Hardened the Better Auth session hook so only the newest committed session row can promote its token into `User.activeSessionToken`; older login hooks now no-op instead of overwriting the marker.
+  - Kept session-table cleanup as secondary work after the marker update succeeds, so stale browser sessions are still removed without being the source of truth.
+  - Added a shared `requireActiveSession()` helper in `src/lib/session.ts` and routed protected server pages/actions through it so stale cookies are redirected consistently.
+  - Applied the active-session check to the dashboard, settings, history, analytics, interview setup, analytics detail server pages, and the interview abandon API route in addition to the existing middleware gate.
+- **Next Steps**:
+  - Verify the same-account Chrome-then-Firefox flow locally once credentials are available.
+  - Confirm Google OAuth and email/password sign-ins both land on the same active-session marker path.
+
+### 2026-06-19: Single-Session Logout On New Login
+- **Decisions Made**:
+  - Switched from blocking duplicate logins to invalidating the previous session when a user signs in on a new device.
+  - Updated `src/lib/auth.ts` so the `databaseHooks.session.create.before` hook deletes any existing non-expired sessions for the same `userId` before creating the new session.
+  - Removed the `APIError` throw path and its error message so the new device login succeeds cleanly.
+  - Kept middleware as the enforcement point: revoked sessions on old devices redirect to `/login` on the next protected request.
+  - Updated `context/architecture.md` and `context/library-docs.md` to describe the new single-active-session behavior.
+- **Next Steps**:
+  - Test device-A-then-device-B login flow end-to-end once a local auth environment is available.
+  - Confirm Google OAuth and email/password sign-ins both trigger the same session invalidation hook.
+
+### 2026-06-19: Backend-Backed Profile Section
+- **Decisions Made**:
+  - Converted `/settings` to a Server Component that loads the authenticated `User` and `Profile` records on first paint.
+  - Hydrates a missing `Profile` row for legacy accounts using the current session values.
+  - Created `src/actions/profile.ts` with `updateProfileAction` to keep `User.name` and `Profile.name` in sync on save.
+  - Simplified the profile form to only editable `name`, read-only `email`, `member since`, `account type`, and an optional avatar.
+  - Removed unsupported mocked fields (language, timezone, bio) from the profile tab.
+- **Next Steps**:
+  - Wire remaining settings tabs (preferences, notifications, appearance, etc.) to real persistence when those backend fields are ready.
+  - Decide whether to support avatar uploads natively or continue relying on OAuth provider avatars.
 
 ### 2026-06-19: Better Auth API Key Wiring
 - **Decisions Made**:

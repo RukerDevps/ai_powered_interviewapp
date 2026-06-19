@@ -910,14 +910,24 @@ Status: `Completed`
 ### Settings Page
 
 #### Profile Setup Form
-File: `components/settings/ProfileForm.tsx`
-Status: `Pending`
+File: `src/components/settings/ProfileForm.tsx`
+Status: `Completed`
 
 | Property | Class |
 | :--- | :--- |
-| Card Background | |
-| Inputs / Selects | |
-| Save Button | |
+| Avatar | `h-16 w-16 rounded-full bg-accent text-accent-foreground`, image `object-cover` |
+| Header border | `border-b border-border/60` |
+| Inputs (editable) | `h-12 rounded-xl bg-surface border-border focus:border-accent disabled:bg-surface-secondary/50` |
+| Inputs (read-only) | `h-12 rounded-xl bg-surface-secondary/50 border-border/60 text-text-secondary cursor-not-allowed` |
+| Save Button | `h-11 bg-accent hover:bg-accent-hover text-accent-foreground rounded-lg` |
+| Status messages | `text-success` for saved, `text-error` for errors |
+
+**Pattern notes:**
+- The profile form now receives real `User` + `Profile` data from the server-rendered settings page.
+- Only `name` is editable; `email`, `member since`, and `account type` are read-only.
+- Avatar is displayed from the auth user record but not editable in this pass.
+- Save submits to `src/actions/profile.ts`, which keeps `User.name` and `Profile.name` in sync.
+- Unsupported mocked fields (language, timezone, bio) have been removed.
 
 ---
 

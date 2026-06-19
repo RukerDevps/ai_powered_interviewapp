@@ -271,7 +271,7 @@ export const { signIn, signUp, signOut, useSession } = authClient;
 
 ### Constraints
 - Only email/password and Google OAuth are enabled.
-- New sessions are rejected if the user already has an active session (`databaseHooks.session.create.before`).
+- Only one session per user is active at a time. The `databaseHooks.session.create.before` hook deletes any existing non-expired sessions for the same `userId` before the new session is created, so logging in on a new device signs the old device out.
 - Raw JWT tokens are never read by the frontend; use `useSession()` or server `getSession()` instead.
 - The auth handler is mounted at `/api/auth/[...all]` via `toNextJsHandler(auth)`.
 
