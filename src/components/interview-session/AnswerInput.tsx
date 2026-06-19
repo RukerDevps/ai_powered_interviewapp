@@ -6,6 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  0: {
+    transcript: string;
+  };
+}
+
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+interface SpeechRecognitionErrorLike {
+  error: string;
+}
+
+interface BrowserSpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
+  onend: (() => void) | null;
+}
+
+interface SpeechRecognitionWindow extends Window {
+  SpeechRecognition?: new () => BrowserSpeechRecognition;
+  webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
+}
+
 interface AnswerInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -26,60 +58,99 @@ export const AnswerInput = ({
   setIsRecording,
 }: AnswerInputProps) => {
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const recognitionActiveRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+  const valueRef = useRef(value);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    valueRef.current = value;
+  }, [onChange, value]);
 
   // Initialize SpeechRecognition in useEffect to avoid SSR errors
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const browserWindow = window as SpeechRecognitionWindow;
+      const SpeechRecognition = browserWindow.SpeechRecognition || browserWindow.webkitSpeechRecognition;
       if (SpeechRecognition) {
-        setIsSpeechSupported(true);
+        queueMicrotask(() => setIsSpeechSupported(true));
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = "en-US";
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEventLike) => {
           let finalTranscript = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript + " ";
+            const result = event.results[i];
+
+            if (result.isFinal) {
+              finalTranscript += `${result[0].transcript} `;
             }
           }
 
           if (finalTranscript) {
-            onChange(value + (value ? " " : "") + finalTranscript.trim());
+            const currentValue = valueRef.current;
+            onChangeRef.current(
+              currentValue + (currentValue ? " " : "") + finalTranscript.trim()
+            );
           }
         };
 
-        recognition.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
+        recognition.onerror = (event: SpeechRecognitionErrorLike) => {
+          recognitionActiveRef.current = false;
+          if (event.error !== "aborted" && event.error !== "no-speech") {
+            console.warn("Speech recognition error:", event.error);
+          }
           setIsRecording(false);
         };
 
         recognition.onend = () => {
-          // If we were supposed to be recording, restart or reset state
+          recognitionActiveRef.current = false;
           setIsRecording(false);
         };
 
         recognitionRef.current = recognition;
+      } else {
+        queueMicrotask(() => setIsSpeechSupported(false));
       }
     }
-  }, [onChange, value, setIsRecording]);
+
+    return () => {
+      const recognition = recognitionRef.current;
+      if (recognition) {
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        if (recognitionActiveRef.current) {
+          recognition.stop();
+        }
+      }
+      recognitionActiveRef.current = false;
+      recognitionRef.current = null;
+    };
+  }, [setIsRecording]);
 
   // Handle start/stop of speech recognition
   const toggleRecording = () => {
     if (!isSpeechSupported || isPaused) return;
 
-    if (isRecording) {
+    if (isRecording || recognitionActiveRef.current) {
       recognitionRef.current?.stop();
+      recognitionActiveRef.current = false;
       setIsRecording(false);
     } else {
       try {
         recognitionRef.current?.start();
+        recognitionActiveRef.current = true;
         setIsRecording(true);
       } catch (err) {
+        if (err instanceof DOMException && err.name === "InvalidStateError") {
+          recognitionActiveRef.current = true;
+          setIsRecording(true);
+          return;
+        }
         console.error("Failed to start speech recognition", err);
       }
     }
@@ -89,6 +160,7 @@ export const AnswerInput = ({
   useEffect(() => {
     if (isPaused && isRecording) {
       recognitionRef.current?.stop();
+      recognitionActiveRef.current = false;
       setIsRecording(false);
     }
   }, [isPaused, isRecording, setIsRecording]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import type { ChangeEvent } from "react";
 import type { ComponentType } from "react";
 import { useRouter } from "next/navigation";
@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { createInterviewAction } from "@/actions/interview";
 import { cn } from "@/lib/utils";
 
 type FieldTone = "accent" | "success" | "warning" | "info";
@@ -523,6 +524,7 @@ const SummaryValue = ({
 export const InterviewSetupPage = () => {
   const router = useRouter();
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [selectedRole, setSelectedRole] = useState(roleOptions[0].value);
   const [selectedExperience, setSelectedExperience] = useState(experienceOptions[1].value);
   const [selectedInterviewType, setSelectedInterviewType] = useState(interviewTypeOptions[0].value);
@@ -539,6 +541,7 @@ export const InterviewSetupPage = () => {
   const [isJobDescriptionDialogOpen, setIsJobDescriptionDialogOpen] = useState(false);
   const [isDeviceWarningDialogOpen, setIsDeviceWarningDialogOpen] = useState(false);
   const [isJobDescriptionExpanded, setIsJobDescriptionExpanded] = useState(false);
+  const [startError, setStartError] = useState("");
   const [selectedSections, setSelectedSections] = useState<SectionId[]>([
     "technical",
     "behavioral",
@@ -637,7 +640,29 @@ export const InterviewSetupPage = () => {
     }
 
     setIsDeviceWarningDialogOpen(false);
-    router.push("/interview?id=session");
+    setStartError("");
+
+    startTransition(async () => {
+      const result = await createInterviewAction({
+        role: selectedRole,
+        experienceLevel: selectedExperience,
+        interviewType: selectedInterviewType,
+        skills: selectedSkills,
+        duration: selectedDuration,
+        questionTarget: selectedQuestionCount,
+        timePerQuestion: selectedTimePerQuestion,
+        sections: selectedSections,
+        questionFocus: selectedQuestionFocus,
+        jobDescriptionText: jobDescription,
+      });
+
+      if (!result.success || !result.interviewId) {
+        setStartError(result.error ?? "Could not start interview. Please try again.");
+        return;
+      }
+
+      router.push(`/interview?id=${result.interviewId}`);
+    });
   };
 
   const selectedSectionLabels = sectionDefinitions
@@ -947,10 +972,14 @@ export const InterviewSetupPage = () => {
             <div className="border-t border-border pt-6">
               <Button
                 onClick={handleStartInterview}
+                disabled={isPending}
                 className="h-12 w-full justify-center rounded-lg text-base font-semibold"
               >
-                Start Interview
+                {isPending ? "Starting..." : "Start Interview"}
               </Button>
+              {startError ? (
+                <p className="mt-3 text-sm font-medium text-error">{startError}</p>
+              ) : null}
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-text-secondary">
                 <ShieldCheck className="h-4 w-4 text-text-secondary" />
                 <span>Your interview is private and secure</span>

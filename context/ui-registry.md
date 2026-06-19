@@ -718,6 +718,7 @@ Status: `Completed`
 **Pattern notes:**
 - Textarea captures manual writing and appends client-side transcribed speech continuously.
 - Implements custom form shortcuts (`Ctrl+Enter` / `Cmd+Enter` to submit).
+- Speech recognition is initialized once per component mount and guarded with an active-state ref so repeated clicks cannot call `start()` while the browser recognizer is already running.
 
 ---
 

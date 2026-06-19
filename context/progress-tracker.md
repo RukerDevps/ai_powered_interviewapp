@@ -6,8 +6,8 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Overall Status
 
-- **Current Phase**: `Phase 2: Authentication & Profile Setup`
-- **Overall Completion**: `80%`
+- **Current Phase**: `Phase 6: Post-Interview Evaluation & Analytics`
+- **Overall Completion**: `92%`
 - **Last Updated**: `2026-06-19`
 
 ---
@@ -49,7 +49,7 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [x] 4-Step Setup Wizard container (`/interview/new`)
 - [x] Wizard forms: Job Details, Context attachments, Section selections, and Timer duration
 - [x] Wizard Live Summary sidebar card
-- [ ] DB interview creation handler (`actions/interview.ts`)
+- [x] DB interview creation handler (`actions/interview.ts`)
 
 ### Phase 5: Live Interview Session
 - [x] Live interview layout view (`/interview/[id]`)
@@ -57,12 +57,15 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [x] AI Interviewer Avatar waveform SVG & speak pulse animations
 - [x] Text & Voice response inputs (Web Speech API transcription)
 - [x] Dynamic Question sidebar listing with attempted badges
-- [ ] Live Kimi 2.6 question generator streaming (`agent/interviewer.ts`)
+- [x] Live Kimi 2.6 adaptive question generator (`agent/interviewer.ts`)
+- [x] Live answer evaluation + difficulty adaptation (`agent/answer-evaluator.ts`, `src/lib/interview-workflow.ts`)
 - [x] Session timer countdown component
 
 ### Phase 6: Post-Interview Evaluation & Analytics
-- [ ] Kimi 2.6 Multi-Dimensional grading engine (`agent/evaluator.ts`)
-- [ ] Post-interview Compilation route (`/api/interview/complete`)
+- [x] Kimi 2.6 Multi-Dimensional grading engine (`agent/final-evaluator.ts`)
+- [x] Post-interview Compilation route (`/api/interview/complete`)
+- [x] DB-backed interview analysis route (`/interview/[id]/analysis`)
+- [x] DB-backed history list (`/history`)
 - [x] Post-feedback metrics cards (circular progress visualizers)
 - [x] Strengths, weaknesses, and individual question feedback accordions
 - [x] Recharts confidence chart & speaking pace indicators
@@ -76,6 +79,24 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Verification checklist runs
 
 ## Session Handoff Notes
+
+### 2026-06-19: Live Interview Error Hardening
+- **Decisions Made**:
+  - Stabilized `AnswerInput` Web Speech recognition by keeping one recognizer per component mount, tracking browser active state in a ref, and ignoring expected `aborted`/`no-speech` events.
+  - Updated `/interview/[id]/analysis` to await Next 16 dynamic route `params` before reading `id`.
+  - Added typed `KimiServiceError` handling so upstream 429/temporary provider failures return retryable API responses instead of generic answer-submit or completion 500s.
+- **Next Steps**:
+  - Re-test a live interview with rapid voice button toggles and a configured non-rate-limited Kimi/OpenRouter model.
+
+### 2026-06-19: Adaptive Interview Backend Milestone
+- **Decisions Made**:
+  - Standardized Kimi on the OpenAI-compatible SDK with env-driven `KIMI_API_KEY`, `KIMI_BASE_URL`, and `KIMI_MODEL`.
+  - Used deterministic answer scoring to drive live difficulty changes: `>=75` increases hardness, `45-74` holds, `25-44` eases, and repeated very poor answers end the interview as `not_eligible`.
+  - Kept live sessions on `/interview?id=SESSION_ID` and added `/interview/[id]/analysis` for post-session review.
+  - Deferred resume parsing/storage for a later milestone and kept this pass focused on job-description context plus the interview session engine.
+- **Next Steps**:
+  - Wire telemetry and dashboard recommendations to the new persisted interview records.
+  - Finish the resume upload/extraction pipeline when that milestone is resumed.
 
 ### 2026-06-19: Latest Login Wins Hardening
 - **Decisions Made**:

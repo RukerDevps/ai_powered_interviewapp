@@ -20,6 +20,7 @@ model User {
   sessions Session[]
   accounts Account[]
   profile  Profile?
+  interviews Interview[]
 }
 
 model Session {
@@ -86,4 +87,92 @@ model Profile {
   plan                String   @default("free")
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+enum InterviewStatus {
+  in_progress
+  completed
+  abandoned
+  incomplete
+  not_eligible
+}
+
+enum InterviewDifficulty {
+  easy
+  medium
+  hard
+}
+
+model Interview {
+  id                  String              @id @default(uuid())
+  userId              String
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role                String
+  experienceLevel     String
+  interviewType       String
+  skills              String[]
+  durationMinutes     Int
+  questionTarget      String?
+  timePerQuestion     String?
+  sections            String[]
+  questionFocus       String
+  jobDescriptionText  String?
+  status              InterviewStatus     @default(in_progress)
+  currentDifficulty   InterviewDifficulty @default(medium)
+  questionsAttempted  Int                 @default(0)
+  veryPoorTotal       Int                 @default(0)
+  consecutiveVeryPoor Int                 @default(0)
+  score               Int?
+  startedAt           DateTime            @default(now())
+  completedAt         DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  questions InterviewQuestion[]
+  analytics InterviewAnalytics?
+
+  @@index([userId, status])
+  @@index([userId, startedAt])
+}
+
+model InterviewQuestion {
+  id                String              @id @default(uuid())
+  interviewId       String
+  interview         Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  order             Int
+  questionText      String
+  difficulty        InterviewDifficulty
+  answerText        String?
+  answerSubmittedAt DateTime?
+  answerScore       Int?
+  clarityScore      Int?
+  relevanceScore    Int?
+  depthScore        Int?
+  confidenceScore   Int?
+  evaluationSummary String?
+  feedback          String?
+  veryPoor          Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([interviewId, order])
+  @@index([interviewId])
+}
+
+model InterviewAnalytics {
+  id                  String    @id @default(uuid())
+  interviewId         String    @unique
+  interview           Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  overallScore        Int
+  clarityScore        Int
+  relevanceScore      Int
+  technicalDepthScore Int
+  confidenceScore     Int
+  strengths           String[]
+  improvements        String[]
+  questionFeedback    Json
+  speakingPaceLabel   String?
+  confidenceTrend     Int[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }

@@ -78,7 +78,7 @@ export function PerQuestionFeedback({
               Your Answer
             </h4>
             <p className="text-sm font-medium text-text-primary italic leading-relaxed whitespace-pre-wrap">
-              "{submittedAnswer}"
+              &quot;{submittedAnswer}&quot;
             </p>
           </div>
         )}

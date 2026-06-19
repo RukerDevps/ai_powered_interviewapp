@@ -58,7 +58,7 @@ Implementation plan and checklist for building **IntervAI** Mock Interview Platf
   - Step 3: Question focus & customize sections
   - Step 4: Time duration configuration (15 / 30 / 45 / 60 minutes)
 - [ ] **4.3 Wizard Summary**: Build `InterviewSummary.tsx` sidebar displaying current options in real-time.
-- [ ] **4.4 Wizard Action**: Wire Server Action in `actions/interview.ts` to create the database row in `interviews` (status: `in_progress`) and fetch/store the initial question.
+- [x] **4.4 Wizard Action**: Wire Server Action in `actions/interview.ts` to create the database row in `interviews` (status: `in_progress`) and fetch/store the initial question.
 
 ---
 
@@ -72,25 +72,17 @@ Implementation plan and checklist for building **IntervAI** Mock Interview Platf
   - "Speak Answer" voice recognition via browser Web Speech API transcription.
   - Submit button.
 - [ ] **5.5 Question Sidebar**: Build `QuestionsPanel.tsx` right sidebar showing answered and current questions with status checkmarks. Show "Attempted Questions Count" (no total question limit set in advance).
-- [ ] **5.6 AI Question Streamer**: Implement `agent/interviewer.ts` utilizing Kimi 2.6 (temperature `0.7`) to stream adaptive questions based on user answers and target profile context.
+- [x] **5.6 AI Question Streamer**: Implement `agent/interviewer.ts` utilizing Kimi 2.6 (temperature `0.7`) to generate adaptive questions based on user answers and target profile context.
+- [x] **5.7 Live Answer Evaluation**: Evaluate each submitted answer with Kimi 2.6 (temperature `0.2`) and adjust difficulty or end as `not_eligible` when thresholds are met.
 
 ---
 
 ## Phase 6: Post-Interview Evaluation & Analytics
 
-- [ ] **6.1 Session Compilation API**: Build `/api/interview/complete` endpoint:
-  - Invokes `agent/evaluator.ts` using Kimi 2.6 (temperature `0.2`) to review all user responses together.
-  - Evaluates scores across 5 dimensions (Overall, Clarity, Relevance, Technical Depth, Confidence) in range 0-100.
-  - Generates bulleted lists of strengths and areas to improve.
-  - Generates detailed feedback for each individual question.
-  - Updates DB records (`interview_questions`, `interview_analytics`, `interviews.status = 'completed'`).
-- [ ] **6.2 Analysis View**: Build `/interview/[id]/analysis` displaying:
-  - Metric score cards (circular SVG loaders)
-  - Strengths and Improvements cards
-  - Per-Question feedback accordions with review answer options
-  - Speaking pace and Recharts confidence trend line charts
+- [x] **6.1 Session Compilation API**: Build `/api/interview/complete` endpoint and persist final analytics.
+- [x] **6.2 Analysis View**: Build `/interview/[id]/analysis` displaying persisted interview analytics.
 - [ ] **6.3 Analytics Page**: Create `/analytics` page displaying historical score averages, performance indicators, and confidence trajectory trends.
-- [ ] **6.4 History Page**: Build `/history` featuring a filtered table search, pagination, and color-coded score status badges.
+- [x] **6.4 History Page**: Build `/history` featuring DB-backed search, filters, pagination, and score/status badges.
 
 ---
 

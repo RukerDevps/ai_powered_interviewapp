@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Video,
   Mic,
-  Bot,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,13 +36,48 @@ interface InterviewSessionClientProps {
   interviewId: string;
 }
 
+interface ApiQuestion {
+  id: string;
+  order: number;
+  text: string;
+  difficulty: "easy" | "medium" | "hard";
+  answered: boolean;
+  answerScore: number | null;
+}
+
+interface InterviewSessionData {
+  id: string;
+  role: string;
+  experienceLevel: string;
+  interviewType: string;
+  durationMinutes: number;
+  currentDifficulty: "easy" | "medium" | "hard";
+  status: "in_progress" | "completed" | "abandoned" | "incomplete" | "not_eligible";
+  completedAt: string | null;
+  questions: ApiQuestion[];
+  hasAnalytics: boolean;
+}
+
+const mapQuestions = (apiQuestions: ApiQuestion[]): QuestionItem[] => {
+  const firstUnansweredIndex = apiQuestions.findIndex((question) => !question.answered);
+
+  return apiQuestions.map((question, index) => ({
+    id: question.id,
+    text: question.text,
+    status: question.answered
+      ? "answered"
+      : index === firstUnansweredIndex
+      ? "current"
+      : "pending",
+  }));
+};
+
 export function InterviewSessionClient({ interviewId }: InterviewSessionClientProps) {
   const router = useRouter();
 
   // Onboarding / Setup States
   const [isReady, setIsReady] = useState(false);
   const [micPermission, setMicPermission] = useState<"checking" | "granted" | "denied">("checking");
-  const [isFullscreenAllowed, setIsFullscreenAllowed] = useState(true);
 
   // Live Session States
   const [isPaused, setIsPaused] = useState(false);
@@ -53,6 +87,10 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
   const [isThinking, setIsThinking] = useState(false);
   const [answerText, setAnswerText] = useState("");
   const [showEndDialog, setShowEndDialog] = useState(false);
+  const [sessionData, setSessionData] = useState<InterviewSessionData | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [sessionError, setSessionError] = useState("");
+  const [notEligibleMessage, setNotEligibleMessage] = useState("");
 
   // Bottom Panel Drawers
   const [activeDrawer, setActiveDrawer] = useState<"analysis" | "notes" | "settings" | null>(null);
@@ -60,31 +98,14 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
   const [micVolume, setMicVolume] = useState(80);
   const [selectedDevice, setSelectedDevice] = useState("default-mic");
 
-  // Dynamic Question State (Pre-populated to match mockup)
-  const [questions, setQuestions] = useState<QuestionItem[]>([
-    { id: "q1", text: "What is the virtual DOM in React?", status: "answered" },
-    { id: "q2", text: "Explain the concept of closures in JavaScript.", status: "answered" },
-    { id: "q3", text: "How does event delegation work in JavaScript?", status: "current" },
-    { id: "q4", text: "What are the differences between var, let, and const?", status: "pending" },
-    { id: "q5", text: "Explain the box model in CSS.", status: "pending" },
-    { id: "q6", text: "What is the purpose of useEffect in React?", status: "pending" },
-    { id: "q7", text: "How does a browser render a web page?", status: "pending" },
-    { id: "q8", text: "How would you optimize a slow website?", status: "pending" },
-  ]);
+  const [questions, setQuestions] = useState<QuestionItem[]>([]);
 
   // Current active question
   const currentQuestionIndex = questions.findIndex((q) => q.status === "current");
-  const currentQuestion = questions[currentQuestionIndex] || questions[2];
-
-  // AI Interviewer responses (mock database content)
-  const questionResponses: Record<number, string> = {
-    2: "Great. Now, let's move on to the third question. How does event delegation work in JavaScript?",
-    3: "Alright. For our fourth question: What are the differences between var, let, and const in JavaScript, particularly concerning scoping and hoisting?",
-    4: "Good answer. Let's move to styling. Can you explain the box model in CSS and how box-sizing affects it?",
-    5: "Excellent. React hooks are very common: What is the purpose of the useEffect hook in React, and how do you replicate lifecycle methods with it?",
-    6: "Nice. Let's look at performance. How does a browser render a web page from an HTML file?",
-    7: "Lastly: How would you optimize a slow-loading website to improve Core Web Vitals?",
-  };
+  const currentQuestion = questions[currentQuestionIndex] ?? questions[0];
+  const currentQuestionText = currentQuestion
+    ? `Question ${currentQuestionIndex + 1}: ${currentQuestion.text}`
+    : "Loading your interview question...";
 
   // Check microphone permissions on mount
   useEffect(() => {
@@ -92,22 +113,61 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then(() => {
-          setMicPermission("granted");
+          queueMicrotask(() => setMicPermission("granted"));
         })
         .catch(() => {
-          setMicPermission("denied");
+          queueMicrotask(() => setMicPermission("denied"));
         });
     } else {
-      setMicPermission("denied");
+      queueMicrotask(() => setMicPermission("denied"));
     }
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadInterview = async () => {
+      try {
+        const response = await fetch(`/api/interview/${interviewId}`);
+        const payload = await response.json();
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.error ?? "Could not load interview.");
+        }
+
+        if (!isMounted) {
+          return;
+        }
+
+        const loadedInterview = payload.interview as InterviewSessionData;
+        setSessionData(loadedInterview);
+        setQuestions(mapQuestions(loadedInterview.questions));
+
+        if (loadedInterview.status !== "in_progress") {
+          router.replace(`/interview/${interviewId}/analysis`);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setLoadError(
+            error instanceof Error ? error.message : "Could not load interview."
+          );
+        }
+      }
+    };
+
+    loadInterview();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [interviewId, router]);
 
   // Text-To-Speech (TTS) voice synthesis using Web Speech API
   useEffect(() => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
 
     if (isSpeaking) {
-      const textToSpeak = questionResponses[currentQuestionIndex] || currentQuestion.text;
+      const textToSpeak = currentQuestionText;
       
       // Cancel any active speaking instances
       window.speechSynthesis.cancel();
@@ -146,75 +206,156 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
         window.speechSynthesis.cancel();
       }
     };
-  }, [isSpeaking, currentQuestionIndex]);
+  }, [isSpeaking, currentQuestionText]);
 
   // Enter Fullscreen & Start Live Session
   const handleStartSession = async () => {
+    if (!sessionData) {
+      setSessionError("Interview data is still loading.");
+      return;
+    }
+
     try {
       if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
       }
       setIsReady(true);
       setIsPaused(false);
+      setSessionError("");
 
-      // Trigger AI Interviewer introduction speech
-      setIsSpeaking(true);
+      if (currentQuestionText && currentQuestion) {
+        setIsSpeaking(true);
+      }
     } catch (err) {
       console.error("Failed to request fullscreen:", err);
-      setIsFullscreenAllowed(false);
+      setSessionError("Fullscreen could not be enabled, but the session can still continue.");
       // Fallback: Proceed even if fullscreen is blocked by settings
       setIsReady(true);
     }
   };
 
-  // Submit Answer Trigger (Simulates AI thinking then proceeding)
-  const handleSubmitAnswer = () => {
-    if (!answerText.trim() || isSubmitting) return;
+  const completeInterview = async (status: "completed" | "incomplete") => {
+    const response = await fetch("/api/interview/complete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        interviewId,
+        status,
+      }),
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok || !payload.success) {
+      throw new Error(payload.error ?? "Could not finish interview.");
+    }
+
+    router.replace(payload.href as string);
+  };
+
+  // Submit Answer Trigger
+  const handleSubmitAnswer = async () => {
+    if (!answerText.trim() || isSubmitting || !currentQuestion) return;
 
     setIsSubmitting(true);
     setIsRecording(false);
     setIsThinking(true);
+    setSessionError("");
 
-    // Simulate server side saving and evaluation processing
-    setTimeout(() => {
-      setQuestions((prevQuestions) => {
-        const updated = [...prevQuestions];
-        const activeIdx = updated.findIndex((q) => q.status === "current");
-
-        if (activeIdx !== -1) {
-          // Complete current question
-          updated[activeIdx].status = "answered";
-
-          // Move to next question if available
-          if (activeIdx + 1 < updated.length) {
-            updated[activeIdx + 1].status = "current";
-          }
-        }
-        return updated;
+    try {
+      const response = await fetch(`/api/interview/${interviewId}/answer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          questionId: currentQuestion.id,
+          answer: answerText,
+        }),
       });
 
-      // Reset state for next question
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Could not submit answer.");
+      }
+
+      const updatedQuestions = [...questions];
+      const currentIndex = updatedQuestions.findIndex((question) => question.id === currentQuestion.id);
+
+      if (currentIndex !== -1) {
+        updatedQuestions[currentIndex] = {
+          ...updatedQuestions[currentIndex],
+          status: "answered",
+        };
+
+        if (payload.question) {
+          updatedQuestions.splice(currentIndex + 1, 0, {
+            id: payload.question.id,
+            text: payload.question.questionText ?? payload.question.text ?? "",
+            status: "current",
+          });
+        } else if (currentIndex + 1 < updatedQuestions.length) {
+          updatedQuestions[currentIndex + 1] = {
+            ...updatedQuestions[currentIndex + 1],
+            status: "current",
+          };
+        }
+      }
+
+      setQuestions(updatedQuestions);
       setAnswerText("");
+      setSessionData((current) =>
+        current
+          ? {
+              ...current,
+              status: payload.status,
+              currentDifficulty: payload.difficulty ?? current.currentDifficulty,
+            }
+          : current
+      );
+
+      if (payload.status === "not_eligible") {
+        setNotEligibleMessage(
+          payload.message ?? "You are not eligible for this role based on this interview performance."
+        );
+        setIsReady(true);
+        setIsThinking(false);
+        setTimeout(() => {
+          router.replace(`/interview/${interviewId}/analysis`);
+        }, 1800);
+        return;
+      }
+
+      setIsSpeaking(true);
+    } catch (error) {
+      setSessionError(error instanceof Error ? error.message : "Could not submit answer.");
+    } finally {
       setIsSubmitting(false);
       setIsThinking(false);
-
-      // AI Speaks the next question
-      setIsSpeaking(true);
-    }, 2500);
-  };
-
-  const handleTimeout = () => {
-    // Session times out, redirect to completed/analytics
-    router.push(`/dashboard?proctoring=completed&status=timeout`);
-  };
-
-  const handleConfirmEndInterview = () => {
-    setShowEndDialog(false);
-    if (document.exitFullscreen && document.fullscreenElement) {
-      document.exitFullscreen().catch(console.error);
     }
-    // Simulate successful submission completion
-    router.push(`/dashboard?proctoring=completed`);
+  };
+
+  const handleTimeout = async () => {
+    try {
+      await completeInterview("incomplete");
+    } catch (error) {
+      setSessionError(error instanceof Error ? error.message : "Could not finish the interview.");
+    }
+  };
+
+  const handleConfirmEndInterview = async () => {
+    setShowEndDialog(false);
+    try {
+      if (document.exitFullscreen && document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      await completeInterview("completed");
+    } catch (error) {
+      setSessionError(error instanceof Error ? error.message : "Could not finish the interview.");
+    }
   };
 
   return (
@@ -278,8 +419,13 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
               )}
 
               <div className="text-xs text-text-muted leading-relaxed">
-                By clicking "Start Session", your browser will enter fullscreen mode. Do not exit fullscreen, switch tabs, or use screenshot shortcuts, as this will result in immediate termination of the interview.
+                By clicking &quot;Start Session&quot;, your browser will enter fullscreen mode. Do not exit fullscreen, switch tabs, or use screenshot shortcuts, as this will result in immediate termination of the interview.
               </div>
+              {loadError ? (
+                <div className="rounded-xl border border-error/20 bg-error-light/10 px-4 py-3 text-sm font-medium text-error">
+                  {loadError}
+                </div>
+              ) : null}
 
               <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end">
                 <Button
@@ -291,7 +437,7 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                 </Button>
                 <Button
                   onClick={handleStartSession}
-                  disabled={micPermission === "denied"}
+                  disabled={micPermission === "denied" || !sessionData || Boolean(loadError)}
                   className="h-11 bg-accent hover:bg-accent-hover text-accent-foreground font-semibold px-6"
                 >
                   Start Session & Enter Fullscreen
@@ -319,10 +465,10 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                 <div className="relative overflow-hidden rounded-2xl bg-surface-secondary border border-border p-6 sm:p-8 flex items-center justify-between shadow-sm">
                   <div className="space-y-1.5 min-w-0 flex-1 pr-4">
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-                      Welcome back, Alex! 👋
+                      {sessionData?.role ? `${sessionData.role} interview` : "Interview session"}
                     </h1>
                     <p className="text-sm sm:text-base text-text-secondary font-medium">
-                      Let's ace your interview today. Focus and take your time.
+                      Answer carefully. The interview adapts as you go.
                     </p>
                   </div>
                   {/* Banner wave animation character mockup */}
@@ -339,7 +485,9 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                     </span>
                     <div className="min-w-0">
                       <p className="text-xs text-text-secondary font-semibold uppercase tracking-wider">Role</p>
-                      <p className="text-sm font-bold text-text-primary truncate">Frontend Dev</p>
+                      <p className="text-sm font-bold text-text-primary truncate">
+                        {sessionData?.role ?? "Loading..."}
+                      </p>
                     </div>
                   </div>
 
@@ -349,7 +497,9 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                     </span>
                     <div className="min-w-0">
                       <p className="text-xs text-text-secondary font-semibold uppercase tracking-wider">Difficulty</p>
-                      <p className="text-sm font-bold text-text-primary truncate">Medium</p>
+                      <p className="text-sm font-bold text-text-primary truncate capitalize">
+                        {sessionData?.currentDifficulty ?? "medium"}
+                      </p>
                     </div>
                   </div>
 
@@ -359,13 +509,15 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                     </span>
                     <div className="min-w-0">
                       <p className="text-xs text-text-secondary font-semibold uppercase tracking-wider">Type</p>
-                      <p className="text-sm font-bold text-text-primary truncate">Technical</p>
+                      <p className="text-sm font-bold text-text-primary truncate">
+                        {sessionData?.interviewType ?? "Technical"}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <SessionTimer
-                      initialMinutes={25}
+                      initialMinutes={sessionData?.durationMinutes ?? 25}
                       isPaused={isPaused}
                       onTimeout={handleTimeout}
                       className="border-none bg-transparent p-0"
@@ -397,6 +549,16 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
 
                     {/* Chat Bubble container */}
                     <div className="space-y-4">
+                      {sessionError ? (
+                        <div className="rounded-xl border border-error/20 bg-error-light/10 px-4 py-3 text-sm font-medium text-error">
+                          {sessionError}
+                        </div>
+                      ) : null}
+                      {notEligibleMessage ? (
+                        <div className="rounded-xl border border-warning/25 bg-warning-light px-4 py-3 text-sm font-semibold text-warning-foreground">
+                          {notEligibleMessage}
+                        </div>
+                      ) : null}
                       <div className="relative rounded-2xl bg-surface-secondary border border-border p-5 text-sm leading-relaxed text-text-dark font-medium shadow-sm">
                         {/* Simulated Kimi 2.6 Streaming text */}
                         {isThinking ? (
@@ -407,7 +569,7 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                             <span>Processing feedback...</span>
                           </div>
                         ) : (
-                          questionResponses[currentQuestionIndex] || currentQuestion.text
+                          currentQuestionText
                         )}
                         <span className="absolute left-6 -top-3 h-3 w-3 rotate-45 border-l border-t border-border bg-surface-secondary" />
                       </div>
@@ -421,7 +583,7 @@ export function InterviewSessionClient({ interviewId }: InterviewSessionClientPr
                   onChange={setAnswerText}
                   onSubmit={handleSubmitAnswer}
                   isSubmitting={isSubmitting}
-                  isPaused={isPaused}
+                  isPaused={isPaused || Boolean(notEligibleMessage) || !currentQuestion}
                   isRecording={isRecording}
                   setIsRecording={setIsRecording}
                 />

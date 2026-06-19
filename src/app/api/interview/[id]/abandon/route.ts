@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { abandonInterviewForUser } from "@/lib/interview-workflow";
 import { validateActiveSession } from "@/lib/session";
 
 export async function POST(
@@ -22,9 +23,7 @@ export async function POST(
     }
 
     console.log(`[Proctoring Violation] Interview ${id} was abandoned. Reason: ${reason}`);
-
-    // In a fully integrated environment, we would run:
-    // UPDATE interviews SET status = 'abandoned', completed_at = NOW() WHERE id = id;
+    await abandonInterviewForUser(session.user.id, id);
     
     return NextResponse.json({
       success: true,

@@ -53,7 +53,7 @@ export const Dialog = ({ children, open, onOpenChange }: DialogProps) => {
 
 interface DialogTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
-  children: React.ReactElement<any>;
+  children: React.ReactElement<{ onClick?: (event: React.MouseEvent<HTMLElement>) => void }>;
 }
 
 export const DialogTrigger = ({ asChild = false, children, ...props }: DialogTriggerProps) => {
@@ -186,7 +186,7 @@ DialogDescription.displayName = "DialogDescription";
 
 interface DialogCloseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
-  children: React.ReactElement<any>;
+  children: React.ReactElement<{ onClick?: (event: React.MouseEvent<HTMLElement>) => void }>;
 }
 
 export const DialogClose = ({ asChild = false, children, ...props }: DialogCloseProps) => {

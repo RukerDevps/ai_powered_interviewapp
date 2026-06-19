@@ -36,33 +36,7 @@ import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-type HistoryInterviewIcon =
-  | "brain"
-  | "code"
-  | "database"
-  | "file-code"
-  | "message"
-  | "pen-tool"
-  | "sigma"
-  | "square-code";
-
-export interface HistoryInterviewRow {
-  id: string;
-  name: string;
-  questions: string;
-  role: string;
-  type: "Technical" | "Behavioral";
-  date: string;
-  time: string;
-  duration: string;
-  score?: number;
-  status: "Completed" | "Incomplete" | "In Progress";
-  action: "View Details" | "Continue";
-  href: string;
-  icon: HistoryInterviewIcon;
-  iconTone: "accent" | "success" | "warning" | "info" | "behavioral";
-}
+import type { HistoryInterviewRow } from "@/types";
 
 interface HistoryTableProps {
   interviews: HistoryInterviewRow[];
@@ -77,7 +51,7 @@ const roleOptions = [
   "Full Stack Developer",
 ] as const;
 
-const typeOptions = ["All Types", "Technical", "Behavioral"] as const;
+const typeOptions = ["All Types", "Technical", "Behavioral", "Mixed"] as const;
 
 const timeOptions = [
   { label: "All Time", value: "all" },
@@ -94,7 +68,7 @@ const iconToneClasses: Record<HistoryInterviewRow["iconTone"], string> = {
   behavioral: "bg-behavioral-light text-behavioral-foreground",
 };
 
-const iconMap: Record<HistoryInterviewIcon, LucideIcon> = {
+const iconMap: Record<HistoryInterviewRow["icon"], LucideIcon> = {
   brain: BrainCircuit,
   code: Code2,
   database: Database,
@@ -108,12 +82,15 @@ const iconMap: Record<HistoryInterviewIcon, LucideIcon> = {
 const typeClasses: Record<HistoryInterviewRow["type"], string> = {
   Technical: "bg-technical-light text-technical-foreground",
   Behavioral: "bg-behavioral-light text-behavioral-foreground",
+  Mixed: "bg-info-lightest text-info-foreground",
 };
 
 const statusClasses: Record<HistoryInterviewRow["status"], string> = {
   Completed: "bg-success-lightest text-success-foreground",
   Incomplete: "bg-info-lightest text-info-foreground",
   "In Progress": "bg-accent-light text-accent",
+  Abandoned: "bg-text-muted/15 text-text-secondary",
+  "Not Eligible": "bg-warning-light text-warning-foreground",
 };
 
 const globalFilterFn: FilterFn<HistoryInterviewRow> = (row, _columnId, filterValue) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ComponentType } from "react";
 import { Calendar, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,7 +40,7 @@ interface IntegrationItem {
   description: string;
   status: "connected" | "disconnected";
   user?: string;
-  icon: any;
+  icon: ComponentType<{ className?: string }>;
 }
 
 export function IntegrationsSection() {
