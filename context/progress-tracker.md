@@ -84,6 +84,13 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - **Next Steps**:
   - If we enable additional Better Auth infra plugins later, reuse the same env key pattern so the config stays consistent.
 
+### 2026-06-19: Logout Cookie Clear Fix
+- **Decisions Made**:
+  - Updated the logout server action to delete the Better Auth session cookies directly in Next after revoking the session on the server.
+  - Kept the existing `/login` redirect so protected routes now see a cleared browser session instead of reusing a stale cookie and bouncing back to `/dashboard`.
+- **Next Steps**:
+  - If any additional Better Auth cookies appear in future config changes, add them to the cleanup list so logout stays authoritative.
+
 ### 2026-06-18: Analytics Overview Mockup Refresh
 - **Decisions Made**:
   - Rebuilt `/analytics` to match the uploaded analysis overview mockup with header filters, seven metric cards, score trend, skill radar, topic coverage, duration scatter, recent sessions, focus areas, and recommended next steps.
