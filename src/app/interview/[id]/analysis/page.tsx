@@ -1,13 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  ListChecks,
-  Target,
-  Trophy,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,35 +73,35 @@ export default async function InterviewAnalysisPage({ params }: InterviewAnalysi
                 score={analysis.overallScore}
                 status="Overall"
                 color={scoreTone(analysis.overallScore)}
-                icon={Trophy}
+                icon="trophy"
               />
               <ScoreCard
                 label="Clarity"
                 score={analysis.clarityScore}
                 status="Clarity"
                 color={scoreTone(analysis.clarityScore)}
-                icon={CheckCircle2}
+                icon="check-circle"
               />
               <ScoreCard
                 label="Relevance"
                 score={analysis.relevanceScore}
                 status="Relevance"
                 color={scoreTone(analysis.relevanceScore)}
-                icon={Target}
+                icon="target"
               />
               <ScoreCard
                 label="Technical Depth"
                 score={analysis.technicalDepthScore}
                 status="Depth"
                 color={scoreTone(analysis.technicalDepthScore)}
-                icon={ListChecks}
+                icon="list-checks"
               />
               <ScoreCard
                 label="Confidence"
                 score={analysis.confidenceScore}
                 status="Confidence"
                 color={scoreTone(analysis.confidenceScore)}
-                icon={ShieldCheck}
+                icon="shield-check"
               />
             </div>
 

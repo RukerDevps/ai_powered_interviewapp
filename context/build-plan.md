@@ -6,20 +6,20 @@ Implementation plan and checklist for building **IntervAI** Mock Interview Platf
 
 ## Phase 1: Foundation & Database Setup
 
-- [ ] **1.1 Environment Config**: Setup `.env.local` containing:
+- [x] **1.1 Environment Config**: Setup `.env.local` containing:
   - `DATABASE_URL` (local or remote PostgreSQL)
   - `KIMI_API_KEY` (Kimi 2.6 API key)
   - `KIMI_BASE_URL` (Kimi API endpoint)
   - `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST`
-- [ ] **1.2 Database Schema**: Run SQL migrations to create the tables:
+- [x] **1.2 Database Schema**: Run SQL migrations to create the tables:
   - `users` (primary account credentials)
   - `profiles` (candidate role, skills, resume url, JD text)
   - `interviews` (session data, overall score, statuses)
   - `interview_questions` (Q&A history, AI response analysis)
   - `interview_analytics` (overall averages, strengths, areas of improvement)
 - [ ] **1.3 Database Pool Utility**: Implement `lib/db.ts` utilizing the `pg` package with pool configurations.
-- [ ] **1.4 Design Tokens Initialization**: Update `app/globals.css` with the Tailwind CSS v4 `@theme` directive, implementing all color tokens, border radius, and font scales defined in `ui-tokens.md`.
-- [ ] **1.5 Basic Layout & Font setup**: Wire Inter font variable `--font-sans` in `app/layout.tsx`.
+- [x] **1.4 Design Tokens Initialization**: Update `app/globals.css` with the Tailwind CSS v4 `@theme` directive, implementing all color tokens, border radius, and font scales defined in `ui-tokens.md`.
+- [x] **1.5 Basic Layout & Font setup**: Wire Inter font variable `--font-sans` in `app/layout.tsx`.
 
 ---
 

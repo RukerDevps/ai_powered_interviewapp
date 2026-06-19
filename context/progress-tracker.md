@@ -80,6 +80,17 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Session Handoff Notes
 
+### 2026-06-19: Proctoring Guard React Warning Fix & Robust Kimi JSON Parsing
+- **Decisions Made**:
+  - Fixed the React rendering warning ("Cannot update a component while rendering a different component") in `ProctoringGuard.tsx`.
+  - Added `strikeCountRef` to track strikes inside window blur event listeners to prevent stale state captures without tearing down listeners.
+  - Moved parent state calls (`setIsPaused`) and warning countdown side effects outside of the `setStrikeCount` and `setCountdown` state updater callbacks.
+  - Hardened `parseJsonObject` in `src/agent/types.ts` to cleanly extract JSON substrings and discard markdown blocks (e.g. ```json ... ```) or conversational prefixes, which free models like Gemma on OpenRouter often output despite JSON-mode parameters.
+  - Appended the raw completion response preview to the error message for easier debugging.
+  - Confirmed the fixes compile cleanly and the project builds successfully for production (`npm run build` completes with no errors).
+- **Next Steps**:
+  - Continue implementing other features and telemetry.
+
 ### 2026-06-19: Live Interview Error Hardening
 - **Decisions Made**:
   - Stabilized `AnswerInput` Web Speech recognition by keeping one recognizer per component mount, tracking browser active state in a ref, and ignoring expected `aborted`/`no-speech` events.

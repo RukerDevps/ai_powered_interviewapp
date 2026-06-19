@@ -2,7 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
+import {
+  Trophy,
+  CheckCircle2,
+  Target,
+  ListChecks,
+  ShieldCheck,
+} from "lucide-react";
+
+const iconMap = {
+  trophy: Trophy,
+  "check-circle": CheckCircle2,
+  target: Target,
+  "list-checks": ListChecks,
+  "shield-check": ShieldCheck,
+};
 
 interface ScoreCardProps {
   label: string;
@@ -10,7 +24,7 @@ interface ScoreCardProps {
   maxScore?: number;
   status: string;
   color: "purple" | "green" | "orange" | "pink" | "blue";
-  icon: LucideIcon;
+  icon: keyof typeof iconMap;
 }
 
 export function ScoreCard({
@@ -19,9 +33,10 @@ export function ScoreCard({
   maxScore = 100,
   status,
   color,
-  icon: Icon,
+  icon,
 }: ScoreCardProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
+  const Icon = iconMap[icon] || Trophy;
 
   // Animate the score counting up on load
   useEffect(() => {

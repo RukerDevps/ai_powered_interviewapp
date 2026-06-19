@@ -23,6 +23,7 @@ export const ProctoringGuard = ({
 }: ProctoringGuardProps) => {
   const router = useRouter();
   const [strikeCount, setStrikeCount] = useState(0);
+  const strikeCountRef = useRef(0);
   const [showSoftWarning, setShowSoftWarning] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -123,33 +124,35 @@ export const ProctoringGuard = ({
     const handleWindowBlur = () => {
       if (isViolationTriggered.current) return;
 
-      setStrikeCount((prev) => {
-        const nextStrikes = prev + 1;
-        if (nextStrikes > 3) {
-          triggerHardViolation("excessive_strikes");
-          return prev;
+      const nextStrikes = strikeCountRef.current + 1;
+      strikeCountRef.current = nextStrikes;
+      setStrikeCount(nextStrikes);
+
+      if (nextStrikes > 3) {
+        triggerHardViolation("excessive_strikes");
+        return;
+      }
+
+      // Trigger Soft Violation Warning Overlay
+      setIsPaused(true);
+      setShowSoftWarning(true);
+      setCountdown(10);
+
+      // Start 10 second countdown
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+      
+      let localCountdown = 10;
+      countdownIntervalRef.current = setInterval(() => {
+        localCountdown -= 1;
+        setCountdown(localCountdown);
+        if (localCountdown <= 0) {
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          triggerHardViolation("soft_violation_timeout");
         }
-
-        // Trigger Soft Violation Warning Overlay
-        setIsPaused(true);
-        setShowSoftWarning(true);
-        setCountdown(10);
-
-        // Start 10 second countdown
-        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-        countdownIntervalRef.current = setInterval(() => {
-          setCountdown((time) => {
-            if (time <= 1) {
-              clearInterval(countdownIntervalRef.current!);
-              triggerHardViolation("soft_violation_timeout");
-              return 0;
-            }
-            return time - 1;
-          });
-        }, 1000);
-
-        return nextStrikes;
-      });
+      }, 1000);
     };
 
     // Register all listeners

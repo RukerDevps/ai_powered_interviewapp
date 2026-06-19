@@ -64,7 +64,25 @@ export type FinalEvaluation = z.infer<typeof finalEvaluationSchema>;
 
 export function parseJsonObject(raw: string) {
   try {
-    const parsed: unknown = JSON.parse(raw);
+    let clean = raw.trim();
+
+    // 1. Remove markdown code blocks if present (e.g. ```json ... ```)
+    if (clean.startsWith("```")) {
+      const firstNewline = clean.indexOf("\n");
+      const lastBackticks = clean.lastIndexOf("```");
+      if (firstNewline !== -1 && lastBackticks > firstNewline) {
+        clean = clean.substring(firstNewline + 1, lastBackticks).trim();
+      }
+    }
+
+    // 2. Extract JSON substring if there is any leading/trailing conversational text
+    const firstBrace = clean.indexOf("{");
+    const lastBrace = clean.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      clean = clean.substring(firstBrace, lastBrace + 1).trim();
+    }
+
+    const parsed: unknown = JSON.parse(clean);
 
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("Kimi response was not a JSON object.");
@@ -74,7 +92,7 @@ export function parseJsonObject(raw: string) {
   } catch (error) {
     throw new Error(
       error instanceof Error
-        ? `Could not parse Kimi JSON response: ${error.message}`
+        ? `Could not parse Kimi JSON response: ${error.message}. Raw response: ${raw.substring(0, 300)}`
         : "Could not parse Kimi JSON response."
     );
   }
