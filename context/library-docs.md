@@ -205,3 +205,97 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 ### Constraints
 - Use the destructive variant for form validation summaries.
 - Keep the component token-based so it matches the rest of the IntervAI palette.
+
+---
+
+## 9. Better Auth (`better-auth`, `@better-auth/prisma-adapter`)
+
+Auth framework handling identity, sessions, OAuth, and JWT tokens.
+
+### Installation
+```bash
+npm install better-auth @better-auth/prisma-adapter @prisma/adapter-pg pg
+npm install --save-dev prisma
+```
+
+### Server Instance (`src/lib/auth.ts`)
+```typescript
+import { betterAuth } from "better-auth";
+import { jwt } from "better-auth/plugins";
+import { prismaAdapter } from "@better-auth/prisma-adapter";
+import { prisma } from "./prisma";
+
+export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
+  database: prismaAdapter(prisma, { provider: "postgresql" }),
+  emailAndPassword: { enabled: true },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
+  plugins: [jwt()],
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          // single-active-session enforcement
+        },
+      },
+    },
+    user: {
+      create: {
+        after: async (user) => {
+          // create application Profile row
+        },
+      },
+    },
+  },
+});
+```
+
+### Client Instance (`src/lib/auth-client.ts`)
+```typescript
+import { createAuthClient } from "better-auth/react";
+import { jwtClient } from "better-auth/client/plugins";
+
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  plugins: [jwtClient()],
+});
+
+export const { signIn, signUp, signOut, useSession } = authClient;
+```
+
+### Constraints
+- Only email/password and Google OAuth are enabled.
+- New sessions are rejected if the user already has an active session (`databaseHooks.session.create.before`).
+- Raw JWT tokens are never read by the frontend; use `useSession()` or server `getSession()` instead.
+- The auth handler is mounted at `/api/auth/[...all]` via `toNextJsHandler(auth)`.
+
+---
+
+## 10. Prisma ORM (`prisma`, `@prisma/client`)
+
+Database toolkit for auth and application persistence.
+
+### Configuration
+- Schema: `prisma/schema.prisma`
+- Config: `prisma.config.ts` loads `.env.local`
+- Generated client: `src/generated/prisma/client`
+- Migrations: `prisma/migrations/`
+
+### Common Commands
+```bash
+npx prisma generate          # generate client after schema changes
+npx prisma migrate dev       # create and apply migrations in development
+npx prisma migrate deploy    # apply migrations in production
+```
+
+### Constraints
+- Import `PrismaClient` from `../generated/prisma/client` (or the configured output path).
+- Use the `PrismaPg` driver adapter with the `DATABASE_URL` connection string.
+- Keep the Prisma client as a singleton via `src/lib/prisma.ts`.
+- Better Auth owns `User`, `Session`, `Account`, `Verification`, and `jwks` tables; app code owns `Profile` and future interview tables.

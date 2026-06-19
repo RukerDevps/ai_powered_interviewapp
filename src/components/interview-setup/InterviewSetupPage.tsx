@@ -176,6 +176,25 @@ const timePerQuestionOptions: SelectOption[] = [
   { label: "3 - 5 Minutes", value: "3 - 5 Minutes" },
 ];
 
+const mobileDevicePattern = /Android|iPhone|iPad|iPod|Mobile|Mobi/i;
+
+const isMobileDevice = () => {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+
+  const nav = navigator as Navigator & { userAgentData?: { mobile?: boolean } };
+  if (nav.userAgentData?.mobile) {
+    return true;
+  }
+
+  if (mobileDevicePattern.test(navigator.userAgent)) {
+    return true;
+  }
+
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches && navigator.maxTouchPoints > 0;
+};
+
 const sectionDefinitions: SectionDefinition[] = [
   {
     id: "technical",
@@ -518,6 +537,7 @@ export const InterviewSetupPage = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [jobDescriptionDraft, setJobDescriptionDraft] = useState("");
   const [isJobDescriptionDialogOpen, setIsJobDescriptionDialogOpen] = useState(false);
+  const [isDeviceWarningDialogOpen, setIsDeviceWarningDialogOpen] = useState(false);
   const [isJobDescriptionExpanded, setIsJobDescriptionExpanded] = useState(false);
   const [selectedSections, setSelectedSections] = useState<SectionId[]>([
     "technical",
@@ -608,6 +628,16 @@ export const InterviewSetupPage = () => {
     setJobDescriptionDraft("");
     setIsJobDescriptionExpanded(false);
     setIsJobDescriptionDialogOpen(false);
+  };
+
+  const handleStartInterview = () => {
+    if (isMobileDevice()) {
+      setIsDeviceWarningDialogOpen(true);
+      return;
+    }
+
+    setIsDeviceWarningDialogOpen(false);
+    router.push("/interview?id=session");
   };
 
   const selectedSectionLabels = sectionDefinitions
@@ -916,9 +946,7 @@ export const InterviewSetupPage = () => {
 
             <div className="border-t border-border pt-6">
               <Button
-                onClick={() => {
-                  router.push("/interview?id=session");
-                }}
+                onClick={handleStartInterview}
                 className="h-12 w-full justify-center rounded-lg text-base font-semibold"
               >
                 Start Interview
@@ -976,6 +1004,40 @@ export const InterviewSetupPage = () => {
               Clear
             </Button>
             <Button onClick={saveJobDescription}>Save Job Description</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeviceWarningDialogOpen} onOpenChange={setIsDeviceWarningDialogOpen}>
+        <DialogContent className="max-w-[480px] border-warning/30">
+          <DialogHeader className="flex flex-col items-center gap-3 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning-light text-warning-foreground">
+              <MonitorSmartphone className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-text-primary">Desktop Required</DialogTitle>
+            <DialogDescription className="text-sm font-medium leading-relaxed text-text-secondary">
+              Start Interview is blocked on mobile and tablet devices. Please open this page on a desktop or
+              laptop to begin your interview.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 rounded-xl bg-surface-secondary p-4">
+            <div className="flex items-start gap-3 text-left">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-warning-foreground">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-text-primary">Desktop-only interview sessions</p>
+                <p className="text-sm leading-6 text-text-secondary">
+                  For the best experience and full-screen interview proctoring, use a desktop browser before
+                  starting.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setIsDeviceWarningDialogOpen(false)}>Okay</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

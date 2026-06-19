@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | Framework | Next.js 16 (App Router) | Full stack framework |
 | UI Library | React 19.2.4 | Component rendering |
-| Database | PostgreSQL (latest) | Relational storage for profiles, interviews, questions, analytics |
-| Authentication | Email Authentication | Email & password based login, session cookie |
+| Database | PostgreSQL + Prisma | Relational storage for auth, profiles, interviews, questions, analytics |
+| Authentication | Better Auth | Email/password + Google OAuth, JWT + session cookies, single-active-session enforcement |
 | Storage | InsForge Storage | File storage (uploaded resumes). Cloudinary is an acceptable drop-in alternative if InsForge limits become a problem — keep storage access behind `lib/storage.ts` so the provider can be swapped without touching callers. |
 | AI model | Kimi 2.6 (OpenAI-compatible SDK, custom baseURL) | Interview question generation, real-time answer evaluation, feedback synthesis, resume extraction |
 | Speech-to-text | Browser Web Speech API | In-browser voice-to-text for answer input. No server-side audio processing. |
@@ -100,7 +100,7 @@
 │   │   ├── InterviewTips.tsx
 │   │   └── RecentInterviews.tsx
 │   ├── interview-setup/
-│   │   └── InterviewSetupPage.tsx         → Client-side setup UI with selectable options and live summary preview
+│   │   └── InterviewSetupPage.tsx         → Client-side setup UI with selectable options, live summary preview, and desktop-only start gate
 │   ├── interview-session/
 │   │   ├── InterviewerAvatar.tsx          → AI avatar + speaking indicator + waveform
 │   │   ├── AnswerInput.tsx                → Text + Web Speech API voice input
@@ -230,10 +230,12 @@ future submit action can serialize this state into actions/interview.ts
 
 **Boundary rule:** keep the interview setup page UI-first and client-local until the interview creation action is wired. Do not move prompt-building, persistence, or upload processing into the component; those belong in `actions/`, `agent/`, or `lib/`.
 
+**Device gate rule:** keep the `Start Interview` device check in the client component so mobile and tablet browsers are blocked before any live-session routing or server mutation begins. Desktop browsers may proceed normally after the summary check passes.
+
 ### Question Generation (API Route, streaming)
 
 ```
-User completes Start New Interview wizard, clicks "Start Interview"
+User completes Start New Interview wizard, clicks "Start Interview" on a desktop browser
         ↓
 actions/interview.ts creates `interviews` row (status: in_progress)
         ↓
@@ -247,6 +249,8 @@ Questions written to `interview_questions` rows as they are generated
         ↓
 Client renders questions progressively in QuestionsPanel
 ```
+
+Mobile and tablet browsers are blocked before this flow starts, so the server-side generation path only receives desktop-originated interview launches.
 
 ### Session Completion & Evaluation (API Route)
 
@@ -390,36 +394,41 @@ Access: authenticated users only, own files only. If InsForge limits become a bl
 
 ## Authentication
 
-- System: Session-based cookie authentication
-- Methods: Email & password login and registration only (no OAuth for MVP)
+- System: [Better Auth](https://www.better-auth.com/) with PostgreSQL + Prisma persistence
+- Methods: Email/password and Google OAuth only
+- Tokens: JWT access token + Better Auth session/refresh token, both stored in HttpOnly cookies
+- Single-active-session policy: new login attempts are rejected if the account already has a non-expired session
 - Protected routes: `/dashboard`, `/interview/*`, `/history`, `/analytics`, `/resources`, `/settings`
 - Public routes: `/`, `/login`, `/register`
-- `middleware.ts` checks the session cookie on every protected route
-- On login → redirect to `/dashboard`
+- `middleware.ts` resolves the session via `/api/auth/get-session` and redirects unauthenticated users to `/login`; authenticated users are kept out of `/login` and `/register`
+- On login/sign-up → redirect to `/dashboard`
+- Auth API handler: `/api/auth/[...all]` (sign-in, sign-up, sign-out, Google OAuth, session refresh)
 
 ---
 
-## PostgreSQL Client Pattern
+## PostgreSQL / Prisma Client Pattern
+
+Auth and application data are persisted through Prisma ORM with a PostgreSQL driver adapter.
 
 ```typescript
-// lib/db.ts
-import { Pool } from "pg";
+// lib/prisma.ts
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-});
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
-export const query = async (text: string, params?: any[]) => {
-  const start = Date.now();
-  const res = await pool.query(text, params);
-  const duration = Date.now() - start;
-  if (duration > 100) {
-    console.warn(`[db] Slow query: ${text} (${duration}ms)`);
-  }
-  return res;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
 };
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 ```
+
+Raw `pg` queries are reserved for non-ORM use cases; auth and profile operations go through `prisma`.
 
 ---
 

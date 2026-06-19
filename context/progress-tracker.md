@@ -6,9 +6,9 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ## Overall Status
 
-- **Current Phase**: `Phase 6: Post-Interview Evaluation & Analytics`
-- **Overall Completion**: `75%`
-- **Last Updated**: `2026-06-18`
+- **Current Phase**: `Phase 2: Authentication & Profile Setup`
+- **Overall Completion**: `80%`
+- **Last Updated**: `2026-06-19`
 
 ---
 
@@ -16,16 +16,24 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 
 ### Phase 1: Foundation & Database Setup
 - [x] Context & Guidelines Setup (Overview, Architecture, Tokens, Rules, Registry, Standards, Library Docs, Build Plan)
-- [ ] Database Schema Initialization (SQL migrations)
-- [ ] Database Connection Pool helper (`lib/db.ts`)
-- [ ] Design System theme tokens in `@theme` (`app/globals.css`)
-- [ ] Font imports & Root layout configurations (`app/layout.tsx`)
+- [x] Database Schema Initialization (Prisma schema + Better Auth tables + Profile model)
+- [x] Prisma Client singleton with PostgreSQL driver adapter (`lib/prisma.ts`)
+- [ ] Database Connection Pool helper (`lib/db.ts`) — reserved for raw pg queries
+- [x] Design System theme tokens in `@theme` (`app/globals.css`)
+- [x] Font imports & Root layout configurations (`app/layout.tsx`)
 
 ### Phase 2: Authentication & Profile Setup
-- [ ] Password hashing & Session utilities (`actions/auth.ts`)
-- [x] Split-panel Login & Registration views (`/login`, `/register`)
-- [ ] Protected route check Middleware (`middleware.ts`)
-- [x] Profile Save & Edit forms
+- [x] Better Auth server instance with JWT + single-active-session hook (`lib/auth.ts`)
+- [x] Better Auth infra API key wired into the server plugin config (`BETTER_AUTH_API_KEY`)
+- [x] Auth API route handler (`/api/auth/[...all]`)
+- [x] Auth client + server session helpers (`lib/auth-client.ts`, `lib/session.ts`)
+- [x] Server auth actions: sign-out + revoke (`actions/auth.ts`)
+- [x] Protected route check Middleware (`middleware.ts`)
+- [x] Split-panel Login & Registration views wired to real auth (`/login`, `/register`)
+- [x] Google OAuth sign-in button wired
+- [x] Header user dropdown with logout
+- [x] Auto-create Profile on user sign-up
+- [ ] Profile Save & Edit forms connected to real data
 - [ ] PDF & DOCX resume parser utilities
 - [ ] Kimi 2.6 resume structure extractor (`agent/resume-extractor.ts`)
 - [ ] InsForge Storage integration (`lib/storage.ts`)
@@ -68,6 +76,13 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
 - [ ] Verification checklist runs
 
 ## Session Handoff Notes
+
+### 2026-06-19: Better Auth API Key Wiring
+- **Decisions Made**:
+  - Wired `BETTER_AUTH_API_KEY` into the Better Auth infra `dash()` plugin so the server config explicitly passes the key instead of relying on an implicit environment lookup.
+  - Added the env key to `.env.example` so fresh local setups know to define it alongside the Better Auth secret and base URL.
+- **Next Steps**:
+  - If we enable additional Better Auth infra plugins later, reuse the same env key pattern so the config stays consistent.
 
 ### 2026-06-18: Analytics Overview Mockup Refresh
 - **Decisions Made**:
@@ -358,3 +373,39 @@ Living tracker to monitor development progress of **IntervAI**. Updated after ev
   - Resolved build-time lucide icon limitations by writing custom, responsive inline SVG brand icons for GitHub, LinkedIn, and Slack.
 - **Next Steps**:
   - Connect settings state forms to real session cookies and db mutations when the backend layer is integrated.
+
+### 2026-06-18: Interview Setup Desktop-Only Gate
+- **Decisions Made**:
+  - Added a browser-device check to the `Start Interview` action on the interview setup page so the live session route only opens from desktop browsers.
+  - Reused the shared dialog primitive to show a blocking warning modal for mobile and tablet users instead of redirecting them immediately.
+  - Documented the desktop-only rule in the living UI rules and registry so the setup flow stays consistent for future edits.
+- **Next Steps**:
+  - If the device gate needs stricter heuristics later, refine the browser detection helper without changing the dialog flow.
+
+### 2026-06-19: Better Auth Login Rebuild
+- **Decisions Made**:
+  - Replaced the placeholder auth flow with Better Auth backed by PostgreSQL + Prisma.
+  - Installed `better-auth`, `@better-auth/prisma-adapter`, `@prisma/adapter-pg`, and `prisma`.
+  - Installed `@better-auth/infra` and wired the `dash()` plugin into the Better Auth server config.
+  - Created `prisma/schema.prisma` with Better Auth core tables (`User`, `Session`, `Account`, `Verification`, `jwks`) plus an app-owned `Profile` model.
+  - Generated the Prisma client to `src/generated/prisma/client` and wired a singleton in `src/lib/prisma.ts` using the `PrismaPg` driver adapter.
+  - Configured `src/lib/auth.ts` with email/password, Google OAuth, JWT plugin, and database hooks that enforce a single-active-session policy and auto-create a `Profile` on sign-up.
+  - Mounted the Better Auth handler at `/api/auth/[...all]` via `toNextJsHandler`.
+  - Created `src/lib/auth-client.ts` (React client + JWT plugin), `src/lib/session.ts` (server session helper), and `src/actions/auth.ts` (sign-out/revoke server actions).
+  - Added `middleware.ts` that resolves sessions through `/api/auth/get-session`, protects dashboard routes, and redirects authenticated users away from `/login` and `/register`.
+  - Wired `AuthFormPanel.tsx` to real `signIn.email`, `signUp.email`, and `signIn.social` (Google) calls with loading and error states.
+  - Updated `/login` and `/register` server pages to redirect authenticated users to `/dashboard`.
+  - Updated `Header.tsx` to show the authenticated user's name/avatar and a dropdown with Settings, Profile, and Log out actions.
+  - Replaced the Settings page logout placeholder with the real `signOutAction()` flow so all visible logout affordances use the same server-managed session teardown.
+  - Removed `output: "export"` from `next.config.ts` because API routes and middleware require a server runtime.
+  - Generated an initial migration at `prisma/migrations/20250619000000_init_better_auth/migration.sql`.
+  - Updated `context/architecture.md`, `context/library-docs.md`, and this tracker to reflect the new auth stack.
+- **Verification Status**:
+  - `npx eslint` passes for the auth-related files touched in this session.
+  - `npm run build` hit a Turbopack sandbox limitation while binding a helper port, so build verification is partially blocked by the current environment rather than an auth compile error.
+  - Database migrations were generated but not yet applied because a local PostgreSQL server was not running in this sandbox.
+- **Next Steps**:
+  - Start PostgreSQL, ensure `DATABASE_URL` in `.env.local` is correct, and run `npx prisma migrate dev` (or `npx prisma migrate deploy`) to apply migrations.
+  - Add real `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `.env.local` to enable Google OAuth.
+  - Test email/password sign-up, sign-in, single-active-session rejection, logout, and Google OAuth.
+  - Connect the remaining dashboard/server components to real `Profile` data (currently the header only reads from the session object).

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   User,
   Sliders,
@@ -12,6 +11,7 @@ import {
   CreditCard,
   Palette,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { PrivacyForm } from "@/components/settings/PrivacyForm";
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
 import { BillingSection } from "@/components/settings/BillingSection";
 import { AppearanceForm } from "@/components/settings/AppearanceForm";
+import { signOutAction } from "@/actions/auth";
 
 type TabId =
   | "profile"
@@ -40,11 +41,10 @@ interface SettingsTab {
   id: TabId;
   label: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("profile");
 
   const tabs: SettingsTab[] = [
@@ -99,12 +99,7 @@ export default function SettingsPage() {
   ];
 
   const handleLogout = () => {
-    // Clear mock session storage
-    if (typeof window !== "undefined") {
-      sessionStorage.clear();
-      localStorage.removeItem("intervai_user");
-    }
-    router.push("/login");
+    void signOutAction();
   };
 
   return (

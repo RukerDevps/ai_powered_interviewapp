@@ -53,6 +53,11 @@ The `--font-sans` variable is declared in `@theme` in `globals.css` (Tailwind v4
 - Right sidebar: Question list panel showing session questions (width 320px)
 - Bottom action bar: contains notes, settings, and "End Interview" action
 
+### Interview Setup Guard
+- The `Start Interview` action should verify the browser device before routing into the live session.
+- Mobile and tablet browsers must be blocked with a modal dialog that explains the desktop-only requirement.
+- Desktop browsers may continue directly into the interview flow after the summary check passes.
+
 ---
 
 ## Navigation

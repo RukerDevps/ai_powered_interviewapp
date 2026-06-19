@@ -334,6 +334,8 @@ Status: `Completed`
 - Resume upload uses a hidden native file input behind a shadcn-style action card, and the selected filename becomes the persisted context label.
 - Job description entry uses the shared dialog primitive with textarea editing plus save/clear actions, then reflects the saved text back into the context card and summary preview.
 - Summary metadata uses compact icon chips plus split label/value rows, and the primary action stays isolated in its own bordered footer zone.
+- The `Start Interview` button performs a browser-device check before routing and opens a blocking modal for mobile or tablet users.
+- The device-restriction dialog uses the shared modal surface so the desktop-only requirement is clear without adding another page or redirect.
 
 ---
 
@@ -433,6 +435,7 @@ Status: `Completed`
 - The left panel now recreates the provided login mockup as a coded hero composition with the shared brand logo, floating insight cards, and the central AI illustration.
 - Entrance motion uses Framer Motion spring/tween combos with reduced-motion fallback.
 - Social auth actions are styled as secondary buttons with consistent icon containers and now use the actual provider logo assets from `public/images`.
+- The forms now submit through Better Auth's client helpers, with server-side session hooks enforcing the one-active-session rule and HttpOnly cookie storage for JWT-backed auth state.
 - The left-side cards intentionally reuse the existing public icon assets so the visual language stays tied to the current asset set.
 - Desktop spacing is compressed to fit the shell into the viewport height without introducing page scroll.
 - Register mode uses the field order `username`, `email`, `create new password`, `confirm password` while keeping the same visual system as login.
@@ -476,6 +479,7 @@ Status: `Completed`
 
 **Pattern notes:**
 - This component owns TanStack Form state, Zod validation, the top-level destructive alert summary, and the login/register field arrangement.
+- It now delegates email/password and Google OAuth sign-in to Better Auth so the same UI works with server-managed sessions instead of mock local state.
 - Keep future auth or onboarding forms aligned to this layout pattern so validation and field messaging stay consistent.
 
 #### Auth Text Field

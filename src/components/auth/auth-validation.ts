@@ -64,8 +64,9 @@ export const collectValidationMessages = (error: unknown): string[] => {
   }
 
   if (typeof error === "object" && error !== null) {
-    if ("message" in error && typeof (error as any).message === "string") {
-      return [(error as any).message];
+    const maybeMessage = error as { message?: unknown };
+    if (typeof maybeMessage.message === "string") {
+      return [maybeMessage.message];
     }
 
     return Object.values(error as Record<string, unknown>).flatMap((item) =>

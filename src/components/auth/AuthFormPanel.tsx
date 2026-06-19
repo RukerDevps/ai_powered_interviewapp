@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, AlertCircle, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { authClient } from "@/lib/auth-client";
 
 import { socialButtons } from "./auth-content";
 import type { AuthMode } from "./auth-types";
@@ -22,7 +23,6 @@ import {
   usernameSchema,
 } from "./auth-validation";
 import { AuthTextField } from "./AuthTextField";
-import { useRouter } from "next/navigation";
 
 interface AuthFormPanelProps {
   mode: AuthMode;
@@ -32,8 +32,9 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
   const reduceMotion = useReducedMotion();
-  const router = useRouter();
 
   const isLogin = mode === "login";
   const activeSchema = isLogin ? loginSchema : registerSchema;
@@ -41,8 +42,39 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
   const form = useForm({
     defaultValues: defaultAuthValues,
     onSubmit: async ({ value }) => {
-      // Placeholder until auth actions are wired in.
-      console.log("Auth submit", { mode, value });
+      setSubmitError(null);
+
+      try {
+        if (isLogin) {
+          const result = await authClient.signIn.email({
+            email: value.email,
+            password: value.password,
+            callbackURL: "/dashboard",
+            rememberMe: value.rememberMe,
+          });
+
+          if (result.error) {
+            setSubmitError(result.error.message ?? "Sign in failed. Please try again.");
+            return;
+          }
+        } else {
+          const result = await authClient.signUp.email({
+            email: value.email,
+            password: value.password,
+            name: value.username,
+            callbackURL: "/dashboard",
+          });
+
+          if (result.error) {
+            setSubmitError(result.error.message ?? "Sign up failed. Please try again.");
+            return;
+          }
+        }
+      } catch (error) {
+        setSubmitError(
+          error instanceof Error ? error.message : "Something went wrong. Please try again."
+        );
+      }
     },
     validators: {
       onSubmit: ({ value }) => {
@@ -64,6 +96,28 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
   ];
   const hasValidationErrors =
     validationMessages.length > 0 && (hasAttemptedSubmit || canSubmit === false);
+
+  const handleGoogleSignIn = async () => {
+    setIsSocialLoading(true);
+    setSubmitError(null);
+
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/dashboard",
+      });
+
+      if (result.error) {
+        setSubmitError(result.error.message ?? "Google sign in failed. Please try again.");
+      }
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Google sign in failed. Please try again."
+      );
+    } finally {
+      setIsSocialLoading(false);
+    }
+  };
 
   const title = isLogin ? "Sign in to your account" : "Create your account";
   const subtitle = isLogin ? "Let&apos;s get you back on track." : "Start practicing smarter in a few seconds.";
@@ -91,14 +145,16 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
           <p className="mt-2 text-sm text-text-secondary sm:text-base lg:text-sm">{subtitle}</p>
         </div>
 
-        {/* <div className="mt-6 space-y-3 xl:mt-7">
+        <div className="mt-6 space-y-3 xl:mt-7">
           {socialButtons.map((button, index) => (
             <motion.button
               key={button.label}
               type="button"
+              disabled={isSocialLoading}
+              onClick={handleGoogleSignIn}
               whileHover={reduceMotion ? undefined : { y: -2, scale: 1.01 }}
               whileTap={reduceMotion ? undefined : { scale: 0.99 }}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 text-sm font-medium text-text-dark shadow-sm transition-colors hover:border-accent-light hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 text-sm font-medium text-text-dark shadow-sm transition-colors hover:border-accent-light hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:cursor-wait disabled:opacity-80"
               initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -116,7 +172,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
                   className="h-5 w-5 object-contain"
                 />
               </span>
-              <span>{button.label}</span>
+              <span>{isSocialLoading ? "Please wait..." : button.label}</span>
             </motion.button>
           ))}
         </div>
@@ -127,7 +183,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
             Or
           </span>
           <div className="h-px flex-1 bg-border" />
-        </div> */}
+        </div>
 
         <form
           onSubmit={(event) => {
@@ -137,7 +193,7 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
           }}
           className="space-y-4 xl:space-y-5"
         >
-          {hasValidationErrors ? (
+          {(hasValidationErrors || submitError) ? (
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -147,13 +203,17 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-error" />
                   <div className="min-w-0">
-                    <AlertTitle>Check the highlighted fields</AlertTitle>
+                    <AlertTitle>{submitError ? "Sign in failed" : "Check the highlighted fields"}</AlertTitle>
                     <AlertDescription>
-                      <ul className="mt-2 list-disc space-y-1 pl-5">
-                        {validationMessages.slice(0, 4).map((message) => (
-                          <li key={message}>{message}</li>
-                        ))}
-                      </ul>
+                      {submitError ? (
+                        <p className="mt-2">{submitError}</p>
+                      ) : (
+                        <ul className="mt-2 list-disc space-y-1 pl-5">
+                          {validationMessages.slice(0, 4).map((message) => (
+                            <li key={message}>{message}</li>
+                          ))}
+                        </ul>
+                      )}
                     </AlertDescription>
                   </div>
                 </div>
@@ -365,10 +425,9 @@ export const AuthFormPanel = ({ mode }: AuthFormPanelProps) => {
 
           <motion.button
             type="submit"
-            onClick={() => router.push('/dashboard')}
             whileHover={reduceMotion ? undefined : { y: -1, scale: 1.01 }}
             whileTap={reduceMotion ? undefined : { scale: 0.99 }}
-            aria-disabled={isSubmitting}
+            aria-disabled={isSubmitting || isSocialLoading}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-accent px-5 py-3.5 text-base font-semibold text-accent-foreground shadow-[0_16px_30px_rgba(103,64,250,0.25)] transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 aria-disabled:cursor-wait aria-disabled:opacity-80"
           >
             <span>{isSubmitting ? "Please wait..." : primaryLabel}</span>
